@@ -164,8 +164,11 @@ liteclaw/
 │   ├── liteclaw-core/          # Claw trait, Ctx, Defender, Sandbox
 │   │   └── src/{lib,claw,ctx,sandbox,defender/}.rs
 │   ├── liteclaw-fs/            # read / grep / edit
+│   ├── liteclaw-skills/        # SKILL.md 解析 + 发现 + SkillClaw
+│   │   └── src/{lib,parser,identity}.rs
 │   ├── liteclaw-model/         # ModelClient trait (骨架)
-│   └── liteclaw-cli/           # main + clap + registry + audit + tests/smoke
+│   └── liteclaw-cli/           # main + clap + registry + audit + skills
+│       └── tests/{smoke,skills}.rs
 ├── DESIGN.md  AGENTS.md  README.md
 ```
 
@@ -206,15 +209,59 @@ release profile:`opt-level=z` + `lto=true` + `codegen-units=1` + `strip` +
 
 ## 11. 资源承诺(SLO,后续里程碑加 CI 断言)
 
-| 指标 | 目标 | 实测(MVP) |
+| 指标 | 目标 | 实测 |
 |---|---|---|
-| release 二进制 | < 10MB | **1.4MB** ✅ |
+| release 二进制 | < 10MB | **1.6MB**(含 serde_yaml + skill 系统)✅ |
 | 启动 RSS | < 8MB | 待测 |
 | idle CPU | 0% | 待测(无后台线程,天然 0) |
 
 ---
 
-## 12. 状态
+## 12. Skill 系统
 
-MVP 已实现并验证:`lc read | grep | edit | audit` + Defender 内核 + 沙箱。
-9 个单测 + 7 个集成测试全过。`lc chat`/ACP/MCP 为后续里程碑保留 crate 位。
+liteclaw 原生支持 claw 生态的 skill(`SKILL.md` 格式):发现、列举、查看、
+(scripts 型)执行、审计。skill 被视为「动态 claw」——和 read/grep/edit 一样,
+经 `Claw` trait 统一调度,继承 Defender 安全前置。
+
+### 发现范围(两目录,项目覆盖全局)
+- **全局**:`~/.agents/skills`(或 `$LITECLAW_SKILLS_DIR`)
+- **项目本地**:`<cwd>/.liteclaw/skills`
+- 同 id 时**项目覆盖全局**
+
+### 身份推导(应对 skill 池的真实混乱)
+目录名 ≠ name ≠ slug 是常态。id 推导优先级:
+`slug` → `name` 小写 → 目录名去 `-<semver>`/`-\d+` 后缀。
+实测 78 个真实 skill 全部正确还原(如 `aminer-open-academic-1.0.5` → `aminer-data-search`,
+`clawdefender-1` → `clawdefender`)。
+
+### 解析(serde_yaml,不可用 regex 替代)
+- 必填字段仅 `name` + `description`
+- `description` 支持 3 种 YAML 形态:plain / 引号 / 块标量(`>`折叠、`|`字面量);
+  多行折叠为单行展示
+- `metadata` 多态(内联 JSON 字符串 vs 嵌套 map),用 `serde_yaml::Value` 接收不强建模
+- 未知字段忽略,保证向前兼容
+
+### scripts 型执行(`SkillClaw`)
+带 `scripts/` 的 skill 可经 `lc skill run <id> [args]` 执行:
+- **Shebang fallback**:脚本无 +x 位时,读 `#!` 选解释器,无 shebang 默认 bash
+  (skill 池脚本多为 bash,用 `sh` 会破 process substitution)
+- **arg 透传**:`disable_version_flag` + `allow_hyphen_values` 确保 `--version`/
+  `--audit` 等 flag 透传给脚本,不被 clap 捕获
+- **Defender 前置**:每个 arg 经 Defender 检查,注入 payload 硬拦截
+
+### prompt 型 skill(待 chat)
+`Skill.body()` 返回 SKILL.md 正文,留给 `lc chat` 落地时当 system prompt。
+数据层现已完整,不欠债。
+
+### CLI
+- `lc skills`:列表(source G=全局/P=项目,id/version/name)
+- `lc skill <id>`:显示完整 SKILL.md(含 dir/scripts 计数)
+- `lc skill-run <id> [args]`:执行 scripts 型 skill
+- 三者均支持 `--json`
+
+## 13. 状态
+
+已实现并验证:`lc read | grep | edit | audit | skills | skill | skill-run` +
+Defender 内核 + 沙箱 + skill 系统。**43 个测试**全过(9 core 单测 + 20 skills 单测 +
+7 smoke + 7 skills 集成),clippy 零 warning。
+`lc chat`/ACP/MCP 为后续里程碑保留 crate 位。

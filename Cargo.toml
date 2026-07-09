@@ -4,6 +4,7 @@ members = [
     "crates/liteclaw-core",
     "crates/liteclaw-fs",
     "crates/liteclaw-model",
+    "crates/liteclaw-skills",
     "crates/liteclaw-cli",
 ]
 
@@ -20,10 +21,11 @@ authors = ["liteclaw contributors"]
 liteclaw-core = { path = "crates/liteclaw-core" }
 liteclaw-fs = { path = "crates/liteclaw-fs" }
 liteclaw-model = { path = "crates/liteclaw-model" }
+liteclaw-skills = { path = "crates/liteclaw-skills" }
 
 # Shared deps — pinned at workspace level for reproducible, lean builds.
 clap = { version = "4.5", features = ["derive"] }
-tokio = { version = "1", default-features = false, features = ["rt", "rt-multi-thread", "macros", "io-std", "io-util", "fs"] }
+tokio = { version = "1", default-features = false, features = ["rt", "rt-multi-thread", "macros", "io-std", "io-util", "fs", "process"] }
 regex = "1"
 ignore = "0.4"
 serde = { version = "1", features = ["derive"] }
@@ -32,6 +34,7 @@ anyhow = "1"
 thiserror = "1"
 async-trait = "0.1"
 tempfile = "3"
+serde_yaml = "0.9"
 
 [profile.release]
 # Optimize for small binaries — a core liteclaw promise.

@@ -1,24 +1,16 @@
 [package]
-name = "liteclaw-cli"
+name = "liteclaw-skills"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
-description = "liteclaw command-line dispatcher."
-
-[[bin]]
-name = "lc"
-path = "src/main.rs"
+description = "Skill discovery and parsing for liteclaw (SKILL.md frontmatter + body)."
 
 [dependencies]
 liteclaw-core.workspace = true
-liteclaw-fs.workspace = true
-liteclaw-model.workspace = true
-liteclaw-skills.workspace = true
-clap.workspace = true
-ignore.workspace = true
-serde_json.workspace = true
+serde.workspace = true
+serde_yaml.workspace = true
 anyhow.workspace = true
 async-trait.workspace = true
 tokio.workspace = true

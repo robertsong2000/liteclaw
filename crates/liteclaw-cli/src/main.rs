@@ -5,6 +5,7 @@
 
 mod audit;
 mod registry;
+mod skills;
 
 use clap::Parser;
 use liteclaw_core::{ClawArgs, Ctx, ExitCode, Sandbox};
@@ -56,6 +57,23 @@ enum Command {
         #[arg(default_value = ".")]
         path: String,
     },
+    /// List discovered skills (global ~/.agents/skills + project .liteclaw/skills).
+    Skills,
+    /// Show a skill's full SKILL.md by id.
+    Skill {
+        id: String,
+    },
+    /// Run a script-based skill by id (passes remaining args to the script).
+    ///
+    /// Use `lc skill-run <id> -- <args>` (or just `lc skill-run <id> <args>`) to
+    /// forward arguments. Known clap flags like --version are intentionally NOT
+    /// captured here so they reach the skill script.
+    #[command(disable_help_flag = true, disable_version_flag = true)]
+    SkillRun {
+        id: String,
+        #[arg(num_args = 0.., trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
     /// List all available claws.
     Claws,
 }
@@ -77,9 +95,36 @@ async fn main() -> std::io::Result<StdExitCode> {
         Command::Grep { pattern, path } => ("grep", vec![pattern.clone(), path.clone()]),
         Command::Edit { path, old, new } => ("edit", vec![path.clone(), old.clone(), new.clone()]),
         Command::Audit { path } => ("audit", vec![path.clone()]),
+        Command::Skills => {
+            return match skills::list(&ctx).await {
+                Ok(code) => Ok(code.into()),
+                Err(e) => {
+                    eprintln!("lc skills: {e:#}");
+                    Ok(ExitCode::Failure.into())
+                }
+            };
+        }
+        Command::Skill { id } => {
+            return match skills::show(id, &ctx).await {
+                Ok(code) => Ok(code.into()),
+                Err(e) => {
+                    eprintln!("lc skill: {e:#}");
+                    Ok(ExitCode::Failure.into())
+                }
+            };
+        }
+        Command::SkillRun { id, args } => {
+            return match skills::run(id, args.clone(), &ctx).await {
+                Ok(code) => Ok(code.into()),
+                Err(e) => {
+                    eprintln!("lc skill run: {e:#}");
+                    Ok(ExitCode::Failure.into())
+                }
+            };
+        }
         Command::Claws => {
             for c in registry::all_claws() {
-                println!("{:<8} {}", c.name(), c.desc());
+                println!("{:<10} {}", c.name(), c.desc());
             }
             return Ok(StdExitCode::SUCCESS);
         }
