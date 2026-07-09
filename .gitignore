@@ -11,3 +11,6 @@ Cargo.lock.bak
 # Local env
 .env
 .env.local
+
+# ZCode plan artifacts
+.zcode/
