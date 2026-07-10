@@ -14,10 +14,34 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::{Instant, SystemTime};
 
-/// Hardcoded credentials (per user request). A future milestone can move these
-/// to ~/.liteclaw/config.json.
-pub const USERNAME: &str = "renault";
-pub const PASSWORD: &str = "renault123";
+/// Default credentials (used when ~/.liteclaw/auth.json is absent).
+const DEFAULT_USERNAME: &str = "renault";
+const DEFAULT_PASSWORD: &str = "renault123";
+
+/// Read credentials from ~/.liteclaw/auth.json, falling back to defaults.
+/// Format: {"username": "...", "password": "..."}
+fn auth_path() -> std::path::PathBuf {
+    let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
+    std::path::PathBuf::from(home).join(".liteclaw/auth.json")
+}
+
+fn read_credentials() -> (String, String) {
+    #[derive(serde::Deserialize)]
+    struct AuthFile {
+        username: Option<String>,
+        password: Option<String>,
+    }
+    match std::fs::read_to_string(auth_path())
+        .ok()
+        .and_then(|s| serde_json::from_str::<AuthFile>(&s).ok())
+    {
+        Some(f) => (
+            f.username.unwrap_or_else(|| DEFAULT_USERNAME.into()),
+            f.password.unwrap_or_else(|| DEFAULT_PASSWORD.into()),
+        ),
+        None => (DEFAULT_USERNAME.into(), DEFAULT_PASSWORD.into()),
+    }
+}
 
 /// Session expiry: 24 hours.
 const SESSION_TTL_SECS: u64 = 86400;
@@ -68,7 +92,8 @@ pub struct LoginRequest {
 
 /// POST /api/login — validate credentials, return a session token.
 pub async fn login(State(state): State<AppState>, Json(req): Json<LoginRequest>) -> Response {
-    if req.username == USERNAME && req.password == PASSWORD {
+    let (user, pass) = read_credentials();
+    if req.username == user && req.password == pass {
         let token = gen_token();
         state.sessions.insert(token.clone());
         Json(serde_json::json!({ "token": token })).into_response()
