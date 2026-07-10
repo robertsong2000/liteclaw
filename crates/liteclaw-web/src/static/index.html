@@ -156,16 +156,54 @@ function addBubble(role, text) {
   return div;
 }
 
-function addToolCard(tool, args, needsConfirm) {
+function addToolCard(tool, args, needsConfirm, confirmId) {
   const div = document.createElement('div');
   div.className = 'tool-card';
   div.innerHTML =
-    '<div class="tname">🔧 ' + tool + (needsConfirm ? ' (需确认)' : '') + '</div>' +
+    '<div class="tname">🔧 ' + tool + (needsConfirm ? ' ⚠️ 需确认' : '') + '</div>' +
     '<div class="targs">' + (typeof args === 'string' ? args : JSON.stringify(args)) + '</div>' +
     '<div class="tres"></div>';
   chat.appendChild(div);
+  const tres = div.querySelector('.tres');
+
+  // For tools needing confirmation, show allow/deny buttons.
+  if (needsConfirm && confirmId) {
+    const btns = document.createElement('div');
+    btns.className = 'confirm-btns';
+    btns.style.marginTop = '6px';
+    const allow = document.createElement('button');
+    allow.textContent = '✓ 允许'; allow.style.marginRight = '8px';
+    allow.style.background = '#43a047'; allow.style.color = '#fff';
+    allow.style.border = 'none'; allow.style.padding = '4px 12px';
+    allow.style.borderRadius = '4px'; allow.style.cursor = 'pointer';
+    const deny = document.createElement('button');
+    deny.textContent = '✗ 拒绝';
+    deny.style.background = '#e53935'; deny.style.color = '#fff';
+    deny.style.border = 'none'; deny.style.padding = '4px 12px';
+    deny.style.borderRadius = '4px'; deny.style.cursor = 'pointer';
+
+    const sendConfirm = (allowed) => {
+      allow.disabled = true; deny.disabled = true;
+      fetch('/api/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirm_id: confirmId, allowed: allowed }),
+      }).then(() => {
+        btns.remove();
+        tres.textContent = allowed ? '⏳ 执行中…' : '🚫 已拒绝';
+      }).catch(() => {
+        tres.textContent = '⚠️ 确认发送失败';
+      });
+    };
+    allow.onclick = () => sendConfirm(true);
+    deny.onclick = () => sendConfirm(false);
+    btns.appendChild(allow);
+    btns.appendChild(deny);
+    div.appendChild(btns);
+    scrollDown();
+  }
   scrollDown();
-  return div.querySelector('.tres');
+  return tres;
 }
 
 async function send() {
@@ -183,6 +221,34 @@ async function send() {
   sendBtn.disabled = false;
 }
 
+// --- Context management: prevent token explosion ---
+// Rough budget: ~12000 chars (≈4000 tokens for CJK/mixed). System prompt is
+// always kept; tool-call/result pairs are kept intact (never split); oldest
+// turns are dropped first when over budget.
+const MAX_CONTEXT_CHARS = 12000;
+
+function estimateChars(msgs) {
+  return msgs.reduce((n, m) => n + (m.content || '').length + (m.tool_calls ? JSON.stringify(m.tool_calls).length : 0), 0);
+}
+
+function trimContext(msgs) {
+  // msgs excludes system. Keep newest messages until under budget, but never
+  // start mid-pair: skip leading 'tool' messages (they answer a preceding call).
+  let kept = msgs.slice(); // newest at the end
+  while (estimateChars(kept) > MAX_CONTEXT_CHARS && kept.length > 2) {
+    kept.shift();
+  }
+  // If the oldest kept message is a 'tool' result without its caller, drop it.
+  while (kept.length > 0 && kept[0].role === 'tool') {
+    kept.shift();
+  }
+  // Also drop a leading assistant message whose tool_calls are now orphaned.
+  while (kept.length > 0 && kept[0].role === 'assistant' && kept[0].tool_calls && (!kept[1] || kept[1].role !== 'tool')) {
+    kept.shift();
+  }
+  return kept;
+}
+
 async function streamChat() {
   const cfg = {
     base_url: document.getElementById('base_url').value.trim(),
@@ -190,10 +256,15 @@ async function streamChat() {
     model: document.getElementById('model').value.trim(),
   };
 
-  // Ensure the system prompt is present.
+  // Trim history to stay within the context budget.
+  const nonSystem = messages.filter(m => m.role !== 'system');
+  const trimmed = trimContext(nonSystem);
+  if (trimmed.length < nonSystem.length) {
+    addBubble('assistant', 'ℹ️ (为节省上下文,已截断 ' + (nonSystem.length - trimmed.length) + ' 条较早的消息)');
+  }
   const reqMessages = [
     { role: 'system', content: SYSTEM_PROMPT },
-    ...messages.filter(m => m.role !== 'system'),
+    ...trimmed,
   ];
 
   let assistantDiv = null;
@@ -247,7 +318,7 @@ async function streamChat() {
       scrollDown();
     } else if (ev.type === 'tool_start') {
       assistantDiv = null; assistantText = '';
-      addToolCard(ev.tool, ev.arguments, ev.needs_confirmation);
+      addToolCard(ev.tool, ev.arguments, ev.needs_confirmation, ev.confirm_id);
     } else if (ev.type === 'tool_result') {
       // Append result to the last tool card (simple heuristic).
       const cards = chat.querySelectorAll('.tool-card .tres');

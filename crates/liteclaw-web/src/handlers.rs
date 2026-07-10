@@ -34,11 +34,11 @@ pub async fn chat(
     // Build the tool set from the registered claws (read-only tools auto-run).
     let tools = default_tools(&state.claws);
 
-    // No human-in-the-loop confirm callback wired in v1: mutating tools are
-    // refused by the agent loop (it needs an approver). This keeps the loop
-    // running safely; a confirm endpoint is a follow-up.
+    // Wire the human-in-the-loop confirm callback so write/edit/bash pause for
+    // the user to approve via POST /api/confirm.
     let ctx = state.ctx.clone();
-    let (rx, _handle) = into_stream(model, req.messages, tools, ctx, None, 8);
+    let confirm = crate::make_confirm(state.confirms.clone());
+    let (rx, _handle) = into_stream(model, req.messages, tools, ctx, Some(confirm), 8);
 
     // Serialize each AgentEvent as an SSE frame.
     let sse = tokio_stream::wrappers::ReceiverStream::new(rx).map(|event| {
@@ -101,5 +101,24 @@ pub async fn post_config(Json(cfg): Json<ModelConfig>) -> Response {
         },
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, format!("serialize failed: {e}"))
             .into_response(),
+    }
+}
+
+/// Request body for POST /api/confirm.
+#[derive(serde::Deserialize)]
+pub struct ConfirmRequest {
+    pub confirm_id: String,
+    pub allowed: bool,
+}
+
+/// POST /api/confirm — resolve a pending tool confirmation from the frontend.
+pub async fn confirm(
+    State(state): State<AppState>,
+    Json(req): Json<ConfirmRequest>,
+) -> Response {
+    if state.confirms.resolve(&req.confirm_id, req.allowed) {
+        (StatusCode::OK, "resolved").into_response()
+    } else {
+        (StatusCode::NOT_FOUND, "no such pending confirmation").into_response()
     }
 }

@@ -15,6 +15,10 @@ pub enum AgentEvent {
         arguments: serde_json::Value,
         /// Whether this tool requires human confirmation before executing.
         needs_confirmation: bool,
+        /// When needs_confirmation is true, an id the frontend must POST back to
+        /// /api/confirm to allow or deny this specific call.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        confirm_id: Option<String>,
     },
     /// A tool finished and produced a result.
     ToolResult {

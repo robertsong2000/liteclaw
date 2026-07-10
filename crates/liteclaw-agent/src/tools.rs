@@ -432,7 +432,7 @@ pub fn default_tools(claws: &[Arc<dyn Claw>]) -> Vec<Tool> {
                 },
                 "required": ["path", "old", "new"]
             }),
-            approval: Approval::Auto,
+            approval: Approval::Confirm,
             arg_order: &["path", "old", "new"],
             claw: edit.clone(),
         },
@@ -447,7 +447,7 @@ pub fn default_tools(claws: &[Arc<dyn Claw>]) -> Vec<Tool> {
                 },
                 "required": ["path", "content"]
             }),
-            approval: Approval::Auto,
+            approval: Approval::Confirm,
             arg_order: &["path", "content"],
             claw: edit.clone(), // placeholder: execute() dispatches to exec_write, not this claw
         },
@@ -461,7 +461,7 @@ pub fn default_tools(claws: &[Arc<dyn Claw>]) -> Vec<Tool> {
                 },
                 "required": ["command"]
             }),
-            approval: Approval::Auto,
+            approval: Approval::Confirm,
             arg_order: &["command"],
             claw: edit.clone(), // placeholder: execute() dispatches to exec_bash, not this claw
         },

@@ -26,9 +26,10 @@ use std::sync::Arc;
 use tokio::sync::mpsc;
 
 /// A callback that asks for human approval before a mutating tool runs.
-/// Returns `true` to allow, `false` to skip.
+/// Returns `true` to allow, `false` to skip. The `confirm_id` is a unique id
+/// the frontend references when posting its decision to /api/confirm.
 pub type ConfirmFn = Arc<
-    dyn Fn(String, serde_json::Value) -> std::pin::Pin<Box<dyn Future<Output = bool> + Send>>
+    dyn Fn(String, serde_json::Value, String) -> std::pin::Pin<Box<dyn Future<Output = bool> + Send>>
         + Send
         + Sync,
 >;
@@ -48,6 +49,7 @@ pub async fn run_loop(
     let mut messages = messages;
     let specs = to_specs(&tools);
     let confirm = confirm;
+    let mut confirm_counter = Counter::default();
 
     for _iter in 0..max_iters {
         // 1. Stream the model response, accumulating text + tool calls.
@@ -93,17 +95,25 @@ pub async fn run_loop(
             };
 
             let needs_confirm = tool.approval == Approval::Confirm;
+            // Generate a confirm id for tools that need human approval.
+            let confirm_id = if needs_confirm {
+                Some(format!("c{}", confirm_counter.next_val()))
+            } else {
+                None
+            };
             let _ = tx
                 .send(AgentEvent::ToolStart {
                     tool: tool.name.into(),
                     arguments: args.clone(),
                     needs_confirmation: needs_confirm,
+                    confirm_id: confirm_id.clone(),
                 })
                 .await;
 
             let outcome = if needs_confirm {
                 if let Some(cf) = &confirm {
-                    let allowed = (cf)(tool.name.into(), args.clone()).await;
+                    let id = confirm_id.clone().unwrap_or_default();
+                    let allowed = (cf)(tool.name.into(), args.clone(), id).await;
                     if allowed {
                         tool.execute(&args, &ctx).await
                     } else {
@@ -161,6 +171,19 @@ pub fn into_stream(
 
 fn tracing_log_error(e: &anyhow::Error) {
     eprintln!("[agent] loop error: {e:#}");
+}
+
+/// Simple incrementing counter for confirm ids (single agent task, no need
+/// for atomics).
+#[derive(Default)]
+struct Counter {
+    n: usize,
+}
+impl Counter {
+    fn next_val(&mut self) -> usize {
+        self.n += 1;
+        self.n
+    }
 }
 
 /// Convert a channel receiver into a stream that yields `None` when closed.
