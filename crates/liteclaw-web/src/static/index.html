@@ -319,12 +319,11 @@ document.getElementById('save_cfg').onclick = saveCfg;
 loadCfg();
 
 // --- <think> tag filter ---
-// qwen3/deepseek-r1 etc. emit <think>...</think> reasoning blocks inline with
-// content. This stateful filter strips them across fragmented stream chunks:
-// a tag may be split across deltas, so we buffer a small tail and only emit
-// text once we know it's outside a think block.
+// qwen3/deepseek-r1 emit <think>...</think> reasoning blocks. Instead of
+// discarding them, we collect the think content and emit a collapsible
+// <details> block so the user can optionally expand it.
 class ThinkFilter {
-  constructor() { this.inThink = false; this.pending = ''; }
+  constructor() { this.inThink = false; this.pending = ''; this.thinkBuf = ''; }
   feed(chunk) {
     let out = '';
     this.pending += chunk;
@@ -332,8 +331,6 @@ class ThinkFilter {
       if (!this.inThink) {
         const open = this.pending.indexOf('<think>');
         if (open === -1) {
-          // No opening tag: emit all but keep a tail in case a partial
-          // '<think>' is split across chunks (max tag len is 7).
           if (this.pending.length > 7) {
             const cut = this.pending.length - 7;
             out += this.pending.slice(0, cut);
@@ -344,31 +341,38 @@ class ThinkFilter {
         out += this.pending.slice(0, open);
         this.pending = this.pending.slice(open + 7);
         this.inThink = true;
+        this.thinkBuf = '';
       } else {
         const close = this.pending.indexOf('</think>');
         if (close === -1) {
-          // Still inside think: drop everything, but keep a tail for partial
-          // '</think>' (max close tag len is 8).
+          // Still inside think: accumulate content, keep tail for partial tag.
           if (this.pending.length > 8) {
+            this.thinkBuf += this.pending.slice(0, this.pending.length - 8);
             this.pending = this.pending.slice(this.pending.length - 8);
           }
           break;
         }
+        this.thinkBuf += this.pending.slice(0, close);
         this.pending = this.pending.slice(close + 8);
         this.inThink = false;
+        // Emit the accumulated think as a collapsible block marker.
+        out += '\n\u0002T' + this.thinkBuf.trim() + '\u0002\n';
+        this.thinkBuf = '';
       }
     }
     return out;
   }
   flush() {
-    // Stream ended: emit any remaining non-think text.
-    if (!this.inThink && this.pending.length > 0) {
-      const r = this.pending;
-      this.pending = '';
-      return r;
+    let out = '';
+    // Unclosed think: emit whatever we have as a block.
+    if (this.inThink && this.thinkBuf.trim()) {
+      out += '\n\u0002T' + this.thinkBuf.trim() + '\u0002\n';
+    } else if (!this.inThink && this.pending.length > 0) {
+      out += this.pending;
     }
     this.pending = '';
-    return '';
+    this.thinkBuf = '';
+    return out;
   }
 }
 
@@ -383,6 +387,13 @@ function escapeHtml(s) {
 function renderMarkdown(md) {
   // 1. Escape all HTML.
   let text = escapeHtml(md);
+  // 1b. Extract <think> blocks (marker: \u0002T...\u0002) → collapsible details.
+  const thinkBlocks = [];
+  text = text.replace(/\u0002T([\s\S]*?)\u0002/g, (m, content) => {
+    const idx = thinkBlocks.length;
+    thinkBlocks.push('<details style="margin:6px 0;border:1px solid var(--border);border-radius:6px;padding:4px 10px"><summary style="cursor:pointer;color:var(--muted);font-size:13px">💭 思考过程</summary><div style="margin-top:6px;color:var(--muted);font-size:13px;white-space:pre-wrap">' + content + '</div></details>');
+    return '\u0000TB' + idx + '\u0000';
+  });
   // 2. Extract fenced code blocks (```lang\n...\n```) → placeholders.
   const codeBlocks = [];
   text = text.replace(/```(\w*)\n([\s\S]*?)```/g, (m, lang, code) => {
@@ -402,6 +413,9 @@ function renderMarkdown(md) {
     // Code-block placeholder on its own line.
     const cbMatch = line.match(/^\u0000CB(\d+)\u0000$/);
     if (cbMatch) { closeList(); closeBq(); html += codeBlocks[parseInt(cbMatch[1])]; continue; }
+    // Think-block placeholder on its own line.
+    const tbMatch = line.match(/^\u0000TB(\d+)\u0000$/);
+    if (tbMatch) { closeList(); closeBq(); html += thinkBlocks[parseInt(tbMatch[1])]; continue; }
     // Headings.
     const h = line.match(/^(#{1,3})\s+(.*)/);
     if (h) { closeList(); closeBq(); html += '<h' + h[1].length + '>' + inline(h[2]) + '</h' + h[1].length + '>'; continue; }
@@ -422,6 +436,8 @@ function renderMarkdown(md) {
   html = html.replace(/<\/p>\n?<p>/g, '<br>');
   // Restore code-block placeholders embedded in lines (rare).
   html = html.replace(/\u0000CB(\d+)\u0000/g, (m, i) => codeBlocks[parseInt(i)]);
+  // Restore think-block placeholders.
+  html = html.replace(/\u0000TB(\d+)\u0000/g, (m, i) => thinkBlocks[parseInt(i)]);
   return html;
 }
 
