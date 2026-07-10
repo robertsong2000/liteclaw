@@ -770,6 +770,7 @@ dependencies = [
  "liteclaw-model",
  "liteclaw-skills",
  "regex",
+ "reqwest",
  "serde",
  "serde_json",
  "tokio",

@@ -7,7 +7,7 @@ use axum::http::{header, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use futures::StreamExt;
-use liteclaw_agent::{default_tools, into_stream, skill_tools};
+use liteclaw_agent::{default_tools, extra_tools, into_stream, skill_tools};
 use liteclaw_model::{Message, ModelConfig};
 
 /// Request body for POST /api/chat.
@@ -35,6 +35,7 @@ pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -
     let mut tools = default_tools(&state.claws);
     if let Some(first) = state.claws.first() {
         tools.extend(skill_tools(first.clone()));
+        tools.extend(extra_tools(first.clone()));
     }
 
     // Wire the confirm callback. In auto_mode all tools run without asking;

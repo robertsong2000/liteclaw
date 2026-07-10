@@ -20,3 +20,4 @@ tokio.workspace = true
 tokio-stream = "0.1"
 regex.workspace = true
 ignore.workspace = true
+reqwest.workspace = true

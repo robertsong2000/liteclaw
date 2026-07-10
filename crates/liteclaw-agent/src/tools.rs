@@ -73,6 +73,8 @@ impl Tool {
             "read" => exec_read(args, ctx),
             "grep" => exec_grep(args, ctx),
             "audit" => exec_audit(args, ctx),
+            "glob" => exec_glob(args, ctx),
+            "fetch" => exec_fetch(args, ctx).await,
             "edit" => exec_edit(args, ctx).await,
             "write" => exec_write(args, ctx).await,
             "bash" => exec_bash(args, ctx).await,
@@ -121,6 +123,118 @@ const READ_MAX_BYTES: usize = 64 * 1024;
 fn resolve_path(args: &serde_json::Value, key: &str, ctx: &Ctx) -> std::path::PathBuf {
     let p = args.get(key).and_then(|v| v.as_str()).unwrap_or(".");
     ctx.cwd.join(p)
+}
+
+/// Glob: list files matching a pattern (e.g. "**/*.rs", "src/*.ts").
+fn exec_glob(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
+    let pattern = match args.get("pattern").and_then(|v| v.as_str()) {
+        Some(s) => s.to_string(),
+        None => return ToolOutcome::failed("missing 'pattern'"),
+    };
+    let root = resolve_path(args, "path", ctx);
+    let walker = ignore::WalkBuilder::new(&root)
+        .hidden(false)
+        .git_ignore(true)
+        .build();
+    let mut matches = Vec::new();
+    for entry in walker.flatten() {
+        if !entry.file_type().map(|t| t.is_file()).unwrap_or(false) {
+            continue;
+        }
+        let p = entry.path();
+        let rel = p.strip_prefix(&ctx.cwd).unwrap_or(p);
+        let rel_str = rel.to_string_lossy();
+        // Simple glob: support ** and * wildcards.
+        if glob_match(&pattern, &rel_str) {
+            matches.push(rel_str.to_string());
+            if matches.len() >= 100 {
+                matches.push("…[truncated at 100]".into());
+                break;
+            }
+        }
+    }
+    if matches.is_empty() {
+        ToolOutcome::failed("no files matched")
+    } else {
+        ToolOutcome::ok(matches.join("\n"))
+    }
+}
+
+/// Minimal glob matcher: supports * (any chars except /) and ** (any chars).
+fn glob_match(pattern: &str, text: &str) -> bool {
+    // Convert glob to regex manually (avoid pulling globset dep).
+    let mut re = String::from("^");
+    let mut chars = pattern.chars().peekable();
+    while let Some(c) = chars.next() {
+        match c {
+            '*' => {
+                if chars.peek() == Some(&'*') {
+                    chars.next();
+                    re.push_str(".*");
+                } else {
+                    re.push_str("[^/]*");
+                }
+            }
+            '?' => re.push('.'),
+            '.' | '+' | '(' | ')' | '|' | '[' | ']' | '{' | '}' | '^' | '$' | '\\' => {
+                re.push('\\');
+                re.push(c);
+            }
+            _ => re.push(c),
+        }
+    }
+    re.push('$');
+    regex::RegexBuilder::new(&re)
+        .case_insensitive(true)
+        .build()
+        .map(|r| r.is_match(text))
+        .unwrap_or(false)
+}
+
+/// Web fetch: download a URL and return text content. Defender validates the URL
+/// against SSRF rules (blocks private IPs, metadata endpoints, exfil sinks).
+async fn exec_fetch(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
+    let url = match args.get("url").and_then(|v| v.as_str()) {
+        Some(s) => s,
+        None => return ToolOutcome::failed("missing 'url'"),
+    };
+    // Defender URL check: blocks localhost, private IPs, metadata, exfil.
+    let report = ctx.guard_url(url);
+    if matches!(report.action, liteclaw_core::defender::Action::Block) {
+        return ToolOutcome::blocked(format!(
+            "Defender blocked URL ({} score {})",
+            report.severity.label(),
+            report.score
+        ));
+    }
+    // Fetch with a 30s timeout, text only.
+    let client = match reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(30))
+        .build()
+    {
+        Ok(c) => c,
+        Err(e) => return ToolOutcome::failed(format!("http client: {e}")),
+    };
+    let resp = match client.get(url).send().await {
+        Ok(r) => r,
+        Err(e) => return ToolOutcome::failed(format!("fetch failed: {e}")),
+    };
+    let status = resp.status();
+    let text = match resp.text().await {
+        Ok(t) => t,
+        Err(e) => return ToolOutcome::failed(format!("read body: {e}")),
+    };
+    // Truncate to keep model context bounded.
+    let max = 8 * 1024;
+    let summary = if text.len() > max {
+        format!("HTTP {} (truncated):\n{}", status, &text[..max])
+    } else {
+        format!("HTTP {}:\n{}", status, text)
+    };
+    ToolOutcome {
+        ok: status.is_success(),
+        summary,
+    }
 }
 
 fn exec_read(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
@@ -652,6 +766,41 @@ pub fn skill_tools(claw: Arc<dyn Claw>) -> Vec<Tool> {
             }),
             approval: Approval::Auto,
             arg_order: &["id", "args"],
+            claw: claw.clone(),
+        },
+    ]
+}
+
+/// Build extra tools: glob (file matching) + fetch (web download).
+pub fn extra_tools(claw: Arc<dyn Claw>) -> Vec<Tool> {
+    vec![
+        Tool {
+            name: "glob",
+            description: "List files matching a glob pattern (e.g. '**/*.rs', 'src/*.ts').",
+            parameters: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "pattern": { "type": "string", "description": "glob pattern" },
+                    "path": { "type": "string", "description": "root dir (defaults to cwd)" }
+                },
+                "required": ["pattern"]
+            }),
+            approval: Approval::Auto,
+            arg_order: &["pattern", "path"],
+            claw: claw.clone(),
+        },
+        Tool {
+            name: "fetch",
+            description: "Download a web page and return text content. SSRF-protected.",
+            parameters: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "url": { "type": "string", "description": "URL to fetch" }
+                },
+                "required": ["url"]
+            }),
+            approval: Approval::Auto,
+            arg_order: &["url"],
             claw: claw.clone(),
         },
     ]

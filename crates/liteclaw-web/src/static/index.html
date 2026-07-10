@@ -471,8 +471,10 @@ let busy = false;
 const SYSTEM_PROMPT =
   '你是 liteclaw 助手，一个能执行操作的编程助手。可用工具：\n' +
   '- read(path): 读文件或列目录\n' +
-  '- grep(pattern,path): 搜索内容\n' +
+  '- grep(pattern,path): 搜索文件内容\n' +
+  '- glob(pattern,path): 按模式匹配文件(如 **/*.rs)\n' +
   '- audit(path): 安全扫描\n' +
+  '- fetch(url): 抓取网页内容\n' +
   '- edit(path,old,new): 修改文件\n' +
   '- write(path,content): 创建/覆盖文件\n' +
   '- bash(command): 执行 shell 命令(编译、运行、git 等)\n' +
