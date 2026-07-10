@@ -50,8 +50,11 @@ pub async fn run_loop(
     let specs = to_specs(&tools);
     let confirm = confirm;
     let mut confirm_counter = Counter::default();
-    let turn_start = std::time::Instant::now();
     let mut total_output_chars: usize = 0;
+    // Record the time of the FIRST delta — excludes queue/network latency
+    // before the model starts producing, so TPS reflects generation speed.
+    let mut gen_start: Option<std::time::Instant> = None;
+    let mut gen_end: Option<std::time::Instant> = None;
 
     for _iter in 0..max_iters {
         // 1. Stream the model response, accumulating text + tool calls.
@@ -62,7 +65,13 @@ pub async fn run_loop(
         while let Some(event) = stream.next().await {
             match event? {
                 StreamEvent::Delta(chunk) => {
+                    if gen_start.is_none() {
+                        gen_start = Some(std::time::Instant::now());
+                    }
+                    gen_end = Some(std::time::Instant::now());
                     text.push_str(&chunk);
+                    // Count ALL output chars including <think> blocks — they
+                    // are real generated tokens even if filtered for display.
                     total_output_chars += chunk.chars().count();
                     let _ = tx.send(AgentEvent::text_delta(chunk)).await;
                 }
@@ -82,11 +91,19 @@ pub async fn run_loop(
 
         // 3. No tool calls → the model answered in plain text; done.
         if tool_calls.is_empty() {
-            let elapsed_ms = turn_start.elapsed().as_millis();
-            // Estimate tokens: ~3 chars per token for mixed CJK/English.
-            let tokens = (total_output_chars / 3).max(1);
-            let tps = if elapsed_ms > 0 {
-                Some((tokens as f64) * 1000.0 / (elapsed_ms as f64))
+            // Compute generation-only elapsed time (first delta → last delta),
+            // excluding pre-generation queue/network latency.
+            let gen_ms = match (gen_start, gen_end) {
+                (Some(s), Some(e)) => e.duration_since(s).as_millis(),
+                _ => 0,
+            };
+            // Token estimate: CJK-heavy text ≈ 1.5 chars/token (not 3, which
+            // is English-only). The <think> content is included since it's
+            // real generated output.
+            let tokens = ((total_output_chars as f64) / 1.5).round() as usize;
+            let tokens = tokens.max(1);
+            let tps = if gen_ms > 0 {
+                Some((tokens as f64) * 1000.0 / (gen_ms as f64))
             } else {
                 None
             };
@@ -94,7 +111,7 @@ pub async fn run_loop(
                 .send(AgentEvent::Done {
                     tps,
                     tokens: Some(tokens),
-                    elapsed_ms: Some(elapsed_ms),
+                    elapsed_ms: Some(gen_ms),
                 })
                 .await;
             return Ok(());
