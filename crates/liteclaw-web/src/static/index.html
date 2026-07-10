@@ -178,7 +178,7 @@ showLogin();
 
 // --- Config persistence (stored in ~/.liteclaw/config.json via backend) ---
 function fillCfg(c) {
-  document.getElementById('base_url').value = c.base_url || 'http://121.40.234.38:3002/v1';
+  document.getElementById('base_url').value = c.base_url || 'http://172.21.0.1:11434/v1';
   document.getElementById('model').value = c.model || 'qwen3:30b-a3b';
   document.getElementById('api_key').value = c.api_key || '';
 }

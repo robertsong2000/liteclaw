@@ -23,7 +23,7 @@ fn default_model() -> String {
 }
 
 fn default_base_url() -> String {
-    "http://localhost:11434/v1".to_string()
+    "http://172.21.0.1:11434/v1".to_string()
 }
 
 impl Default for ModelConfig {
