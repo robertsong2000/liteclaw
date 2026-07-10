@@ -4,6 +4,7 @@
 //! (`--json`, `--no-defender`, `--allow-write`) configure the shared [`Ctx`].
 
 mod audit;
+mod mcp;
 mod registry;
 mod skills;
 
@@ -74,6 +75,8 @@ enum Command {
     },
     /// List all available claws.
     Claws,
+    /// Run as an MCP server (stdio JSON-RPC) for Claude Code / Cursor.
+    Mcp,
     /// Start the web UI (chat + agent loop).
     Serve {
         /// Bind address: 127.0.0.1 (local only) or 0.0.0.0 (container/public).
@@ -87,6 +90,16 @@ enum Command {
 #[tokio::main]
 async fn main() -> std::io::Result<StdExitCode> {
     let cli = Cli::parse();
+
+    // MCP server uses its own runtime (block_on per tool call), so it must run
+    // OUTSIDE the tokio runtime that #[tokio::main] creates.
+    if let Command::Mcp = cli.command {
+        return Ok(if mcp::run() == 0 {
+            StdExitCode::SUCCESS
+        } else {
+            StdExitCode::FAILURE
+        });
+    }
 
     let mut sandbox = Sandbox::readonly();
     for dir in &cli.allow_write {
@@ -134,6 +147,7 @@ async fn main() -> std::io::Result<StdExitCode> {
             }
             return Ok(StdExitCode::SUCCESS);
         }
+        Command::Mcp => unreachable!(),
         Command::Serve { host, port } => {
             // For the web agent, default to allowing writes under cwd so the
             // edit tool is usable (unless the user passed stricter flags).

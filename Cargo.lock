@@ -785,6 +785,7 @@ dependencies = [
  "async-trait",
  "clap",
  "ignore",
+ "liteclaw-agent",
  "liteclaw-core",
  "liteclaw-fs",
  "liteclaw-model",

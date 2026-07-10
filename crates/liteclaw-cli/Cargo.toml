@@ -16,6 +16,7 @@ liteclaw-core.workspace = true
 liteclaw-fs.workspace = true
 liteclaw-model.workspace = true
 liteclaw-skills.workspace = true
+liteclaw-agent.workspace = true
 liteclaw-web.workspace = true
 clap.workspace = true
 ignore.workspace = true
