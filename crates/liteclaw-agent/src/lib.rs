@@ -50,6 +50,8 @@ pub async fn run_loop(
     let specs = to_specs(&tools);
     let confirm = confirm;
     let mut confirm_counter = Counter::default();
+    let turn_start = std::time::Instant::now();
+    let mut total_output_chars: usize = 0;
 
     for _iter in 0..max_iters {
         // 1. Stream the model response, accumulating text + tool calls.
@@ -61,6 +63,7 @@ pub async fn run_loop(
             match event? {
                 StreamEvent::Delta(chunk) => {
                     text.push_str(&chunk);
+                    total_output_chars += chunk.chars().count();
                     let _ = tx.send(AgentEvent::text_delta(chunk)).await;
                 }
                 StreamEvent::Done { tool_calls: calls } => {
@@ -79,7 +82,21 @@ pub async fn run_loop(
 
         // 3. No tool calls → the model answered in plain text; done.
         if tool_calls.is_empty() {
-            let _ = tx.send(AgentEvent::Done).await;
+            let elapsed_ms = turn_start.elapsed().as_millis();
+            // Estimate tokens: ~3 chars per token for mixed CJK/English.
+            let tokens = (total_output_chars / 3).max(1);
+            let tps = if elapsed_ms > 0 {
+                Some((tokens as f64) * 1000.0 / (elapsed_ms as f64))
+            } else {
+                None
+            };
+            let _ = tx
+                .send(AgentEvent::Done {
+                    tps,
+                    tokens: Some(tokens),
+                    elapsed_ms: Some(elapsed_ms),
+                })
+                .await;
             return Ok(());
         }
 

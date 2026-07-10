@@ -27,8 +27,15 @@ pub enum AgentEvent {
         /// Short human-readable summary of the output.
         summary: String,
     },
-    /// The agent turn is complete.
-    Done,
+    /// The agent turn is complete. Includes throughput stats if available.
+    Done {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        tps: Option<f64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        tokens: Option<usize>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        elapsed_ms: Option<u128>,
+    },
     /// An error terminated the turn.
     Error { message: String },
 }

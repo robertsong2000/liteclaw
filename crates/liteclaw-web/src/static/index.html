@@ -590,6 +590,14 @@ async function streamChat() {
       if (assistantText && assistantText.trim()) {
         messages.push({ role: 'assistant', content: assistantText });
       }
+      // Show throughput stats if present.
+      if (ev.tps) {
+        const stat = document.createElement('div');
+        stat.style.cssText = 'font-size:12px;color:var(--muted);margin-top:4px;align-self:flex-end';
+        stat.textContent = '⚡ ' + ev.tps.toFixed(1) + ' tok/s · ~' + ev.tokens + ' tok · ' + (ev.elapsed_ms / 1000).toFixed(1) + 's';
+        chat.appendChild(stat);
+        scrollDown();
+      }
     } else if (ev.type === 'error') {
       const div = document.createElement('div');
       div.className = 'err'; div.textContent = '⚠️ ' + ev.message;

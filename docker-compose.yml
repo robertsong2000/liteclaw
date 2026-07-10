@@ -1,0 +1,55 @@
+# docker-compose.yml — liteclaw development environment
+#
+# Purpose: give developers a reproducible toolchain without installing Rust
+# locally. Source is bind-mounted for incremental builds; cargo caches live in
+# named volumes so rebuilds stay fast across runs.
+#
+# Common tasks:
+#   docker compose run --rm lc build            # recompile inside container
+#   docker compose run --rm lc read README.md
+#   docker compose run --rm lc grep "async" crates/
+#   docker compose run --rm lc audit .
+#   docker compose run --rm lc --allow-write /workspace edit README.md a b
+#   docker compose run --rm lc skills
+#
+# Write operations need the mount to be read-write (it is, by default here)
+# AND the in-tool --allow-write flag — both layers apply.
+
+services:
+  lc:
+        build:
+          context: .
+          dockerfile: Dockerfile
+        image: liteclaw:dev
+        container_name: liteclaw
+
+        # Bind-mount the host project dir as the working directory, so `lc`
+        # operates on your real files. :rw lets edit/skill-run modify them.
+        volumes:
+          - ./:/workspace:rw
+          # Skill discovery: expose the host skill pool into the container so
+          # `lc skills` / `lc skill-run` see the same skills as on bare metal.
+          - ${HOME}/.agents/skills:/root/.agents/skills:ro
+          # Persist cargo + target caches across container runs → fast rebuilds.
+          - cargo-cache:/usr/local/cargo/registry
+          - target-cache:/workspace/target
+
+        working_dir: /workspace
+
+        # Keep the container alive as a dev sandbox (override entrypoint) when
+        # started with `docker compose up`. Individual `run` commands ignore
+        # this and execute `lc` directly via the ENTRYPOINT.
+        tty: true
+        stdin_open: true
+
+        # Reserved for the upcoming `lc chat` milestone. The model client
+        # (crates/liteclaw-model) already reads these; they are no-ops today
+        # for file/search claws. Set them on the host or via an .env file.
+        environment:
+          - LC_BASE_URL=${LC_BASE_URL:-http://localhost:11434/v1}
+          - LC_API_KEY=${LC_API_KEY:-}
+          - LC_MODEL=${LC_MODEL:-qwen2.5:7b}
+
+volumes:
+  cargo-cache:
+  target-cache:
