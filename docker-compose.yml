@@ -1,0 +1,23 @@
+# docker-compose.yml — liteclaw 容器部署
+#
+# 启动:  docker compose up -d
+# 访问:  http://localhost:8080
+# 日志:  docker compose logs -f
+# 停止:  docker compose down
+
+services:
+  lc:
+    build: .
+    image: liteclaw:latest
+    container_name: liteclaw
+    ports:
+      - "8080:8080"
+    volumes:
+      # 工作目录:agent 的 read/write/edit/bash 在这里操作
+      - ./:/workspace:rw
+      # 配置文件:宿主机 ~/.liteclaw 映射进容器,配置持久化
+      - ${HOME}/.liteclaw:/root/.liteclaw:rw
+      # Skill 池:宿主机 ~/.agents/skills 只读映射(只看不改)
+      - ${HOME}/.agents/skills:/root/.agents/skills:ro
+    # CMD 已经是 serve --host 0.0.0.0 8080,无需覆盖
+    restart: unless-stopped

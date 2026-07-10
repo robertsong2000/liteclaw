@@ -36,8 +36,9 @@ pub fn make_confirm(reg: confirm::ConfirmRegistry) -> ConfirmFn {
     })
 }
 
-/// Run the web server on the given port. Blocks until shutdown.
-pub async fn serve(port: u16, claws: Vec<Arc<dyn Claw>>, ctx: Ctx) -> Result<()> {
+/// Run the web server. `host` is the bind address: "127.0.0.1" for local-only
+/// (default), "0.0.0.0" for container/public access. Blocks until shutdown.
+pub async fn serve(host: &str, port: u16, claws: Vec<Arc<dyn Claw>>, ctx: Ctx) -> Result<()> {
     let state = AppState {
         claws,
         ctx: Arc::new(ctx),
@@ -63,8 +64,11 @@ pub async fn serve(port: u16, claws: Vec<Arc<dyn Claw>>, ctx: Ctx) -> Result<()>
         .nest("/api", api)
         .with_state(state);
 
-    let addr = std::net::SocketAddr::from(([127, 0, 0, 1], port));
-    eprintln!("liteclaw web UI → http://localhost:{port}");
+    let ip: std::net::IpAddr = host
+        .parse()
+        .map_err(|e| anyhow::anyhow!("invalid host '{host}': {e}"))?;
+    let addr = std::net::SocketAddr::from((ip, port));
+    eprintln!("liteclaw web UI → http://{addr}");
 
     let listener = tokio::net::TcpListener::bind(addr)
         .await

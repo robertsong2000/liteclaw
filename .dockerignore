@@ -1,0 +1,10 @@
+# Keep the build context small → faster builds.
+target/
+.git/
+.zcode/
+site/
+*.md
+!README.md
+.env
+.env.local
+.DS_Store
