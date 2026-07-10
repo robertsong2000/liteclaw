@@ -127,6 +127,60 @@ async function saveCfg() {
 document.getElementById('save_cfg').onclick = saveCfg;
 loadCfg();
 
+// --- <think> tag filter ---
+// qwen3/deepseek-r1 etc. emit <think>...</think> reasoning blocks inline with
+// content. This stateful filter strips them across fragmented stream chunks:
+// a tag may be split across deltas, so we buffer a small tail and only emit
+// text once we know it's outside a think block.
+class ThinkFilter {
+  constructor() { this.inThink = false; this.pending = ''; }
+  feed(chunk) {
+    let out = '';
+    this.pending += chunk;
+    while (this.pending.length > 0) {
+      if (!this.inThink) {
+        const open = this.pending.indexOf('<think>');
+        if (open === -1) {
+          // No opening tag: emit all but keep a tail in case a partial
+          // '<think>' is split across chunks (max tag len is 7).
+          if (this.pending.length > 7) {
+            const cut = this.pending.length - 7;
+            out += this.pending.slice(0, cut);
+            this.pending = this.pending.slice(cut);
+          }
+          break;
+        }
+        out += this.pending.slice(0, open);
+        this.pending = this.pending.slice(open + 7);
+        this.inThink = true;
+      } else {
+        const close = this.pending.indexOf('</think>');
+        if (close === -1) {
+          // Still inside think: drop everything, but keep a tail for partial
+          // '</think>' (max close tag len is 8).
+          if (this.pending.length > 8) {
+            this.pending = this.pending.slice(this.pending.length - 8);
+          }
+          break;
+        }
+        this.pending = this.pending.slice(close + 8);
+        this.inThink = false;
+      }
+    }
+    return out;
+  }
+  flush() {
+    // Stream ended: emit any remaining non-think text.
+    if (!this.inThink && this.pending.length > 0) {
+      const r = this.pending;
+      this.pending = '';
+      return r;
+    }
+    this.pending = '';
+    return '';
+  }
+}
+
 // --- Chat state ---
 const chat = document.getElementById('chat');
 const input = document.getElementById('input');
@@ -269,6 +323,7 @@ async function streamChat() {
 
   let assistantDiv = null;
   let assistantText = '';
+  let thinkFilter = new ThinkFilter();
 
   try {
     const resp = await fetch('/api/chat', {
@@ -310,13 +365,24 @@ async function streamChat() {
 
   function handleEvent(ev) {
     if (ev.type === 'text_delta') {
-      if (!assistantDiv) {
-        assistantDiv = addBubble('assistant', '');
+      // Strip <think>...</think> reasoning blocks (qwen3/deepseek-r1).
+      const clean = thinkFilter.feed(ev.text);
+      if (clean) {
+        if (!assistantDiv) {
+          assistantDiv = addBubble('assistant', '');
+        }
+        assistantText += clean;
+        assistantDiv.textContent = assistantText;
+        scrollDown();
       }
-      assistantText += ev.text;
-      assistantDiv.textContent = assistantText;
-      scrollDown();
     } else if (ev.type === 'tool_start') {
+      // Flush any trailing non-think text before switching to a tool card.
+      const tail = thinkFilter.flush();
+      if (tail) {
+        if (!assistantDiv) assistantDiv = addBubble('assistant', '');
+        assistantText += tail;
+        assistantDiv.textContent = assistantText;
+      }
       assistantDiv = null; assistantText = '';
       addToolCard(ev.tool, ev.arguments, ev.needs_confirmation, ev.confirm_id);
     } else if (ev.type === 'tool_result') {
@@ -328,7 +394,14 @@ async function streamChat() {
         last.className = 'tres ' + (ev.ok ? 'ok' : 'fail');
       }
     } else if (ev.type === 'done') {
-      if (assistantText) messages.push({ role: 'assistant', content: assistantText });
+      const tail = thinkFilter.flush();
+      if (tail) {
+        assistantText += tail;
+        if (assistantDiv) assistantDiv.textContent = assistantText;
+      }
+      if (assistantText && assistantText.trim()) {
+        messages.push({ role: 'assistant', content: assistantText });
+      }
     } else if (ev.type === 'error') {
       const div = document.createElement('div');
       div.className = 'err'; div.textContent = '⚠️ ' + ev.message;
