@@ -633,9 +633,11 @@ async function streamChat() {
         auto_mode: document.getElementById('auto_mode').checked,
       }),
     });
+    if (resp.status === 401) { showLogin(); return; }
     if (!resp.ok) {
-      const t = await resp.text();
-      addBubble('assistant', '⚠️ ' + (t || resp.status));
+      let hint = '⚠️ 请求失败 (HTTP ' + resp.status + ')';
+      if (resp.status === 500) hint += '\n可能原因: 模型 API 地址错误、模型未加载、或网络不通';
+      addBubble('assistant', hint);
       return;
     }
 
@@ -662,7 +664,12 @@ async function streamChat() {
       }
     }
   } catch (e) {
-    addBubble('assistant', '⚠️ 连接失败: ' + e.message + ' (检查 base_url 和模型是否运行)');
+    const msg = e.message || '';
+    let hint = '⚠️ 连接中断: ' + msg;
+    if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+      hint = '⚠️ 无法连接服务器\n请检查:\n1. lc serve 是否在运行\n2. 模型 base_url 是否正确\n3. 模型是否已加载';
+    }
+    addBubble('assistant', hint);
   }
 
   function handleEvent(ev) {
@@ -719,7 +726,19 @@ async function streamChat() {
       saveCurrentSession();
     } else if (ev.type === 'error') {
       const div = document.createElement('div');
-      div.className = 'err'; div.textContent = '⚠️ ' + ev.message;
+      div.className = 'err';
+      let msg = ev.message || '未知错误';
+      // Add actionable hints for common errors.
+      if (msg.includes('model_not_found') || msg.includes('No models loaded')) {
+        msg += '\n→ 请检查模型名称是否正确,或模型是否已加载';
+      } else if (msg.includes('404') || msg.includes('Not Found')) {
+        msg += '\n→ 请检查 base_url 是否正确(应以 /v1 结尾)';
+      } else if (msg.includes('timeout') || msg.includes('Timeout')) {
+        msg += '\n→ 模型响应超时,可能是推理负载过重';
+      } else if (msg.includes('Connection refused') || msg.includes('ECONNREFUSED')) {
+        msg += '\n→ 模型服务未运行,请先启动 Ollama/LM Studio';
+      }
+      div.textContent = '⚠️ ' + msg;
       chat.appendChild(div); scrollDown();
     }
   }
