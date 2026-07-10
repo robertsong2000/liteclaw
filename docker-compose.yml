@@ -19,5 +19,9 @@ services:
       - ${HOME}/.liteclaw:/root/.liteclaw:rw
       # Skill 池:宿主机 ~/.agents/skills 只读映射(只看不改)
       - ${HOME}/.agents/skills:/root/.agents/skills:ro
+    # host.docker.internal: 让容器内用这个域名访问宿主机服务
+    # (如宿主机上的 Ollama / LM Studio)。Linux 需要 extra_hosts 显式映射。
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     # CMD 已经是 serve --host 0.0.0.0 8080,无需覆盖
     restart: unless-stopped
