@@ -74,6 +74,9 @@
     <input class="url" id="base_url" placeholder="http://localhost:11434/v1" title="OpenAI-compatible base URL" />
     <input class="model" id="model" placeholder="qwen2.5:7b" title="model id" />
     <input class="key" id="api_key" type="password" placeholder="api key (可选)" title="API key" />
+    <label title="勾选后所有工具(写文件/执行命令)自动执行,不弹确认框" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
+      <input type="checkbox" id="auto_mode" /> 自动模式
+    </label>
     <button id="save_cfg">保存</button>
   </div>
 </header>
@@ -329,7 +332,11 @@ async function streamChat() {
     const resp = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: reqMessages, model: cfg }),
+      body: JSON.stringify({
+        messages: reqMessages,
+        model: cfg,
+        auto_mode: document.getElementById('auto_mode').checked,
+      }),
     });
     if (!resp.ok) {
       const t = await resp.text();

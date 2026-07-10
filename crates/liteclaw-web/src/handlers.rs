@@ -15,6 +15,10 @@ use liteclaw_model::{Message, ModelConfig};
 pub struct ChatRequest {
     pub messages: Vec<Message>,
     pub model: ModelConfig,
+    /// When true, all tools (including write/edit/bash) auto-execute without
+    /// waiting for human confirmation.
+    #[serde(default)]
+    pub auto_mode: bool,
 }
 
 /// POST /api/chat — start an agent turn and stream events back as SSE.
@@ -34,11 +38,15 @@ pub async fn chat(
     // Build the tool set from the registered claws (read-only tools auto-run).
     let tools = default_tools(&state.claws);
 
-    // Wire the human-in-the-loop confirm callback so write/edit/bash pause for
-    // the user to approve via POST /api/confirm.
+    // Wire the confirm callback. In auto_mode all tools run without asking;
+    // otherwise write/edit/bash pause for human approval via POST /api/confirm.
     let ctx = state.ctx.clone();
-    let confirm = crate::make_confirm(state.confirms.clone());
-    let (rx, _handle) = into_stream(model, req.messages, tools, ctx, Some(confirm), 8);
+    let confirm = if req.auto_mode {
+        None // no callback → Confirm tools execute immediately (see agent loop)
+    } else {
+        Some(crate::make_confirm(state.confirms.clone()))
+    };
+    let (rx, _handle) = into_stream(model, req.messages, tools, ctx, confirm, 8);
 
     // Serialize each AgentEvent as an SSE frame.
     let sse = tokio_stream::wrappers::ReceiverStream::new(rx).map(|event| {

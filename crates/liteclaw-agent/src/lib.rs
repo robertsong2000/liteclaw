@@ -94,7 +94,8 @@ pub async fn run_loop(
                 continue;
             };
 
-            let needs_confirm = tool.approval == Approval::Confirm;
+            // In auto mode (no confirm callback), treat all tools as auto-run.
+            let needs_confirm = tool.approval == Approval::Confirm && confirm.is_some();
             // Generate a confirm id for tools that need human approval.
             let confirm_id = if needs_confirm {
                 Some(format!("c{}", confirm_counter.next_val()))
@@ -111,17 +112,14 @@ pub async fn run_loop(
                 .await;
 
             let outcome = if needs_confirm {
-                if let Some(cf) = &confirm {
-                    let id = confirm_id.clone().unwrap_or_default();
-                    let allowed = (cf)(tool.name.into(), args.clone(), id).await;
-                    if allowed {
-                        tool.execute(&args, &ctx).await
-                    } else {
-                        ToolOutcome::failed("denied by user")
-                    }
+                // confirm.is_some() is guaranteed by the needs_confirm calc above.
+                let cf = confirm.as_ref().unwrap();
+                let id = confirm_id.clone().unwrap_or_default();
+                let allowed = (cf)(tool.name.into(), args.clone(), id).await;
+                if allowed {
+                    tool.execute(&args, &ctx).await
                 } else {
-                    // No confirm callback: refuse mutating tools for safety.
-                    ToolOutcome::failed("requires confirmation but no approver connected")
+                    ToolOutcome::failed("denied by user")
                 }
             } else {
                 tool.execute(&args, &ctx).await
