@@ -756,6 +756,7 @@ dependencies = [
  "ignore",
  "liteclaw-core",
  "liteclaw-model",
+ "liteclaw-skills",
  "regex",
  "serde",
  "serde_json",

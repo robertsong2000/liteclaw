@@ -7,7 +7,7 @@ use axum::http::{header, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use futures::StreamExt;
-use liteclaw_agent::{default_tools, into_stream};
+use liteclaw_agent::{default_tools, into_stream, skill_tools};
 use liteclaw_model::{Message, ModelConfig};
 
 /// Request body for POST /api/chat.
@@ -35,8 +35,11 @@ pub async fn chat(
         }
     };
 
-    // Build the tool set from the registered claws (read-only tools auto-run).
-    let tools = default_tools(&state.claws);
+    // Build the tool set: core claws + skill tools (list/run).
+    let mut tools = default_tools(&state.claws);
+    if let Some(first) = state.claws.first() {
+        tools.extend(skill_tools(first.clone()));
+    }
 
     // Wire the confirm callback. In auto_mode all tools run without asking;
     // otherwise write/edit/bash pause for human approval via POST /api/confirm.

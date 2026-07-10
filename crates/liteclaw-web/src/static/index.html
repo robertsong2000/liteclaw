@@ -65,6 +65,29 @@
   }
   footer button:disabled { opacity: 0.4; cursor: default; }
   .err { color: #ef5350; font-size: 13px; }
+  /* Markdown rendering inside assistant bubbles */
+  .msg.assistant pre {
+    background: #0d1117; border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 12px; overflow-x: auto; margin: 8px 0; font-size: 13px;
+  }
+  .msg.assistant pre code { background: none; padding: 0; color: #e6e6e6; }
+  .msg.assistant code {
+    background: #0d1117; padding: 1px 5px; border-radius: 3px;
+    font-family: "SF Mono", Menlo, monospace; font-size: 13px; color: #f0883e;
+  }
+  .msg.assistant ul, .msg.assistant ol { margin: 6px 0; padding-left: 22px; }
+  .msg.assistant li { margin: 3px 0; }
+  .msg.assistant h1, .msg.assistant h2, .msg.assistant h3 {
+    margin: 10px 0 6px; line-height: 1.3;
+  }
+  .msg.assistant h1 { font-size: 17px; } .msg.assistant h2 { font-size: 15px; }
+  .msg.assistant h3 { font-size: 14px; }
+  .msg.assistant p { margin: 6px 0; }
+  .msg.assistant strong { color: #fff; }
+  .msg.assistant blockquote {
+    border-left: 3px solid var(--accent); margin: 6px 0; padding-left: 12px;
+    color: var(--muted);
+  }
 </style>
 </head>
 <body>
@@ -184,6 +207,78 @@ class ThinkFilter {
   }
 }
 
+// --- Lightweight Markdown renderer (no external deps) ---
+// Renders common markdown into safe HTML. Pipeline: escape HTML first (XSS),
+// extract fenced code blocks (protect from inline processing), then apply
+// block + inline transforms.
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderMarkdown(md) {
+  // 1. Escape all HTML.
+  let text = escapeHtml(md);
+  // 2. Extract fenced code blocks (```lang\n...\n```) → placeholders.
+  const codeBlocks = [];
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, (m, lang, code) => {
+    const idx = codeBlocks.length;
+    codeBlocks.push('<pre><code>' + code.replace(/\n$/, '') + '</code></pre>');
+    return '\u0000CB' + idx + '\u0000';
+  });
+  // 3. Split into lines for block-level processing.
+  const lines = text.split('\n');
+  let html = '';
+  let inList = false;
+  let inBlockquote = false;
+  const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+  const closeBq = () => { if (inBlockquote) { html += '</blockquote>'; inBlockquote = false; } };
+  for (let raw of lines) {
+    const line = raw;
+    // Code-block placeholder on its own line.
+    const cbMatch = line.match(/^\u0000CB(\d+)\u0000$/);
+    if (cbMatch) { closeList(); closeBq(); html += codeBlocks[parseInt(cbMatch[1])]; continue; }
+    // Headings.
+    const h = line.match(/^(#{1,3})\s+(.*)/);
+    if (h) { closeList(); closeBq(); html += '<h' + h[1].length + '>' + inline(h[2]) + '</h' + h[1].length + '>'; continue; }
+    // Unordered list.
+    if (/^\s*[-*]\s+/.test(line)) { closeBq(); if (!inList) { html += '<ul>'; inList = true; } html += '<li>' + inline(line.replace(/^\s*[-*]\s+/, '')) + '</li>'; continue; }
+    // Ordered list.
+    if (/^\s*\d+\.\s+/.test(line)) { closeBq(); if (!inList) { html += '<ul>'; inList = true; } html += '<li>' + inline(line.replace(/^\s*\d+\.\s+/, '')) + '</li>'; continue; }
+    // Blockquote.
+    if (/^&gt;\s?/.test(line)) { closeList(); if (!inBlockquote) { html += '<blockquote>'; inBlockquote = true; } html += inline(line.replace(/^&gt;\s?/, '')); continue; }
+    // Blank line.
+    if (line.trim() === '') { closeList(); closeBq(); html += '\n'; continue; }
+    // Regular paragraph.
+    closeList(); closeBq();
+    html += '<p>' + inline(line) + '</p>';
+  }
+  closeList(); closeBq();
+  // Merge consecutive <p> (a paragraph split across lines).
+  html = html.replace(/<\/p>\n?<p>/g, '<br>');
+  // Restore code-block placeholders embedded in lines (rare).
+  html = html.replace(/\u0000CB(\d+)\u0000/g, (m, i) => codeBlocks[parseInt(i)]);
+  return html;
+}
+
+// Inline transforms: bold, italic, inline code, links. Order matters: code
+// first (protect its content), then bold/italic/links.
+function inline(s) {
+  // Inline code: `...` → protect content.
+  const codes = [];
+  s = s.replace(/`([^`]+)`/g, (m, c) => { codes.push(c); return '\u0001C' + (codes.length - 1) + '\u0001'; });
+  // Bold **text** or __text__.
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+  // Italic *text* or _text_ (avoid matching bold leftovers).
+  s = s.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
+  s = s.replace(/(^|[^_])_([^_]+)_/g, '$1<em>$2</em>');
+  // Links [text](url).
+  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--accent-2)">$1</a>');
+  // Restore inline code.
+  s = s.replace(/\u0001C(\d+)\u0001/g, (m, i) => '<code>' + codes[parseInt(i)] + '</code>');
+  return s;
+}
+
 // --- Chat state ---
 const chat = document.getElementById('chat');
 const input = document.getElementById('input');
@@ -200,7 +295,10 @@ const SYSTEM_PROMPT =
   '- edit(path,old,new): 修改文件\n' +
   '- write(path,content): 创建/覆盖文件\n' +
   '- bash(command): 执行 shell 命令(编译、运行、git 等)\n' +
-  '遇到用户问题时，先用工具收集信息，再行动。简洁回答，操作后报告结果。';
+  '- skill_list(): 列出所有可用的 skill(能力扩展)\n' +
+  '- skill_run(id,args?): 运行某个 skill(scripts 型执行,prompt 型返回内容)\n' +
+  '遇到用户问题时，先用工具收集信息，再行动。简洁回答，操作后报告结果。\n' +
+  '如果用户的需求匹配某个 skill，优先用 skill_run 调用它。';
 
 function scrollDown() { chat.scrollTop = chat.scrollHeight; }
 
@@ -327,6 +425,20 @@ async function streamChat() {
   let assistantDiv = null;
   let assistantText = '';
   let thinkFilter = new ThinkFilter();
+  // Pending render flag for debounced markdown rendering. Must be declared
+  // BEFORE the try block (handleEvent, called inside it, references it).
+  let renderPending = false;
+  function renderAssistant() {
+    if (renderPending) return;
+    renderPending = true;
+    requestAnimationFrame(() => {
+      renderPending = false;
+      if (assistantDiv) {
+        assistantDiv.innerHTML = renderMarkdown(assistantText);
+        scrollDown();
+      }
+    });
+  }
 
   try {
     const resp = await fetch('/api/chat', {
@@ -379,8 +491,7 @@ async function streamChat() {
           assistantDiv = addBubble('assistant', '');
         }
         assistantText += clean;
-        assistantDiv.textContent = assistantText;
-        scrollDown();
+        renderAssistant();
       }
     } else if (ev.type === 'tool_start') {
       // Flush any trailing non-think text before switching to a tool card.
@@ -388,7 +499,7 @@ async function streamChat() {
       if (tail) {
         if (!assistantDiv) assistantDiv = addBubble('assistant', '');
         assistantText += tail;
-        assistantDiv.textContent = assistantText;
+        renderAssistant();
       }
       assistantDiv = null; assistantText = '';
       addToolCard(ev.tool, ev.arguments, ev.needs_confirmation, ev.confirm_id);
@@ -404,7 +515,11 @@ async function streamChat() {
       const tail = thinkFilter.flush();
       if (tail) {
         assistantText += tail;
-        if (assistantDiv) assistantDiv.textContent = assistantText;
+      }
+      // Force final render (bypass debounce so the last chunk always shows).
+      if (assistantDiv && assistantText) {
+        assistantDiv.innerHTML = renderMarkdown(assistantText);
+        scrollDown();
       }
       if (assistantText && assistantText.trim()) {
         messages.push({ role: 'assistant', content: assistantText });

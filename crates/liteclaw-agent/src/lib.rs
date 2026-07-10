@@ -15,7 +15,7 @@ pub mod events;
 pub mod tools;
 
 pub use events::AgentEvent;
-pub use tools::{default_tools, find, to_specs, Approval, Tool, ToolOutcome};
+pub use tools::{default_tools, find, skill_tools, to_specs, Approval, Tool, ToolOutcome};
 
 use anyhow::Result;
 use futures::{Stream, StreamExt};

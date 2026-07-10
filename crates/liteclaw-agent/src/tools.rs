@@ -80,6 +80,8 @@ impl Tool {
             "edit" => exec_edit(args, ctx).await,
             "write" => exec_write(args, ctx).await,
             "bash" => exec_bash(args, ctx).await,
+            "skill_list" => exec_skill_list(),
+            "skill_run" => exec_skill_run(args, ctx).await,
             other => ToolOutcome::failed(format!("tool '{other}' has no captured executor")),
         }
     }
@@ -353,6 +355,122 @@ async fn exec_bash(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
     }
 }
 
+/// List all discovered skills as a compact text summary for the model.
+fn exec_skill_list() -> ToolOutcome {
+    let skills = liteclaw_skills::discover();
+    if skills.is_empty() {
+        return ToolOutcome::ok("no skills found");
+    }
+    let lines: Vec<String> = skills
+        .iter()
+        .map(|s| {
+            let script = if s.is_scripted() { " [scripted]" } else { "" };
+            format!(
+                "- {}: {}{}",
+                s.id,
+                s.description.chars().take(80).collect::<String>(),
+                script
+            )
+        })
+        .collect();
+    ToolOutcome::ok(format!("{} skill(s):\n{}", skills.len(), lines.join("\n")))
+}
+
+/// Run a script-based skill by id. Defender scans any string arguments.
+async fn exec_skill_run(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
+    let id = match args.get("id").and_then(|v| v.as_str()) {
+        Some(s) => s,
+        None => return ToolOutcome::failed("missing 'id'"),
+    };
+    let skills = liteclaw_skills::discover();
+    let Some(skill) = liteclaw_skills::find(&skills, id).cloned() else {
+        return ToolOutcome::failed(format!("no skill with id '{id}'"));
+    };
+    if !skill.is_scripted() {
+        // Prompt-only skill: return its body so the model can use the knowledge.
+        return ToolOutcome::ok(format!(
+            "(prompt-only skill, returning body)\n\n{}",
+            skill.body
+        ));
+    }
+    let Some(script) = skill.main_script().map(|p| p.to_path_buf()) else {
+        return ToolOutcome::failed("skill has no main script");
+    };
+    // Defender-check any extra arguments.
+    if let Some(extra) = args.get("args").and_then(|v| v.as_str()) {
+        let report = ctx.guard_text(extra);
+        if matches!(report.action, liteclaw_core::defender::Action::Block) {
+            return ToolOutcome::blocked(format!(
+                "Defender blocked skill arg ({} score {})",
+                report.severity.label(),
+                report.score
+            ));
+        }
+    }
+    // Execute via shebang fallback (same logic as SkillClaw).
+    #[cfg(unix)]
+    let is_exec = std::fs::metadata(&script)
+        .map(|m| { use std::os::unix::fs::PermissionsExt; m.permissions().mode() & 0o111 != 0 })
+        .unwrap_or(false);
+    #[cfg(not(unix))]
+    let is_exec = false;
+
+    let mut cmd = if is_exec {
+        tokio::process::Command::new(&script)
+    } else {
+        let interp = read_shebang_interpreter(&script).unwrap_or_else(|| "bash".into());
+        let mut c = tokio::process::Command::new(interp);
+        c.arg(&script);
+        c
+    };
+    cmd.current_dir(&ctx.cwd);
+    if let Some(extra) = args.get("args").and_then(|v| v.as_str()) {
+        for a in extra.split_whitespace() {
+            cmd.arg(a);
+        }
+    }
+    let result = tokio::time::timeout(std::time::Duration::from_secs(60), cmd.output()).await;
+    match result {
+        Ok(Ok(output)) => {
+            let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+            let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+            let mut combined = stdout;
+            if !stderr.is_empty() {
+                combined.push_str("\n[stderr]\n");
+                combined.push_str(&stderr);
+            }
+            let max = 8 * 1024;
+            if combined.len() > max {
+                combined.truncate(max);
+                combined.push_str(&format!("\n…[truncated at {max} bytes]"));
+            }
+            ToolOutcome {
+                ok: output.status.success(),
+                summary: format!("(exit {})\n{}", output.status.code().unwrap_or(-1), combined),
+            }
+        }
+        Ok(Err(e)) => ToolOutcome::failed(format!("skill run failed: {e}")),
+        Err(_) => ToolOutcome::failed("skill run timed out after 60s"),
+    }
+}
+
+/// Read the interpreter from a script's `#!` shebang line.
+fn read_shebang_interpreter(path: &std::path::Path) -> Option<String> {
+    let bytes = std::fs::read(path).ok()?;
+    let first_line = bytes.split(|&b| b == b'\n').next()?;
+    let s = std::str::from_utf8(first_line).ok()?.trim();
+    let s = s.strip_prefix("#!")?;
+    let s = s.trim();
+    if s.is_empty() {
+        return None;
+    }
+    if s.contains("/env") {
+        return s.split_whitespace().last().map(String::from);
+    }
+    s.split_whitespace()
+        .next()
+        .and_then(|t| t.rsplit('/').next().map(String::from))
+}
 
 /// JSON Schema for `{ path: string }`.
 fn schema_path() -> serde_json::Value {
@@ -464,6 +582,36 @@ pub fn default_tools(claws: &[Arc<dyn Claw>]) -> Vec<Tool> {
             approval: Approval::Confirm,
             arg_order: &["command"],
             claw: edit.clone(), // placeholder: execute() dispatches to exec_bash, not this claw
+        },
+    ]
+}
+
+/// Build the skill tool set: skill_list (auto) + skill_run (auto).
+/// These let the agent discover and invoke installed skills.
+pub fn skill_tools(claw: Arc<dyn Claw>) -> Vec<Tool> {
+    vec![
+        Tool {
+            name: "skill_list",
+            description: "List all available skills with their descriptions.",
+            parameters: serde_json::json!({ "type": "object", "properties": {} }),
+            approval: Approval::Auto,
+            arg_order: &[],
+            claw: claw.clone(),
+        },
+        Tool {
+            name: "skill_run",
+            description: "Run a skill by id. For script-based skills it executes the script; for prompt-based skills it returns the SKILL.md body as knowledge.",
+            parameters: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "id": { "type": "string", "description": "skill id (from skill_list)" },
+                    "args": { "type": "string", "description": "optional arguments to pass to the skill" }
+                },
+                "required": ["id"]
+            }),
+            approval: Approval::Auto,
+            arg_order: &["id", "args"],
+            claw: claw.clone(),
         },
     ]
 }
