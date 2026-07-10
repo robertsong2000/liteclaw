@@ -544,6 +544,8 @@ function addToolCard(tool, args, needsConfirm, confirmId) {
   return tres;
 }
 
+let abortCtrl = null;
+
 async function send() {
   if (busy) return;
   const text = input.value.trim();
@@ -553,10 +555,15 @@ async function send() {
   messages.push({ role: 'user', content: text });
 
   busy = true;
-  sendBtn.disabled = true;
+  abortCtrl = new AbortController();
+  sendBtn.textContent = '⏹ 停止';
+  sendBtn.disabled = false;
+  sendBtn.onclick = () => { if (abortCtrl) abortCtrl.abort(); };
   await streamChat();
   busy = false;
-  sendBtn.disabled = false;
+  abortCtrl = null;
+  sendBtn.textContent = '发送';
+  sendBtn.onclick = send;
 }
 
 // --- Context management: prevent token explosion ---
@@ -627,6 +634,7 @@ async function streamChat() {
     const resp = await fetch('/api/chat', {
       method: 'POST',
       headers: authHeaders({ 'Content-Type': 'application/json' }),
+      signal: abortCtrl ? abortCtrl.signal : undefined,
       body: JSON.stringify({
         messages: reqMessages,
         model: cfg,
@@ -664,6 +672,18 @@ async function streamChat() {
       }
     }
   } catch (e) {
+    // User clicked stop — not an error.
+    if (e.name === 'AbortError') {
+      if (assistantText && assistantText.trim()) {
+        messages.push({ role: 'assistant', content: assistantText });
+      }
+      const stopNote = document.createElement('div');
+      stopNote.style.cssText = 'font-size:12px;color:var(--muted);margin-top:4px';
+      stopNote.textContent = '⏹ 已停止';
+      chat.appendChild(stopNote);
+      scrollDown();
+      return;
+    }
     const msg = e.message || '';
     let hint = '⚠️ 连接中断: ' + msg;
     if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
