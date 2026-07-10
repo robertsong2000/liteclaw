@@ -47,11 +47,7 @@ impl Tool {
     pub fn positionals(&self, args: &serde_json::Value) -> Vec<String> {
         self.arg_order
             .iter()
-            .filter_map(|k| {
-                args.get(k)
-                    .and_then(|v| v.as_str())
-                    .map(String::from)
-            })
+            .filter_map(|k| args.get(k).and_then(|v| v.as_str()).map(String::from))
             .collect()
     }
 
@@ -67,7 +63,7 @@ impl Tool {
         let raw = args.to_string();
         let report = ctx.guard_text(&raw);
         if matches!(report.action, liteclaw_core::defender::Action::Block) {
-            return ToolOutcome::blocked(&format!(
+            return ToolOutcome::blocked(format!(
                 "Defender blocked ({} score {})",
                 report.severity.label(),
                 report.score
@@ -96,13 +92,22 @@ pub struct ToolOutcome {
 
 impl ToolOutcome {
     pub fn ok(s: impl Into<String>) -> Self {
-        Self { ok: true, summary: s.into() }
+        Self {
+            ok: true,
+            summary: s.into(),
+        }
     }
     pub fn failed(s: impl Into<String>) -> Self {
-        Self { ok: false, summary: s.into() }
+        Self {
+            ok: false,
+            summary: s.into(),
+        }
     }
     pub fn blocked(s: impl Into<String>) -> Self {
-        Self { ok: false, summary: s.into() }
+        Self {
+            ok: false,
+            summary: s.into(),
+        }
     }
 }
 
@@ -143,7 +148,11 @@ fn exec_read(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
         Err(e) => return ToolOutcome::failed(format!("read {}: {e}", path.display())),
     };
     let truncated = bytes.len() > READ_MAX_BYTES;
-    let slice = if truncated { &bytes[..READ_MAX_BYTES] } else { &bytes };
+    let slice = if truncated {
+        &bytes[..READ_MAX_BYTES]
+    } else {
+        &bytes
+    };
     let mut text = String::from_utf8_lossy(slice).to_string();
     if truncated {
         text.push_str(&format!("\n…[truncated at {READ_MAX_BYTES} bytes]"));
@@ -157,7 +166,10 @@ fn exec_grep(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
         None => return ToolOutcome::failed("missing 'pattern'"),
     };
     let root = resolve_path(args, "path", ctx);
-    let re = match regex::RegexBuilder::new(&pattern).case_insensitive(true).build() {
+    let re = match regex::RegexBuilder::new(&pattern)
+        .case_insensitive(true)
+        .build()
+    {
         Ok(r) => r,
         Err(e) => return ToolOutcome::failed(format!("invalid pattern: {e}")),
     };
@@ -193,8 +205,13 @@ fn exec_grep(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
 
 fn exec_audit(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
     let root = resolve_path(args, "path", ctx);
-    let walker = ignore::WalkBuilder::new(&root).hidden(true).git_ignore(true).build();
-    let exts = ["md", "sh", "js", "py", "ts", "rs", "json", "yaml", "yml", "toml"];
+    let walker = ignore::WalkBuilder::new(&root)
+        .hidden(true)
+        .git_ignore(true)
+        .build();
+    let exts = [
+        "md", "sh", "js", "py", "ts", "rs", "json", "yaml", "yml", "toml",
+    ];
     let mut lines = Vec::new();
     let mut any_block = false;
     for entry in walker.flatten() {
@@ -202,10 +219,17 @@ fn exec_audit(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
             continue;
         }
         let p = entry.path();
-        if p.extension().and_then(|e| e.to_str()).map(|e| exts.contains(&e)).unwrap_or(false) == false {
+        if !p
+            .extension()
+            .and_then(|e| e.to_str())
+            .map(|e| exts.contains(&e))
+            .unwrap_or(false)
+        {
             continue;
         }
-        let Ok(text) = std::fs::read_to_string(p) else { continue };
+        let Ok(text) = std::fs::read_to_string(p) else {
+            continue;
+        };
         let report = liteclaw_core::scan_text(&text);
         if report.is_clean() {
             continue;
@@ -280,7 +304,11 @@ async fn exec_write(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
         }
     }
     match std::fs::write(&path, content) {
-        Ok(_) => ToolOutcome::ok(format!("wrote {} bytes to {}", content.len(), path.display())),
+        Ok(_) => ToolOutcome::ok(format!(
+            "wrote {} bytes to {}",
+            content.len(),
+            path.display()
+        )),
         Err(e) => ToolOutcome::failed(format!("write: {e}")),
     }
 }
@@ -302,7 +330,11 @@ async fn exec_bash(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
             "Defender blocked command ({} score {}): matches '{}'",
             report.severity.label(),
             report.score,
-            report.findings.first().map(|f| f.matched.as_str()).unwrap_or("?"),
+            report
+                .findings
+                .first()
+                .map(|f| f.matched.as_str())
+                .unwrap_or("?"),
         ));
     }
 
@@ -322,8 +354,8 @@ async fn exec_bash(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
     };
 
     // Wait with a 60s timeout to prevent runaway commands.
-    let result = tokio::time::timeout(std::time::Duration::from_secs(60), child.wait_with_output())
-        .await;
+    let result =
+        tokio::time::timeout(std::time::Duration::from_secs(60), child.wait_with_output()).await;
     match result {
         Ok(Ok(output)) => {
             let stdout = String::from_utf8_lossy(&output.stdout).to_string();
@@ -410,7 +442,10 @@ async fn exec_skill_run(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
     // Execute via shebang fallback (same logic as SkillClaw).
     #[cfg(unix)]
     let is_exec = std::fs::metadata(&script)
-        .map(|m| { use std::os::unix::fs::PermissionsExt; m.permissions().mode() & 0o111 != 0 })
+        .map(|m| {
+            use std::os::unix::fs::PermissionsExt;
+            m.permissions().mode() & 0o111 != 0
+        })
         .unwrap_or(false);
     #[cfg(not(unix))]
     let is_exec = false;
@@ -446,7 +481,11 @@ async fn exec_skill_run(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
             }
             ToolOutcome {
                 ok: output.status.success(),
-                summary: format!("(exit {})\n{}", output.status.code().unwrap_or(-1), combined),
+                summary: format!(
+                    "(exit {})\n{}",
+                    output.status.code().unwrap_or(-1),
+                    combined
+                ),
             }
         }
         Ok(Err(e)) => ToolOutcome::failed(format!("skill run failed: {e}")),
@@ -526,7 +565,8 @@ pub fn default_tools(claws: &[Arc<dyn Claw>]) -> Vec<Tool> {
         },
         Tool {
             name: "audit",
-            description: "Scan a directory for security risks (prompt injection, SSRF, path traversal).",
+            description:
+                "Scan a directory for security risks (prompt injection, SSRF, path traversal).",
             parameters: serde_json::json!({
                 "type": "object",
                 "properties": {
@@ -571,7 +611,8 @@ pub fn default_tools(claws: &[Arc<dyn Claw>]) -> Vec<Tool> {
         },
         Tool {
             name: "bash",
-            description: "Run a shell command (gcc, make, cargo, etc.). Defender blocks dangerous commands.",
+            description:
+                "Run a shell command (gcc, make, cargo, etc.). Defender blocks dangerous commands.",
             parameters: serde_json::json!({
                 "type": "object",
                 "properties": {

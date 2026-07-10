@@ -47,7 +47,11 @@ impl Claw for ReadClaw {
 async fn read_file(path: &Path, ctx: &Ctx) -> anyhow::Result<ExitCode> {
     let bytes = fs::read(path).await?;
     let truncated = bytes.len() > MAX_BYTES;
-    let slice = if truncated { &bytes[..MAX_BYTES] } else { &bytes };
+    let slice = if truncated {
+        &bytes[..MAX_BYTES]
+    } else {
+        &bytes
+    };
     let content = String::from_utf8_lossy(slice).to_string();
 
     // Defender pre-check on the content. We warn but still print (read is
@@ -119,7 +123,10 @@ async fn list_dir(path: &Path, ctx: &Ctx) -> anyhow::Result<ExitCode> {
 }
 
 fn collect_lines(content: &str) -> Vec<String> {
-    content.lines().map(|l| truncate_line(l).into_owned()).collect()
+    content
+        .lines()
+        .map(|l| truncate_line(l).into_owned())
+        .collect()
 }
 
 fn truncate_line(line: &str) -> std::borrow::Cow<'_, str> {

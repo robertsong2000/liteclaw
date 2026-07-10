@@ -9,7 +9,9 @@ use liteclaw_core::{Claw, ClawArgs, Ctx, ExitCode, Severity};
 use std::path::Path;
 
 /// File extensions scanned (matches clawdefender's scope).
-const SCANNED_EXT: &[&str] = &["md", "sh", "js", "py", "ts", "rs", "json", "yaml", "yml", "toml"];
+const SCANNED_EXT: &[&str] = &[
+    "md", "sh", "js", "py", "ts", "rs", "json", "yaml", "yml", "toml",
+];
 
 /// The `audit` claw — security-scan a directory.
 pub struct AuditClaw;

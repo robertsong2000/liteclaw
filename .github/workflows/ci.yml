@@ -1,0 +1,56 @@
+# CI: run tests + clippy on every push/PR.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: Format check
+        run: cargo fmt --all -- --check
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --workspace
+
+  release-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Release build
+        run: cargo build --release
+      - name: Binary size assertion (< 5MB)
+        run: |
+          SIZE=$(stat -c%s target/release/lc)
+          MAX=$((5 * 1024 * 1024))
+          echo "Binary size: $SIZE bytes ($((SIZE / 1024 / 1024)) MB)"
+          if [ "$SIZE" -gt "$MAX" ]; then
+            echo "❌ FAIL: binary exceeds 5MB limit"
+            exit 1
+          fi
+          echo "✅ PASS: within 5MB budget"
+      - name: Smoke test
+        run: |
+          ./target/release/lc --help
+          ./target/release/lc --version
+          ./target/release/lc claws
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lc-linux-amd64
+          path: target/release/lc

@@ -123,12 +123,20 @@ fn extract_host(url: &str) -> Option<&str> {
     let after_scheme = url.split("://").nth(1).unwrap_or(url);
     let host_part = after_scheme.split(['/', ':', '?', '#']).next()?;
     let host = host_part.trim();
-    if host.is_empty() { None } else { Some(host) }
+    if host.is_empty() {
+        None
+    } else {
+        Some(host)
+    }
 }
 
 /// Reduce raw findings to a report: compute max-score severity + action.
 fn finalize(findings: Vec<Finding>) -> ScanReport {
-    let max_score = findings.iter().map(|f| f.severity.score()).max().unwrap_or(0);
+    let max_score = findings
+        .iter()
+        .map(|f| f.severity.score())
+        .max()
+        .unwrap_or(0);
     let severity = Severity::from_score(max_score);
     let action = match severity {
         Severity::Critical | Severity::High => Action::Block,

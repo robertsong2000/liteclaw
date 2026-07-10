@@ -213,10 +213,7 @@ impl Claw for SkillClaw {
         ctx: &liteclaw_core::Ctx,
     ) -> Result<liteclaw_core::ExitCode> {
         let Some(script) = self.skill.main_script() else {
-            eprintln!(
-                "lc skill run {}: no scripts found",
-                self.skill.id
-            );
+            eprintln!("lc skill run {}: no scripts found", self.skill.id);
             return Ok(liteclaw_core::ExitCode::Failure);
         };
 
@@ -253,7 +250,8 @@ impl Claw for SkillClaw {
             // No +x bit: run via an interpreter. Prefer the shebang if present,
             // otherwise default to bash (skill-pool scripts are bash-heavy and
             // use features like process substitution that plain sh lacks).
-            let interpreter = read_shebang_interpreter(&script_path).unwrap_or_else(|| "bash".to_string());
+            let interpreter =
+                read_shebang_interpreter(&script_path).unwrap_or_else(|| "bash".to_string());
             let mut c = tokio::process::Command::new(interpreter);
             c.arg(&script_path);
             c

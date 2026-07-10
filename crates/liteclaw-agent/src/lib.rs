@@ -29,7 +29,11 @@ use tokio::sync::mpsc;
 /// Returns `true` to allow, `false` to skip. The `confirm_id` is a unique id
 /// the frontend references when posting its decision to /api/confirm.
 pub type ConfirmFn = Arc<
-    dyn Fn(String, serde_json::Value, String) -> std::pin::Pin<Box<dyn Future<Output = bool> + Send>>
+    dyn Fn(
+            String,
+            serde_json::Value,
+            String,
+        ) -> std::pin::Pin<Box<dyn Future<Output = bool> + Send>>
         + Send
         + Sync,
 >;
@@ -85,7 +89,11 @@ pub async fn run_loop(
         messages.push(Message {
             role: liteclaw_model::Role::Assistant,
             content: if text.is_empty() { None } else { Some(text) },
-            tool_calls: if tool_calls.is_empty() { None } else { Some(tool_calls.clone()) },
+            tool_calls: if tool_calls.is_empty() {
+                None
+            } else {
+                Some(tool_calls.clone())
+            },
             tool_call_id: None,
         });
 
@@ -119,8 +127,8 @@ pub async fn run_loop(
 
         // 4. Execute each tool call, feeding results back.
         for call in tool_calls {
-            let args: serde_json::Value = serde_json::from_str(&call.function.arguments)
-                .unwrap_or(serde_json::Value::Null);
+            let args: serde_json::Value =
+                serde_json::from_str(&call.function.arguments).unwrap_or(serde_json::Value::Null);
             let Some(tool) = find(&tools, &call.function.name) else {
                 let msg = format!("unknown tool: {}", call.function.name);
                 let _ = tx.send(AgentEvent::error(&msg)).await;
@@ -190,7 +198,10 @@ pub fn into_stream(
     ctx: Arc<Ctx>,
     confirm: Option<ConfirmFn>,
     max_iters: usize,
-) -> (mpsc::Receiver<AgentEvent>, tokio::task::JoinHandle<Result<()>>) {
+) -> (
+    mpsc::Receiver<AgentEvent>,
+    tokio::task::JoinHandle<Result<()>>,
+) {
     let (tx, rx) = mpsc::channel(64);
     let handle = tokio::spawn(async move {
         if let Err(e) = run_loop(tx, model, messages, tools, ctx, confirm, max_iters).await {

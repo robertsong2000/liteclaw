@@ -33,8 +33,8 @@ pub struct ParsedSkill {
 /// Parse a SKILL.md document. Returns an error if there is no frontmatter block
 /// or the frontmatter is not valid YAML.
 pub fn parse(content: &str) -> Result<ParsedSkill> {
-    let (fm_text, body) = split_frontmatter(content)
-        .context("SKILL.md must start with a `---` frontmatter block")?;
+    let (fm_text, body) =
+        split_frontmatter(content).context("SKILL.md must start with a `---` frontmatter block")?;
     let frontmatter: Frontmatter = serde_yaml::from_str(fm_text)
         .with_context(|| "failed to parse SKILL.md frontmatter as YAML")?;
     if frontmatter.name.is_empty() && frontmatter.description.is_empty() {
@@ -50,7 +50,9 @@ pub fn parse(content: &str) -> Result<ParsedSkill> {
 
 /// Split off the leading `---\n...\n---` block, returning (frontmatter_yaml, body).
 fn split_frontmatter(content: &str) -> Option<(&str, &str)> {
-    let content = content.strip_prefix("---\n").or_else(|| content.strip_prefix("---\r\n"))?;
+    let content = content
+        .strip_prefix("---\n")
+        .or_else(|| content.strip_prefix("---\r\n"))?;
     // Find the closing `---` on its own line.
     let close = find_closing_fence(content)?;
     let fm = &content[..close.idx];
@@ -73,7 +75,13 @@ fn find_closing_fence(after_open: &str) -> Option<Fence> {
         if at_line_start {
             // Body starts after the fence line (including its newline).
             let after_fence = &after_open[abs + 3..];
-            let body_start = abs + 3 + after_fence.chars().take_while(|&c| c == '\n').count().min(1);
+            let body_start = abs
+                + 3
+                + after_fence
+                    .chars()
+                    .take_while(|&c| c == '\n')
+                    .count()
+                    .min(1);
             // Prefer consuming exactly one trailing newline if present.
             let body_start = if after_fence.starts_with('\n') {
                 abs + 4
@@ -82,7 +90,10 @@ fn find_closing_fence(after_open: &str) -> Option<Fence> {
             } else {
                 body_start
             };
-            return Some(Fence { idx: abs, body_start });
+            return Some(Fence {
+                idx: abs,
+                body_start,
+            });
         }
         search_from = abs + 3;
     }

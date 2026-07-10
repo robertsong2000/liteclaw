@@ -67,10 +67,7 @@ pub struct LoginRequest {
 }
 
 /// POST /api/login — validate credentials, return a session token.
-pub async fn login(
-    State(state): State<AppState>,
-    Json(req): Json<LoginRequest>,
-) -> Response {
+pub async fn login(State(state): State<AppState>, Json(req): Json<LoginRequest>) -> Response {
     if req.username == USERNAME && req.password == PASSWORD {
         let token = gen_token();
         state.sessions.insert(token.clone());

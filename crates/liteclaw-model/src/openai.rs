@@ -63,7 +63,10 @@ impl OpenAiClient {
             req = req.bearer_auth(&self.cfg.api_key);
         }
 
-        let resp = req.send().await.map_err(|e| anyhow!("request failed: {e}"))?;
+        let resp = req
+            .send()
+            .await
+            .map_err(|e| anyhow!("request failed: {e}"))?;
         if !resp.status().is_success() {
             let status = resp.status();
             let text = resp.text().await.unwrap_or_default();
@@ -104,7 +107,12 @@ where
     S: Stream<Item = Result<bytes::Bytes, reqwest::Error>> + Unpin + Send,
 {
     fn new(inner: S) -> Self {
-        Self { inner, buf: String::new(), tool_calls: Vec::new(), finished: false }
+        Self {
+            inner,
+            buf: String::new(),
+            tool_calls: Vec::new(),
+            finished: false,
+        }
     }
 }
 
@@ -283,13 +291,11 @@ mod tests {
     use super::*;
 
     /// Build a fake upstream that yields the given SSE frames as bytes.
-    fn fake_stream(frames: Vec<String>) -> impl Stream<Item = Result<bytes::Bytes, reqwest::Error>> + Send {
+    fn fake_stream(
+        frames: Vec<String>,
+    ) -> impl Stream<Item = Result<bytes::Bytes, reqwest::Error>> + Send {
         use futures::stream;
-        stream::iter(
-            frames
-                .into_iter()
-                .map(|f| Ok(bytes::Bytes::from(f))),
-        )
+        stream::iter(frames.into_iter().map(|f| Ok(bytes::Bytes::from(f))))
     }
 
     #[tokio::test]
@@ -308,7 +314,9 @@ mod tests {
             })
             .collect();
         assert_eq!(deltas, "Hello world");
-        assert!(events.iter().any(|e| matches!(e, Ok(StreamEvent::Done { .. }))));
+        assert!(events
+            .iter()
+            .any(|e| matches!(e, Ok(StreamEvent::Done { .. }))));
     }
 
     #[tokio::test]

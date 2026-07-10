@@ -8,14 +8,14 @@ use liteclaw_skills::{discover, find, SkillClaw};
 pub async fn list(ctx: &Ctx) -> anyhow::Result<ExitCode> {
     let skills = discover();
     if skills.is_empty() {
-        eprintln!("no skills found (looked in ~/.agents/skills and {}/.liteclaw/skills)", ctx.cwd.display());
+        eprintln!(
+            "no skills found (looked in ~/.agents/skills and {}/.liteclaw/skills)",
+            ctx.cwd.display()
+        );
         return Ok(ExitCode::Failure);
     }
     if ctx.json {
-        let entries: Vec<serde_json::Value> = skills
-            .iter()
-            .map(skill_json)
-            .collect();
+        let entries: Vec<serde_json::Value> = skills.iter().map(skill_json).collect();
         println!("{}", serde_json::json!({ "skills": entries }));
     } else {
         // Human-readable table: source | id | version | name

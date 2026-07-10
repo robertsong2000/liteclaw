@@ -24,16 +24,18 @@ pub struct AppState {
 
 /// Build a confirm callback that bridges to the frontend via the registry.
 pub fn make_confirm(reg: confirm::ConfirmRegistry) -> ConfirmFn {
-    Arc::new(move |_tool: String, _args: serde_json::Value, id: String| -> Pin<Box<dyn Future<Output = bool> + Send>> {
-        let reg = reg.clone();
-        Box::pin(async move {
-            let rx = reg.register(&id);
-            match rx.await {
-                Ok(allowed) => allowed,
-                Err(_) => false,
-            }
-        })
-    })
+    Arc::new(
+        move |_tool: String,
+              _args: serde_json::Value,
+              id: String|
+              -> Pin<Box<dyn Future<Output = bool> + Send>> {
+            let reg = reg.clone();
+            Box::pin(async move {
+                let rx = reg.register(&id);
+                rx.await.unwrap_or_default()
+            })
+        },
+    )
 }
 
 /// Run the web server. `host` is the bind address: "127.0.0.1" for local-only

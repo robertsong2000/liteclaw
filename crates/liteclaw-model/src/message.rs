@@ -50,13 +50,28 @@ pub struct Message {
 
 impl Message {
     pub fn system(content: impl Into<String>) -> Self {
-        Self { role: Role::System, content: Some(content.into()), tool_calls: None, tool_call_id: None }
+        Self {
+            role: Role::System,
+            content: Some(content.into()),
+            tool_calls: None,
+            tool_call_id: None,
+        }
     }
     pub fn user(content: impl Into<String>) -> Self {
-        Self { role: Role::User, content: Some(content.into()), tool_calls: None, tool_call_id: None }
+        Self {
+            role: Role::User,
+            content: Some(content.into()),
+            tool_calls: None,
+            tool_call_id: None,
+        }
     }
     pub fn assistant_text(content: impl Into<String>) -> Self {
-        Self { role: Role::Assistant, content: Some(content.into()), tool_calls: None, tool_call_id: None }
+        Self {
+            role: Role::Assistant,
+            content: Some(content.into()),
+            tool_calls: None,
+            tool_call_id: None,
+        }
     }
     /// A tool-result message answering a prior tool call.
     pub fn tool_result(tool_call_id: impl Into<String>, content: impl Into<String>) -> Self {

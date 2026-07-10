@@ -75,10 +75,7 @@ async fn skill_claw_runs_script_via_shebang_fallback() {
     let g = TempDir::new().unwrap();
     let d = g.path().join("tool-1.0.0");
     fs::create_dir_all(d.join("scripts")).unwrap();
-    write_skill_md(
-        &d,
-        "---\nname: tool\ndescription: scripted.\n---\nbody\n",
-    );
+    write_skill_md(&d, "---\nname: tool\ndescription: scripted.\n---\nbody\n");
     let script = d.join("scripts/run.sh");
     fs::write(&script, "#!/bin/bash\necho ran-ok\n").unwrap();
     // intentionally NOT chmod +x: exercise the fallback path
@@ -114,7 +111,10 @@ async fn skill_claw_fails_without_scripts() {
     let g = TempDir::new().unwrap();
     let d = g.path().join("prompt-only-1.0.0");
     fs::create_dir_all(&d).unwrap();
-    write_skill_md(&d, "---\nname: prompt-only\ndescription: no scripts.\n---\nbody\n");
+    write_skill_md(
+        &d,
+        "---\nname: prompt-only\ndescription: no scripts.\n---\nbody\n",
+    );
 
     let skills = discover_from(g.path(), TempDir::new().unwrap().path());
     let claw = SkillClaw::new(find(&skills, "prompt-only").unwrap().clone());

@@ -22,16 +22,12 @@ pub struct ChatRequest {
 }
 
 /// POST /api/chat — start an agent turn and stream events back as SSE.
-pub async fn chat(
-    State(state): State<AppState>,
-    Json(req): Json<ChatRequest>,
-) -> Response {
+pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -> Response {
     // Build the model client from the frontend-supplied config.
     let model = match liteclaw_model::OpenAiClient::new(req.model) {
         Ok(m) => m,
         Err(e) => {
-            return (StatusCode::BAD_REQUEST, format!("bad model config: {e}"))
-                .into_response();
+            return (StatusCode::BAD_REQUEST, format!("bad model config: {e}")).into_response();
         }
     };
 
@@ -101,16 +97,25 @@ pub async fn get_config() -> Response {
 pub async fn post_config(Json(cfg): Json<ModelConfig>) -> Response {
     let path = config_path();
     if let Err(e) = std::fs::create_dir_all(path.parent().unwrap_or(std::path::Path::new("."))) {
-        return (StatusCode::INTERNAL_SERVER_ERROR, format!("mkdir failed: {e}"))
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("mkdir failed: {e}"),
+        )
             .into_response();
     }
     match serde_json::to_string_pretty(&cfg) {
         Ok(text) => match std::fs::write(&path, text) {
             Ok(_) => (StatusCode::OK, "saved").into_response(),
-            Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, format!("write failed: {e}"))
+            Err(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("write failed: {e}"),
+            )
                 .into_response(),
         },
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, format!("serialize failed: {e}"))
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("serialize failed: {e}"),
+        )
             .into_response(),
     }
 }
@@ -123,10 +128,7 @@ pub struct ConfirmRequest {
 }
 
 /// POST /api/confirm — resolve a pending tool confirmation from the frontend.
-pub async fn confirm(
-    State(state): State<AppState>,
-    Json(req): Json<ConfirmRequest>,
-) -> Response {
+pub async fn confirm(State(state): State<AppState>, Json(req): Json<ConfirmRequest>) -> Response {
     if state.confirms.resolve(&req.confirm_id, req.allowed) {
         (StatusCode::OK, "resolved").into_response()
     } else {

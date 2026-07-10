@@ -60,9 +60,7 @@ enum Command {
     /// List discovered skills (global ~/.agents/skills + project .liteclaw/skills).
     Skills,
     /// Show a skill's full SKILL.md by id.
-    Skill {
-        id: String,
-    },
+    Skill { id: String },
     /// Run a script-based skill by id (passes remaining args to the script).
     ///
     /// Use `lc skill-run <id> -- <args>` (or just `lc skill-run <id> <args>`) to
@@ -141,7 +139,12 @@ async fn main() -> std::io::Result<StdExitCode> {
             // edit tool is usable (unless the user passed stricter flags).
             let serve_ctx = if cli.allow_write.is_empty() {
                 let cwd2 = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
-                Ctx::new(cwd2, Sandbox::readonly().allow_write(std::path::PathBuf::from(".")), false, false)
+                Ctx::new(
+                    cwd2,
+                    Sandbox::readonly().allow_write(std::path::PathBuf::from(".")),
+                    false,
+                    false,
+                )
             } else {
                 ctx.clone()
             };

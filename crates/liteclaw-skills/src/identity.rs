@@ -113,7 +113,11 @@ mod tests {
     fn normalizes_name_with_spaces_to_dashes() {
         // e.g. name "Social Media Scheduler" -> "social-media-scheduler"
         assert_eq!(
-            skill_id(None, Some("Social Media Scheduler"), "social-media-scheduler-1.0.0"),
+            skill_id(
+                None,
+                Some("Social Media Scheduler"),
+                "social-media-scheduler-1.0.0"
+            ),
             "social-media-scheduler"
         );
     }

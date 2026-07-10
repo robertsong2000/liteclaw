@@ -31,10 +31,7 @@ async fn grep_finds_matches() {
     let tmp = TempDir::new().unwrap();
     std::fs::write(tmp.path().join("f.txt"), "alpha\nbeta\ngamma\n").unwrap();
     let ctx = ctx_at(tmp.path().to_path_buf(), false);
-    let args = ClawArgs::new([
-        "beta".to_string(),
-        tmp.path().to_str().unwrap().to_string(),
-    ]);
+    let args = ClawArgs::new(["beta".to_string(), tmp.path().to_str().unwrap().to_string()]);
     let code = GrepClaw.run(&args, &ctx).await.unwrap();
     assert_eq!(code, ExitCode::Success);
 }
@@ -44,10 +41,7 @@ async fn grep_returns_failure_when_no_match() {
     let tmp = TempDir::new().unwrap();
     std::fs::write(tmp.path().join("f.txt"), "alpha\n").unwrap();
     let ctx = ctx_at(tmp.path().to_path_buf(), false);
-    let args = ClawArgs::new([
-        "zzz".to_string(),
-        tmp.path().to_str().unwrap().to_string(),
-    ]);
+    let args = ClawArgs::new(["zzz".to_string(), tmp.path().to_str().unwrap().to_string()]);
     let code = GrepClaw.run(&args, &ctx).await.unwrap();
     assert_eq!(code, ExitCode::Failure);
 }
