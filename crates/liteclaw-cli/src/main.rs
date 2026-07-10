@@ -76,6 +76,11 @@ enum Command {
     },
     /// List all available claws.
     Claws,
+    /// Start the web UI (chat + agent loop) on localhost.
+    Serve {
+        #[arg(default_value = "8080")]
+        port: u16,
+    },
 }
 
 #[tokio::main]
@@ -127,6 +132,23 @@ async fn main() -> std::io::Result<StdExitCode> {
                 println!("{:<10} {}", c.name(), c.desc());
             }
             return Ok(StdExitCode::SUCCESS);
+        }
+        Command::Serve { port } => {
+            // For the web agent, default to allowing writes under cwd so the
+            // edit tool is usable (unless the user passed stricter flags).
+            let serve_ctx = if cli.allow_write.is_empty() {
+                let cwd2 = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+                Ctx::new(cwd2, Sandbox::readonly().allow_write(std::path::PathBuf::from(".")), false, false)
+            } else {
+                ctx.clone()
+            };
+            return match liteclaw_web::serve(*port, registry::all_claws(), serve_ctx).await {
+                Ok(_) => Ok(StdExitCode::SUCCESS),
+                Err(e) => {
+                    eprintln!("lc serve: {e:#}");
+                    Ok(ExitCode::Failure.into())
+                }
+            };
         }
     };
 

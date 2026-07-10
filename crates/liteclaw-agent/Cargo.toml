@@ -1,18 +1,21 @@
 [package]
-name = "liteclaw-model"
+name = "liteclaw-agent"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
-description = "Streaming OpenAI-compatible model client for liteclaw."
+description = "Agent loop for liteclaw: reason → tool → observe."
 
 [dependencies]
+liteclaw-core.workspace = true
+liteclaw-model.workspace = true
 async-trait.workspace = true
 anyhow.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-reqwest.workspace = true
 futures.workspace = true
 tokio.workspace = true
-bytes = "1"
+tokio-stream = "0.1"
+regex.workspace = true
+ignore.workspace = true

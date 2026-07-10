@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>liteclaw 🦞</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #1a1d24; --panel-2: #22262f; --border: #2d323d;
+    --text: #e6e6e6; --muted: #8b93a7; --accent: #ff7043; --accent-2: #42a5f5;
+    --user: #2a3a4d; --tool: #3a2f1f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  header {
+    background: var(--panel); border-bottom: 1px solid var(--border);
+    padding: 10px 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  header h1 { font-size: 16px; margin: 0; color: var(--accent); }
+  header .cfg { display: flex; gap: 8px; align-items: center; flex: 1; flex-wrap: wrap; }
+  header input {
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+    padding: 5px 8px; border-radius: 4px; font-size: 13px;
+  }
+  header input.url { width: 240px; }
+  header input.model { width: 140px; }
+  header input.key { width: 120px; }
+  header button {
+    background: var(--accent); color: #fff; border: none; padding: 6px 12px;
+    border-radius: 4px; cursor: pointer; font-size: 13px;
+  }
+  header button:hover { opacity: 0.85; }
+  #chat {
+    flex: 1; overflow-y: auto; padding: 16px; display: flex;
+    flex-direction: column; gap: 12px;
+  }
+  .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; white-space: pre-wrap; word-break: break-word; line-height: 1.5; }
+  .msg.user { background: var(--user); align-self: flex-end; }
+  .msg.assistant { background: var(--panel-2); align-self: flex-start; border: 1px solid var(--border); }
+  .tool-card {
+    background: var(--tool); border: 1px solid #5a4520; border-radius: 8px;
+    padding: 8px 12px; align-self: flex-start; max-width: 80%; font-size: 13px;
+  }
+  .tool-card .tname { color: var(--accent); font-weight: 600; }
+  .tool-card .targs { color: var(--muted); margin: 4px 0; font-family: monospace; }
+  .tool-card .tres { margin-top: 4px; }
+  .tool-card .tres.ok { color: #66bb6a; }
+  .tool-card .tres.fail { color: #ef5350; }
+  footer {
+    border-top: 1px solid var(--border); padding: 12px 16px;
+    display: flex; gap: 8px; background: var(--panel);
+  }
+  footer textarea {
+    flex: 1; background: var(--panel-2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 8px; padding: 10px; font-size: 14px;
+    resize: none; height: 48px; font-family: inherit;
+  }
+  footer button {
+    background: var(--accent); color: #fff; border: none; padding: 0 20px;
+    border-radius: 8px; cursor: pointer; font-size: 14px;
+  }
+  footer button:disabled { opacity: 0.4; cursor: default; }
+  .err { color: #ef5350; font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🦞 liteclaw</h1>
+  <div class="cfg">
+    <input class="url" id="base_url" placeholder="http://localhost:11434/v1" title="OpenAI-compatible base URL" />
+    <input class="model" id="model" placeholder="qwen2.5:7b" title="model id" />
+    <input class="key" id="api_key" type="password" placeholder="api key (可选)" title="API key" />
+    <button id="save_cfg">保存</button>
+  </div>
+</header>
+
+<div id="chat"></div>
+
+<footer>
+  <textarea id="input" placeholder="说点什么… (Enter 发送, Shift+Enter 换行)"></textarea>
+  <button id="send">发送</button>
+</footer>
+
+<script>
+// --- Config persistence (stored in ~/.liteclaw/config.json via backend) ---
+function fillCfg(c) {
+  document.getElementById('base_url').value = c.base_url || 'http://localhost:11434/v1';
+  document.getElementById('model').value = c.model || 'qwen2.5:7b';
+  document.getElementById('api_key').value = c.api_key || '';
+}
+async function loadCfg() {
+  try {
+    const resp = await fetch('/api/config');
+    if (resp.ok) {
+      const c = await resp.json();
+      fillCfg(c);
+      return;
+    }
+  } catch (e) {}
+  // Fallback to defaults if backend unreachable.
+  fillCfg({});
+}
+async function saveCfg() {
+  const c = {
+    base_url: document.getElementById('base_url').value.trim(),
+    model: document.getElementById('model').value.trim(),
+    api_key: document.getElementById('api_key').value.trim(),
+  };
+  const btn = document.getElementById('save_cfg');
+  const orig = btn.textContent;
+  try {
+    const resp = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(c),
+    });
+    btn.textContent = resp.ok ? '✓ 已保存' : '✗ 失败';
+  } catch (e) {
+    btn.textContent = '✗ 失败';
+  }
+  setTimeout(() => { btn.textContent = orig; }, 1500);
+}
+document.getElementById('save_cfg').onclick = saveCfg;
+loadCfg();
+
+// --- Chat state ---
+const chat = document.getElementById('chat');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+let messages = [];
+let busy = false;
+
+// Prepend a system prompt so the model knows its tools.
+const SYSTEM_PROMPT =
+  '你是 liteclaw 助手，一个能执行操作的编程助手。可用工具：\n' +
+  '- read(path): 读文件或列目录\n' +
+  '- grep(pattern,path): 搜索内容\n' +
+  '- audit(path): 安全扫描\n' +
+  '- edit(path,old,new): 修改文件\n' +
+  '- write(path,content): 创建/覆盖文件\n' +
+  '- bash(command): 执行 shell 命令(编译、运行、git 等)\n' +
+  '遇到用户问题时，先用工具收集信息，再行动。简洁回答，操作后报告结果。';
+
+function scrollDown() { chat.scrollTop = chat.scrollHeight; }
+
+function addBubble(role, text) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.textContent = text;
+  chat.appendChild(div);
+  scrollDown();
+  return div;
+}
+
+function addToolCard(tool, args, needsConfirm) {
+  const div = document.createElement('div');
+  div.className = 'tool-card';
+  div.innerHTML =
+    '<div class="tname">🔧 ' + tool + (needsConfirm ? ' (需确认)' : '') + '</div>' +
+    '<div class="targs">' + (typeof args === 'string' ? args : JSON.stringify(args)) + '</div>' +
+    '<div class="tres"></div>';
+  chat.appendChild(div);
+  scrollDown();
+  return div.querySelector('.tres');
+}
+
+async function send() {
+  if (busy) return;
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addBubble('user', text);
+  messages.push({ role: 'user', content: text });
+
+  busy = true;
+  sendBtn.disabled = true;
+  await streamChat();
+  busy = false;
+  sendBtn.disabled = false;
+}
+
+async function streamChat() {
+  const cfg = {
+    base_url: document.getElementById('base_url').value.trim(),
+    api_key: document.getElementById('api_key').value.trim(),
+    model: document.getElementById('model').value.trim(),
+  };
+
+  // Ensure the system prompt is present.
+  const reqMessages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    ...messages.filter(m => m.role !== 'system'),
+  ];
+
+  let assistantDiv = null;
+  let assistantText = '';
+
+  try {
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: reqMessages, model: cfg }),
+    });
+    if (!resp.ok) {
+      const t = await resp.text();
+      addBubble('assistant', '⚠️ ' + (t || resp.status));
+      return;
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      // Parse complete SSE frames separated by \n\n
+      let idx;
+      while ((idx = buf.indexOf('\n\n')) >= 0) {
+        const frame = buf.slice(0, idx);
+        buf = buf.slice(idx + 2);
+        const dataLine = frame.split('\n').find(l => l.startsWith('data:'));
+        if (!dataLine) continue;
+        const json = dataLine.slice(5).trim();
+        if (!json) continue;
+        let ev;
+        try { ev = JSON.parse(json); } catch (e) { continue; }
+        handleEvent(ev);
+      }
+    }
+  } catch (e) {
+    addBubble('assistant', '⚠️ 连接失败: ' + e.message + ' (检查 base_url 和模型是否运行)');
+  }
+
+  function handleEvent(ev) {
+    if (ev.type === 'text_delta') {
+      if (!assistantDiv) {
+        assistantDiv = addBubble('assistant', '');
+      }
+      assistantText += ev.text;
+      assistantDiv.textContent = assistantText;
+      scrollDown();
+    } else if (ev.type === 'tool_start') {
+      assistantDiv = null; assistantText = '';
+      addToolCard(ev.tool, ev.arguments, ev.needs_confirmation);
+    } else if (ev.type === 'tool_result') {
+      // Append result to the last tool card (simple heuristic).
+      const cards = chat.querySelectorAll('.tool-card .tres');
+      const last = cards[cards.length - 1];
+      if (last) {
+        last.textContent = (ev.ok ? '✓ ' : '✗ ') + ev.summary;
+        last.className = 'tres ' + (ev.ok ? 'ok' : 'fail');
+      }
+    } else if (ev.type === 'done') {
+      if (assistantText) messages.push({ role: 'assistant', content: assistantText });
+    } else if (ev.type === 'error') {
+      const div = document.createElement('div');
+      div.className = 'err'; div.textContent = '⚠️ ' + ev.message;
+      chat.appendChild(div); scrollDown();
+    }
+  }
+}
+
+// --- Input handling ---
+sendBtn.onclick = send;
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+});
+</script>
+</body>
+</html>
