@@ -135,3 +135,108 @@ pub async fn confirm(State(state): State<AppState>, Json(req): Json<ConfirmReque
         (StatusCode::NOT_FOUND, "no such pending confirmation").into_response()
     }
 }
+
+// ─── Conversation history persistence ────────────────────────────────
+
+/// One conversation session.
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
+pub struct Session {
+    pub id: String,
+    pub title: String,
+    pub messages: Vec<HistoryMessage>,
+    pub updated: u64,
+}
+
+/// A message in history (simplified: only role + content, no tool_calls).
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
+pub struct HistoryMessage {
+    pub role: String,
+    pub content: String,
+}
+
+/// The on-disk history file: a list of sessions.
+#[derive(serde::Serialize, serde::Deserialize, Default)]
+struct HistoryFile {
+    sessions: Vec<Session>,
+}
+
+fn history_path() -> std::path::PathBuf {
+    let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
+    std::path::PathBuf::from(home).join(".liteclaw/history.json")
+}
+
+fn read_history() -> HistoryFile {
+    std::fs::read_to_string(history_path())
+        .ok()
+        .and_then(|s| serde_json::from_str(&s).ok())
+        .unwrap_or_default()
+}
+
+fn write_history(h: &HistoryFile) -> Result<(), std::io::Error> {
+    let path = history_path();
+    std::fs::create_dir_all(path.parent().unwrap_or(std::path::Path::new(".")))?;
+    let text = serde_json::to_string_pretty(h)?;
+    std::fs::write(&path, text)
+}
+
+/// GET /api/history — list all saved sessions (without full messages).
+pub async fn list_history() -> Response {
+    let h = read_history();
+    // Return summaries only (id, title, updated, message count) to keep it light.
+    let summaries: Vec<serde_json::Value> = h
+        .sessions
+        .iter()
+        .map(|s| {
+            serde_json::json!({
+                "id": s.id,
+                "title": s.title,
+                "updated": s.updated,
+                "message_count": s.messages.len(),
+            })
+        })
+        .collect();
+    Json(serde_json::json!({ "sessions": summaries })).into_response()
+}
+
+/// GET /api/history/:id — full messages of one session.
+pub async fn get_session(axum::extract::Path(id): axum::extract::Path<String>) -> Response {
+    let h = read_history();
+    match h.sessions.iter().find(|s| s.id == id) {
+        Some(s) => Json(s).into_response(),
+        None => (StatusCode::NOT_FOUND, "session not found").into_response(),
+    }
+}
+
+/// POST /api/history — save (create or update) a session.
+pub async fn save_session(Json(session): Json<Session>) -> Response {
+    let mut h = read_history();
+    // Upsert: replace if id exists, else push.
+    if let Some(existing) = h.sessions.iter_mut().find(|s| s.id == session.id) {
+        *existing = session;
+    } else {
+        h.sessions.push(session);
+    }
+    // Keep only the latest 50 sessions.
+    if h.sessions.len() > 50 {
+        let cutoff = h.sessions.len() - 50;
+        h.sessions.drain(..cutoff);
+    }
+    match write_history(&h) {
+        Ok(_) => (StatusCode::OK, "saved").into_response(),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, format!("write: {e}")).into_response(),
+    }
+}
+
+/// DELETE /api/history/:id — delete a session.
+pub async fn delete_session(axum::extract::Path(id): axum::extract::Path<String>) -> Response {
+    let mut h = read_history();
+    let before = h.sessions.len();
+    h.sessions.retain(|s| s.id != id);
+    if h.sessions.len() == before {
+        return (StatusCode::NOT_FOUND, "session not found").into_response();
+    }
+    match write_history(&h) {
+        Ok(_) => (StatusCode::OK, "deleted").into_response(),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, format!("write: {e}")).into_response(),
+    }
+}

@@ -12,7 +12,7 @@
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    margin: 0 0 0 200px; font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
     background: var(--bg); color: var(--text); height: 100vh;
     display: flex; flex-direction: column;
   }
@@ -103,6 +103,12 @@
   </div>
 </div>
 
+<!-- Sidebar: conversation history -->
+<div id="sidebar" style="position:fixed;left:0;top:0;bottom:0;width:200px;background:var(--panel);border-right:1px solid var(--border);display:none;flex-direction:column;z-index:100">
+  <button id="new-session" style="margin:10px;background:var(--accent);color:#fff;border:none;padding:8px;border-radius:6px;cursor:pointer;font-size:13px">＋ 新会话</button>
+  <div id="session-list" style="flex:1;overflow-y:auto;padding:0 8px"></div>
+</div>
+
 <header>
   <h1>🦞 liteclaw</h1>
   <div class="cfg">
@@ -142,6 +148,98 @@ function showLogin() {
 }
 function hideLogin() {
   document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('sidebar').style.display = 'flex';
+  loadSessionList();
+  newSession();
+}
+
+// --- Session management ---
+let currentSessionId = null;
+
+function genSessionId() {
+  return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function newSession() {
+  currentSessionId = genSessionId();
+  messages = [];
+  chat.innerHTML = '';
+  saveCurrentSession();
+  loadSessionList();
+}
+
+async function saveCurrentSession() {
+  if (!currentSessionId || messages.length === 0) return;
+  const title = messages.find(m => m.role === 'user')?.content?.slice(0, 30) || '新会话';
+  const session = {
+    id: currentSessionId,
+    title: title,
+    messages: messages.filter(m => m.role === 'user' || m.role === 'assistant').map(m => ({
+      role: m.role, content: m.content || ''
+    })),
+    updated: Date.now(),
+  };
+  try {
+    await fetch('/api/history', {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(session),
+    });
+  } catch (e) {}
+}
+
+async function loadSessionList() {
+  try {
+    const resp = await fetch('/api/history', { headers: authHeaders() });
+    if (!resp.ok) return;
+    const d = await resp.json();
+    const list = document.getElementById('session-list');
+    list.innerHTML = '';
+    d.sessions.forEach(s => {
+      const item = document.createElement('div');
+      item.style.cssText = 'padding:8px 10px;margin:4px 0;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text);display:flex;justify-content:space-between;align-items:center';
+      if (s.id === currentSessionId) item.style.background = 'var(--panel-2)';
+      item.onmouseenter = () => item.style.background = item.style.background.includes('panel-2') ? 'var(--panel-2)' : 'var(--bg)';
+      item.onmouseleave = () => item.style.background = s.id === currentSessionId ? 'var(--panel-2)' : 'transparent';
+      const label = document.createElement('span');
+      label.textContent = s.title;
+      label.style.overflow = 'hidden'; label.style.textOverflow = 'ellipsis'; label.style.whiteSpace = 'nowrap';
+      label.onclick = () => loadSession(s.id);
+      const del = document.createElement('span');
+      del.textContent = '✕'; del.style.color = 'var(--muted)'; del.style.marginLeft = '6px';
+      del.onclick = async (e) => { e.stopPropagation(); await deleteSession(s.id); };
+      item.appendChild(label); item.appendChild(del);
+      list.appendChild(item);
+    });
+  } catch (e) {}
+}
+
+async function loadSession(id) {
+  try {
+    const resp = await fetch('/api/history/' + id, { headers: authHeaders() });
+    if (!resp.ok) return;
+    const session = await resp.json();
+    currentSessionId = session.id;
+    messages = session.messages.map(m => ({ role: m.role, content: m.content }));
+    chat.innerHTML = '';
+    messages.forEach(m => {
+      if (m.role === 'user') addBubble('user', m.content);
+      else if (m.role === 'assistant') {
+        const d = addBubble('assistant', '');
+        d.innerHTML = renderMarkdown(m.content);
+      }
+    });
+    scrollDown();
+    loadSessionList();
+  } catch (e) {}
+}
+
+async function deleteSession(id) {
+  try {
+    await fetch('/api/history/' + id, { method: 'DELETE', headers: authHeaders() });
+    if (id === currentSessionId) newSession();
+    else loadSessionList();
+  } catch (e) {}
 }
 
 async function doLogin() {
@@ -169,6 +267,7 @@ async function doLogin() {
   }
 }
 document.getElementById('login-btn').onclick = doLogin;
+document.getElementById('new-session').onclick = newSession;
 document.getElementById('login-pass').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') doLogin();
 });
@@ -598,6 +697,8 @@ async function streamChat() {
         chat.appendChild(stat);
         scrollDown();
       }
+      // Persist this session after each completed reply.
+      saveCurrentSession();
     } else if (ev.type === 'error') {
       const div = document.createElement('div');
       div.className = 'err'; div.textContent = '⚠️ ' + ev.message;
