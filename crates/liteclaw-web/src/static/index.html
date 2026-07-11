@@ -843,6 +843,16 @@ async function streamChat() {
         chat.appendChild(stat);
         scrollDown();
       }
+      // Strip images from prior messages: after the first reply, the model has
+      // already seen the image. Keeping the base64 in history wastes tokens on
+      // every subsequent turn (hundreds of KB per image, re-sent each time).
+      // Replace image array content with just the text part.
+      messages.forEach(m => {
+        if (m.role === 'user' && Array.isArray(m.content)) {
+          const textPart = m.content.find(p => p.type === 'text');
+          m.content = textPart ? textPart.text : '[图片已处理]';
+        }
+      });
       // Persist this session after each completed reply.
       saveCurrentSession();
     } else if (ev.type === 'error') {
