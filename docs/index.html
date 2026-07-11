@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>liteclaw 🦞 — 小龙虾 · 本地 AI 编程助手</title>
+<meta name="description" content="liteclaw 是一个 ~3MB 的单二进制本地 AI 编程助手。内含 Web 对话界面 + Agent Loop(模型自动读写文件、执行命令、调用 skill)+ Defender 安全内核。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;0,800;1,400&family=Major+Mono+Display&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   liteclaw — terminal-brutalist + lobster-warm aesthetic
+   ============================================================ */
+
+:root{
+  --bg:        #0b0a09;
+  --bg-2:      #100f0d;
+  --panel:     #15130f;
+  --panel-2:   #1b1813;
+  --line:      #2a2620;
+  --line-2:    #3a342b;
+  --ink:       #ece7df;
+  --ink-dim:   #9a938a;
+  --ink-faint: #5f5a52;
+  --red:       #ff5230;   /* lobster */
+  --red-deep:  #c8351c;
+  --red-soft:  #ff7a5c;
+  --amber:     #ffb422;
+  --amber-2:   #f59e0b;
+  --green:     #6dd96f;   /* terminal green, sparingly */
+  --blue:      #7cc4ff;
+  --violet:    #b794f4;
+  --maxw: 1280px;
+  --pad: clamp(20px, 5vw, 72px);
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
+body{
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 400; font-size: 15px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden; position: relative;
+}
+
+/* atmosphere */
+body::before{
+  content:""; position: fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(1100px 700px at 78% -8%, rgba(255,82,48,0.13), transparent 60%),
+    radial-gradient(900px 600px at 5% 12%, rgba(255,180,34,0.06), transparent 55%),
+    linear-gradient(180deg, #0b0a09 0%, #0c0b09 100%);
+}
+body::after{
+  content:""; position: fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 90%);
+}
+.grain{
+  position: fixed; inset:-50%; z-index:1; pointer-events:none;
+  opacity:.05; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
+  animation: grain 8s steps(6) infinite;
+}
+@keyframes grain{
+  0%{transform:translate(0,0)} 20%{transform:translate(-4%,3%)} 40%{transform:translate(3%,-4%)}
+  60%{transform:translate(-3%,-3%)} 80%{transform:translate(4%,2%)} 100%{transform:translate(0,0)}
+}
+
+::selection{ background: var(--red); color:#0b0a09; }
+::-webkit-scrollbar{ width:11px; height:11px;}
+::-webkit-scrollbar-track{ background: var(--bg);}
+::-webkit-scrollbar-thumb{ background:#2c2820; border:2px solid var(--bg); border-radius:0;}
+::-webkit-scrollbar-thumb:hover{ background: var(--red-deep);}
+a{ color: inherit; }
+.wrap{ max-width: var(--maxw); margin:0 auto; padding:0 var(--pad); position:relative; z-index:2; }
+
+/* ---------- NAV ---------- */
+nav{
+  position: sticky; top:0; z-index:50;
+  background: rgba(11,10,9,0.72);
+  backdrop-filter: blur(12px) saturate(120%);
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner{
+  max-width: var(--maxw); margin:0 auto; padding: 0 var(--pad);
+  display:flex; align-items:center; justify-content:space-between; height: 62px;
+}
+.brand{ display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.04em; }
+.brand .mark{ font-size:20px; }
+.brand b{ color: var(--ink); }
+.brand span{ color: var(--ink-faint); font-weight:400; }
+.nav-links{ display:flex; gap:26px; align-items:center; font-size:13px; color: var(--ink-dim);}
+.nav-links a{ text-decoration:none; transition:color .15s; }
+.nav-links a:hover{ color: var(--red-soft); }
+.nav-cta{
+  font-size:12px; text-decoration:none; color:var(--ink);
+  border:1px solid var(--line-2); padding:8px 14px;
+  transition: all .18s; letter-spacing:.02em;
+}
+.nav-cta:hover{ border-color: var(--red); color: var(--red-soft); background:rgba(255,82,48,.06); }
+@media(max-width:820px){ .nav-links{ display:none; } }
+
+/* ---------- HERO ---------- */
+.hero{ padding: clamp(56px, 8vw, 110px) 0 clamp(50px,6vw,80px); position:relative; }
+.hero-grid{
+  display:grid; grid-template-columns: 1.05fr .95fr;
+  gap: clamp(30px, 5vw, 64px); align-items: center;
+}
+@media(max-width: 940px){ .hero-grid{ grid-template-columns:1fr; } }
+
+.eyebrow{
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:11.5px; letter-spacing:.22em; text-transform:uppercase;
+  color: var(--amber); margin-bottom: 26px;
+}
+.eyebrow .dot{ width:7px; height:7px; background:var(--red); border-radius:50%;
+  box-shadow:0 0 14px var(--red); animation: pulse 2.2s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.35} }
+
+h1.title{
+  font-family:'Major Mono Display', monospace; font-weight:400;
+  font-size: clamp(50px, 10vw, 130px); line-height: .9; letter-spacing: -.02em;
+  color: var(--ink); margin-bottom: 8px;
+}
+h1.title .lobster{ display:inline-block; transform: translateY(-.06em);
+  filter: drop-shadow(0 6px 22px rgba(255,82,48,.5)); }
+.sub-cn{
+  font-size: clamp(17px, 2.2vw, 24px); color: var(--ink); font-weight:500;
+  letter-spacing:.02em; margin-top: 6px;
+}
+.sub-cn em{ font-style:normal; color: var(--red-soft); }
+.lede{
+  margin-top: 22px; max-width: 48ch; color: var(--ink-dim);
+  font-size: 15px; line-height:1.75;
+}
+.lede b{ color: var(--ink); font-weight:500; }
+
+.meta-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 30px; }
+.tag{
+  font-size:11.5px; letter-spacing:.04em;
+  border:1px solid var(--line-2); padding: 6px 11px; color: var(--ink-dim);
+  display:inline-flex; align-items:center; gap:7px;
+}
+.tag b{ color: var(--ink); font-weight:600; }
+.tag .k{ color: var(--ink-faint); }
+.tag.accent{ border-color: rgba(255,82,48,.4); color: var(--red-soft); }
+
+.cta-row{ display:flex; gap:12px; margin-top: 34px; flex-wrap:wrap; }
+.btn{
+  font-family:inherit; font-size:13px; font-weight:500; text-decoration:none;
+  letter-spacing:.03em; padding: 13px 22px; border:1px solid var(--line-2);
+  color: var(--ink); display:inline-flex; align-items:center; gap:10px;
+  transition: all .2s; cursor:pointer; background:transparent;
+}
+.btn:hover{ border-color: var(--red); color: var(--red-soft); transform: translateY(-1px); }
+.btn-primary{ background: var(--red); border-color: var(--red); color:#0b0a09; font-weight:700; }
+.btn-primary:hover{ background: var(--red-soft); border-color: var(--red-soft); color:#0b0a09; box-shadow:0 10px 30px -8px rgba(255,82,48,.5); }
+.btn .arr{ transition: transform .2s; }
+.btn:hover .arr{ transform: translateX(3px); }
+
+/* ---------- TERMINAL ---------- */
+.term{
+  background: linear-gradient(180deg, #15130f, #100e0b);
+  border:1px solid var(--line-2);
+  box-shadow: 0 40px 80px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.02) inset, 0 0 60px -10px rgba(255,82,48,.08);
+  overflow:hidden; transform: rotate(.4deg);
+}
+.term-bar{
+  display:flex; align-items:center; gap:8px; padding: 11px 14px;
+  border-bottom:1px solid var(--line); background: rgba(255,255,255,.015);
+}
+.tl{ width:12px; height:12px; border-radius:50%; }
+.tl.r{ background:#ff5e4e; } .tl.y{ background:#ffbf3a; } .tl.g{ background:#28c93f; }
+.term-title{ margin-left:10px; font-size:11.5px; color: var(--ink-faint); letter-spacing:.04em; }
+.term-tabs{ margin-left:auto; display:flex; gap:6px; flex-wrap:wrap; }
+.term-tab{
+  font-size:11px; color: var(--ink-faint); padding: 3px 9px;
+  border:1px solid var(--line); cursor:pointer; transition: all .15s;
+  background:transparent; font-family:inherit;
+}
+.term-tab:hover{ color: var(--ink-dim); }
+.term-tab.active{ color: var(--red-soft); border-color: rgba(255,82,48,.45); background:rgba(255,82,48,.06);}
+.term-body{
+  padding: 18px 18px 20px; font-size: 12.5px; line-height: 1.7;
+  min-height: 360px; max-height: 400px; overflow:auto;
+}
+.term-line{ white-space:pre-wrap; word-break: break-word; }
+.prmpt{ color: var(--red-soft); }
+.prmpt .path{ color: var(--amber); }
+.cmd{ color: var(--ink); }
+.cmd .flag{ color: var(--green); }
+.cmd .str{ color: var(--amber); }
+.out{ color: var(--ink-dim); }
+.out .ln{ color: var(--ink-faint); user-select:none; display:inline-block; width:2.4em; text-align:right; margin-right:14px; }
+.out .kw{ color: var(--blue); }
+.ok{ color: var(--green); }
+.warn{ color: var(--amber); }
+.bad{ color: var(--red-soft); }
+.cmt{ color: var(--ink-faint); font-style: italic; }
+.tool{ color: var(--violet); }
+.cursor{
+  display:inline-block; width:8px; height:15px; background: var(--red-soft);
+  vertical-align: text-bottom; margin-left:2px; animation: blink 1s steps(2) infinite;
+}
+@keyframes blink{ 0%,50%{opacity:1} 50.01%,100%{opacity:0} }
+
+/* ---------- SECTIONS ---------- */
+section{ position:relative; z-index:2; }
+.sec{ padding: clamp(56px, 8vw, 100px) 0; border-top:1px solid var(--line); }
+.sec-head{ margin-bottom: clamp(36px, 5vw, 60px); }
+.sec-num{
+  font-size:12px; letter-spacing:.2em; color: var(--red);
+  display:flex; align-items:center; gap:12px; margin-bottom:14px;
+}
+.sec-num::after{ content:""; height:1px; flex:1; background:linear-gradient(90deg,var(--line-2),transparent); max-width:200px;}
+.sec-title{
+  font-family:'Major Mono Display', monospace; font-weight:400;
+  font-size: clamp(28px, 5vw, 54px); line-height:1; letter-spacing:-.01em;
+}
+.sec-title .cn{ font-family:'JetBrains Mono',monospace; font-size:.48em; color: var(--ink-dim); display:block; margin-top:14px; letter-spacing:.02em; font-weight:400;}
+.sec-sub{ color: var(--ink-faint); font-size:13px; margin-top:18px; max-width:60ch; line-height:1.8; }
+
+/* ---------- FEATURES ---------- */
+.feat-grid{
+  display:grid; grid-template-columns: repeat(3, 1fr);
+  gap:1px; background: var(--line); border:1px solid var(--line);
+}
+@media(max-width:880px){ .feat-grid{ grid-template-columns: repeat(2,1fr);} }
+@media(max-width:560px){ .feat-grid{ grid-template-columns: 1fr;} }
+.feat{
+  background: var(--bg); padding: 32px 28px 34px; position:relative; overflow:hidden; transition: background .2s;
+}
+.feat:hover{ background: var(--panel); }
+.feat::before{
+  content:""; position:absolute; left:0; top:0; height:2px; width:0;
+  background: var(--red); transition: width .35s ease;
+}
+.feat:hover::before{ width:100%; }
+.feat-ico{ font-size:26px; margin-bottom:18px; display:block; filter: saturate(1.1); }
+.feat h3{ font-size:15px; font-weight:700; margin-bottom:10px; letter-spacing:.01em; }
+.feat h3 .en{ color: var(--ink-faint); font-weight:400; font-size:12px; margin-left:8px;}
+.feat p{ color: var(--ink-dim); font-size:13px; line-height:1.7; }
+.feat .n{ position:absolute; top:18px; right:20px; font-size:11px; color: var(--ink-faint); letter-spacing:.1em; }
+
+/* ---------- STATS ---------- */
+.stats{
+  display:grid; grid-template-columns: repeat(4,1fr);
+  gap:1px; background: var(--line); border:1px solid var(--line);
+}
+@media(max-width:760px){ .stats{ grid-template-columns: repeat(2,1fr);} }
+.stat{ background: var(--bg); padding: 36px 24px; position:relative; }
+.stat .big{
+  font-family:'Major Mono Display', monospace; font-size: clamp(36px,5.5vw,60px);
+  line-height:1; color: var(--red-soft);
+}
+.stat .big .unit{ font-size:.4em; color: var(--ink-dim); margin-left:4px; }
+.stat .lbl{ margin-top:14px; font-size:12px; color: var(--ink-dim); letter-spacing:.06em; }
+.stat .lbl b{ color: var(--ink); font-weight:600; }
+
+/* ---------- AGENT LOOP DIAGRAM ---------- */
+.loop{
+  display:flex; align-items:stretch; gap:0; flex-wrap:wrap;
+  border:1px solid var(--line-2); margin-top: 20px; background: var(--panel);
+}
+.loop-node{
+  flex:1; min-width:140px; padding: 22px 18px; border-right:1px solid var(--line); position:relative; text-align:center;
+}
+.loop-node:last-child{ border-right:none; }
+.loop-node .ln-ico{ font-size:24px; margin-bottom:8px; }
+.loop-node .ln-name{ font-weight:700; color: var(--ink); font-size:13px; }
+.loop-node .ln-name .hl{ color: var(--red-soft); }
+.loop-node .ln-desc{ font-size:11px; color: var(--ink-faint); margin-top:6px; }
+.loop-node::after{
+  content:"→"; position:absolute; right:-9px; top:50%; transform:translateY(-50%);
+  color: var(--red); z-index:3; background: var(--panel); width:18px; text-align:center; font-size:14px;
+}
+.loop-node:last-child::after{ display:none; }
+.loop-back{
+  margin-top:12px; text-align:center; font-size:11px; color: var(--ink-faint);
+  letter-spacing:.05em;
+}
+.loop-back .hl{ color: var(--violet); }
+
+/* ---------- TOOL TABLE ---------- */
+.tool-table{ border:1px solid var(--line); overflow:hidden; }
+.tool-row{
+  display:grid; grid-template-columns: 1fr 2.2fr auto;
+  align-items:center; gap: 20px; padding: 16px 24px;
+  border-bottom:1px solid var(--line); transition: background .15s;
+}
+.tool-row:last-child{ border-bottom:none; }
+.tool-row:hover{ background: var(--panel); }
+.tool-name{ font-weight:700; color: var(--ink); font-size:13.5px; }
+.tool-name .fn{ color: var(--violet); }
+.tool-name .arg{ color: var(--ink-faint); font-weight:400; }
+.tool-desc{ color: var(--ink-dim); font-size:13px; }
+.tool-badge{ font-size:10.5px; padding:3px 8px; white-space:nowrap; border:1px solid; }
+.tool-badge.auto{ color: var(--green); border-color: rgba(109,217,111,.3); }
+.tool-badge.confirm{ color: var(--amber); border-color: rgba(255,180,34,.3); }
+@media(max-width:720px){ .tool-row{ grid-template-columns:1fr; gap:6px; padding:16px 18px;} }
+
+/* ---------- CMD TABLE (reuse tool styles) ---------- */
+.cmd-table{ border:1px solid var(--line); overflow:hidden; }
+.cmd-row{
+  display:grid; grid-template-columns: 1.3fr 2fr auto;
+  align-items:center; gap: 20px; padding: 16px 24px;
+  border-bottom:1px solid var(--line); transition: background .15s;
+}
+.cmd-row:last-child{ border-bottom:none; }
+.cmd-row:hover{ background: var(--panel); }
+.cmd-name{ font-weight:700; color: var(--ink); }
+.cmd-name .lc{ color: var(--red-soft); }
+.cmd-name .arg{ color: var(--ink-faint); font-weight:400; }
+.cmd-name .new{ font-size:9px; color:var(--bg); background:var(--red); padding:2px 5px; margin-left:6px; letter-spacing:.06em; vertical-align:middle;}
+.cmd-desc{ color: var(--ink-dim); font-size:13px; }
+.cmd-flag{ font-size:10.5px; color: var(--ink-faint); border:1px solid var(--line-2); padding:3px 8px; white-space:nowrap; }
+.cmd-flag.r{ color: var(--green); border-color: rgba(109,217,111,.3); }
+.cmd-flag.w{ color: var(--amber); border-color: rgba(255,180,34,.3); }
+.cmd-flag.n{ color: var(--violet); border-color: rgba(183,148,244,.3); }
+@media(max-width:720px){ .cmd-row{ grid-template-columns:1fr; gap:6px; padding:16px 18px;} }
+
+/* ---------- CODE BLOCKS ---------- */
+.codeblock{ background: #100f0d; border:1px solid var(--line-2); margin: 14px 0; overflow:auto; }
+.codeblock .cb-bar{
+  display:flex; align-items:center; gap:10px; padding: 9px 14px;
+  border-bottom:1px solid var(--line); font-size:11px; color: var(--ink-faint);
+}
+.codeblock .cb-bar .fname{ color: var(--ink-dim); }
+.codeblock pre{
+  padding: 16px 18px; font-family:'JetBrains Mono',monospace;
+  font-size:13px; line-height:1.75; color: var(--ink-dim);
+}
+.codeblock .c-sh{ color: var(--red-soft); }
+.codeblock .c-cm{ color: var(--ink-faint); font-style:italic; }
+.codeblock .c-fl{ color: var(--green); }
+.codeblock .c-st{ color: var(--amber); }
+.codeblock .c-kw{ color: var(--blue); }
+
+/* ---------- PIPE ---------- */
+.pipe{ display:flex; align-items:stretch; gap:0; flex-wrap:wrap; border:1px solid var(--line-2); margin-top: 20px; }
+.pipe-node{ flex:1; min-width:130px; padding: 18px 16px; background: var(--panel); border-right:1px solid var(--line); position:relative; }
+.pipe-node:last-child{ border-right:none; }
+.pipe-node .pn-name{ font-weight:700; color: var(--ink); font-size:13px; }
+.pipe-node .pn-name .lc{ color: var(--red-soft); }
+.pipe-node .pn-desc{ font-size:11.5px; color: var(--ink-faint); margin-top:4px; }
+.pipe-node::after{
+  content:"→"; position:absolute; right:-9px; top:50%; transform:translateY(-50%);
+  color: var(--red); z-index:3; background: var(--bg); width:18px; text-align:center; font-size:14px;
+}
+.pipe-node:last-child::after{ display:none; }
+
+/* ---------- WAY TABS (3 run modes) ---------- */
+.ways{ display:grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+@media(max-width:820px){ .ways{ grid-template-columns:1fr; } }
+.way{
+  border:1px solid var(--line-2); padding: 22px 20px; background: var(--bg);
+  transition: all .2s; position:relative;
+}
+.way:hover{ border-color: var(--red); transform: translateY(-2px); }
+.way .w-num{ font-size:11px; color: var(--red); letter-spacing:.15em; margin-bottom:8px; }
+.way h4{ font-size:14px; font-weight:700; margin-bottom:6px; }
+.way .w-tag{ font-size:11px; color: var(--ink-faint); margin-bottom:14px; }
+.way .w-code{
+  background:#100f0d; border:1px solid var(--line); padding:12px 14px;
+  font-size:11.5px; line-height:1.7; color: var(--ink-dim); overflow:auto;
+}
+.way .w-code .c-sh{ color: var(--red-soft); } .way .w-code .c-cm{ color: var(--ink-faint); }
+.way .w-code .c-fl{ color: var(--green); } .way .w-code .c-kw{ color: var(--blue); }
+.way .w-code .c-st{ color: var(--amber); }
+
+/* ---------- ROADMAP ---------- */
+.road{ display:flex; flex-wrap:wrap; gap:0; border:1px solid var(--line-2); margin-top:20px; }
+.road-item{
+  flex:1; min-width:150px; padding: 18px 18px; border-right:1px solid var(--line);
+  position:relative;
+}
+.road-item:last-child{ border-right:none; }
+.road-item .ri-stage{ font-size:10px; color: var(--ink-faint); letter-spacing:.1em; }
+.road-item .ri-name{ font-size:13px; font-weight:700; margin: 6px 0; color: var(--ink-dim); }
+.road-item .ri-status{ font-size:18px; }
+.road-item.done .ri-name{ color: var(--green); }
+.road-item.cur .ri-name{ color: var(--amber); }
+.road-item.cur{ background: linear-gradient(180deg, rgba(255,180,34,.05), transparent); }
+@media(max-width:700px){ .road-item{ border-right:none; border-bottom:1px solid var(--line);} }
+
+/* ---------- FOOTER ---------- */
+footer{ border-top:1px solid var(--line); padding: 50px 0 40px; position:relative; z-index:2; }
+.foot-inner{ display:flex; justify-content:space-between; align-items:flex-end; gap:30px; flex-wrap:wrap; }
+.foot-brand{ font-family:'Major Mono Display',monospace; font-size:40px; line-height:1; }
+.foot-brand .lobster{ filter: drop-shadow(0 4px 14px rgba(255,82,48,.4)); }
+.foot-meta{ color: var(--ink-faint); font-size:12px; line-height:1.8; text-align:right; }
+.foot-meta a{ color: var(--ink-dim); text-decoration:none; }
+.foot-meta a:hover{ color: var(--red-soft); }
+
+/* ---------- reveal ---------- */
+.reveal{ opacity:0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.in{ opacity:1; transform:none; }
+@media(prefers-reduced-motion: reduce){
+  .reveal{ opacity:1; transform:none; transition:none; }
+  .grain{ display:none; }
+  .cursor, .eyebrow .dot{ animation:none; }
+}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ===================== NAV ===================== -->
+<nav>
+  <div class="nav-inner">
+    <div class="brand"><span class="mark">🦞</span><b>liteclaw</b><span>// 小龙虾</span></div>
+    <div class="nav-links">
+      <a href="#features">能力</a>
+      <a href="#agent">Agent</a>
+      <a href="#commands">命令</a>
+      <a href="#start">上手</a>
+      <a href="#roadmap">路线图</a>
+    </div>
+    <a class="nav-cta" href="#start">lc serve →</a>
+  </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow reveal"><span class="dot"></span> local AI coding assistant · single binary</div>
+      <h1 class="title reveal">lite<span style="color:var(--red-soft)">claw</span><span class="lobster">🦞</span></h1>
+      <div class="sub-cn reveal">小龙虾 — 你的<em>本地 AI 编程助手</em></div>
+      <p class="lede reveal">
+        一个 <b>~3MB</b> 的单二进制。浏览器打开即对话,模型自主<b>读写文件、执行命令、调用 78+ skill</b>。
+        内嵌 <b>Defender 安全内核</b>——prompt injection / 危险命令 / 路径穿越,在每次执行前拦截。
+        也能作为 <b>MCP server</b> 接入 Claude Code / Cursor。
+      </p>
+
+      <div class="meta-row reveal">
+        <span class="tag accent"><b>v0.1.0</b> <span class="k">MIT</span></span>
+        <span class="tag"><span class="k">binary</span> <b>~3MB</b></span>
+        <span class="tag"><span class="k">tools</span> <b>9</b></span>
+        <span class="tag"><span class="k">skills</span> <b>78+</b></span>
+        <span class="tag"><span class="k">tests</span> <b>46</b></span>
+        <span class="tag"><span class="k">tls</span> <b>rustls</b></span>
+      </div>
+
+      <div class="cta-row reveal">
+        <a class="btn btn-primary" href="#start">快速开始 <span class="arr">→</span></a>
+        <a class="btn" href="#agent">看 Agent Loop <span class="arr">→</span></a>
+      </div>
+    </div>
+
+    <!-- TERMINAL DEMO -->
+    <div class="term reveal" id="term">
+      <div class="term-bar">
+        <span class="tl r"></span><span class="tl y"></span><span class="tl g"></span>
+        <span class="term-title">lc — bash</span>
+        <div class="term-tabs" id="termTabs">
+          <button class="term-tab active" data-demo="serve">serve</button>
+          <button class="term-tab" data-demo="agent">agent</button>
+          <button class="term-tab" data-demo="mcp">mcp</button>
+          <button class="term-tab" data-demo="audit">audit</button>
+        </div>
+      </div>
+      <div class="term-body" id="termBody"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== FEATURES ===================== -->
+<section class="sec" id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-num">01 / 能力</div>
+      <h2 class="sec-title">what it does<span class="cn">一只小龙虾能干什么</span></h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat reveal">
+        <span class="n">F.01</span><span class="feat-ico">💬</span>
+        <h3>Web 对话界面 <span class="en">chat ui</span></h3>
+        <p>浏览器打开即用。流式输出、Markdown 渲染、可折叠 &lt;think&gt; 推理、TPS 吞吐率显示。会话历史持久化,侧边栏随时切换。</p>
+      </div>
+      <div class="feat reveal">
+        <span class="n">F.02</span><span class="feat-ico">🤖</span>
+        <h3>Agent Loop <span class="en">reason → tool → observe</span></h3>
+        <p>模型自主多轮调用工具:读文件、搜索、写文件、跑命令、调 skill。reason → tool_call → observe → decide 循环,带迭代上限防失控。</p>
+      </div>
+      <div class="feat reveal">
+        <span class="n">F.03</span><span class="feat-ico">🛡️</span>
+        <h3>Defender 安全内核 <span class="en">defender-first</span></h3>
+        <p>内嵌 clawdefender 规则引擎。prompt injection、危险命令(rm -rf /、reverse shell)、路径穿越——在每次执行前拦截,不是事后补救。</p>
+      </div>
+      <div class="feat reveal">
+        <span class="n">F.04</span><span class="feat-ico">🔧</span>
+        <h3>9 个内置工具 <span class="en">function calling</span></h3>
+        <p>read / grep / glob / fetch / write / edit / bash / audit / skill。只读工具自动执行,写操作需确认。支持 OpenAI function calling 的模型即可用。</p>
+      </div>
+      <div class="feat reveal">
+        <span class="n">F.05</span><span class="feat-ico">🧩</span>
+        <h3>Skill 原生 <span class="en">78+ skills</span></h3>
+        <p>自动发现 ~/.agents/skills 与项目本地 skill。模型在对话中可 skill_list 查看、skill_run 执行——飞书、搜索、安全扫描等 78+ skill 即装即用。</p>
+      </div>
+      <div class="feat reveal">
+        <span class="n">F.06</span><span class="feat-ico">🔌</span>
+        <h3>MCP Server <span class="en">claude / cursor</span></h3>
+        <p>lc mcp 一键启动 stdio JSON-RPC server,把所有能力暴露给 Claude Code、Cursor 等 MCP 客户端。同一套工具,换个宿主。</p>
+      </div>
+      <div class="feat reveal">
+        <span class="n">F.07</span><span class="feat-ico">🐳</span>
+        <h3>容器部署 <span class="en">one command</span></h3>
+        <p>Dockerfile 多阶段构建 + docker-compose 一键编排。挂载源码与 skill 池,cargo 缓存持久化,容器内增量编译。</p>
+      </div>
+      <div class="feat reveal">
+        <span class="n">F.08</span><span class="feat-ico">⏹️</span>
+        <h3>可中止 + 确认 <span class="en">human-in-loop</span></h3>
+        <p>流式响应中途可一键 abort。write / edit / bash 等变更操作弹「允许/拒绝」确认卡;勾选自动模式则全部免确认。</p>
+      </div>
+      <div class="feat reveal">
+        <span class="n">F.09</span><span class="feat-ico">⚡</span>
+        <h3>资源极省 <span class="en">lean-first</span></h3>
+        <p>纯 Rust 静态二进制,opt-level z + LTO + strip。rustls 而非 openssl,ignore 而非完整 ripgrep。CI 断言 &lt; 5MB。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== AGENT LOOP ===================== -->
+<section class="sec" id="agent">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-num">02 / agent loop</div>
+      <h2 class="sec-title">reason · tool · observe<span class="cn">模型自主干活的安全循环</span></h2>
+      <p class="sec-sub">
+        给模型一组工具和一段对话,它自己决定调哪个、传什么参数、怎么解读结果——直到任务完成。
+        每个工具调用都过 Defender,每个写操作都经你确认。循环有上限,不会失控。
+      </p>
+    </div>
+
+    <div class="loop reveal">
+      <div class="loop-node">
+        <div class="ln-ico">🧠</div>
+        <div class="ln-name"><span class="hl">reason</span></div>
+        <div class="ln-desc">模型思考下一步</div>
+      </div>
+      <div class="loop-node">
+        <div class="ln-ico">📞</div>
+        <div class="ln-name"><span class="hl">tool_call</span></div>
+        <div class="ln-desc">决定调哪个工具</div>
+      </div>
+      <div class="loop-node">
+        <div class="ln-ico">🛡️</div>
+        <div class="ln-name"><span class="hl">defender</span></div>
+        <div class="ln-desc">安全前置检查</div>
+      </div>
+      <div class="loop-node">
+        <div class="ln-ico">⚙️</div>
+        <div class="ln-name"><span class="hl">execute</span></div>
+        <div class="ln-desc">执行 + 捕获输出</div>
+      </div>
+      <div class="loop-node">
+        <div class="ln-ico">👁️</div>
+        <div class="ln-name"><span class="hl">observe</span></div>
+        <div class="ln-desc">结果喂回模型</div>
+      </div>
+    </div>
+    <div class="loop-back reveal">↻ &nbsp; 循环直到模型给出最终文本回答,或达到迭代上限 · <span class="hl">max_iters</span> 防失控</div>
+
+    <h3 style="margin: 48px 0 6px; font-size:14px; letter-spacing:.06em; color:var(--ink-dim);">Agent 可调用的 9 个工具</h3>
+    <p style="color:var(--ink-faint); font-size:13px;">只读工具 <span style="color:var(--green)">自动执行</span> · 变更工具 <span style="color:var(--amber)">需确认(或开自动模式)</span></p>
+
+    <div class="tool-table reveal" style="margin-top:14px;">
+      <div class="tool-row">
+        <div class="tool-name"><span class="fn">read</span><span class="arg">(path)</span></div>
+        <div class="tool-desc">读文件 / 列目录,带行号与截断</div>
+        <div class="tool-badge auto">auto</div>
+      </div>
+      <div class="tool-row">
+        <div class="tool-name"><span class="fn">grep</span><span class="arg">(pattern, path)</span></div>
+        <div class="tool-desc">内容搜索,尊重 .gitignore</div>
+        <div class="tool-badge auto">auto</div>
+      </div>
+      <div class="tool-row">
+        <div class="tool-name"><span class="fn">glob</span><span class="arg">(pattern)</span></div>
+        <div class="tool-desc">文件名通配匹配,找文件不读内容</div>
+        <div class="tool-badge auto">auto</div>
+      </div>
+      <div class="tool-row">
+        <div class="tool-name"><span class="fn">fetch</span><span class="arg">(url)</span></div>
+        <div class="tool-desc">抓取网页内容(Defender 检查 URL)</div>
+        <div class="tool-badge auto">auto</div>
+      </div>
+      <div class="tool-row">
+        <div class="tool-name"><span class="fn">audit</span><span class="arg">(path)</span></div>
+        <div class="tool-desc">扫描目录安全风险</div>
+        <div class="tool-badge auto">auto</div>
+      </div>
+      <div class="tool-row">
+        <div class="tool-name"><span class="fn">skill_list</span><span class="arg">()</span></div>
+        <div class="tool-desc">列出所有已发现的 skill</div>
+        <div class="tool-badge auto">auto</div>
+      </div>
+      <div class="tool-row">
+        <div class="tool-name"><span class="fn">skill_run</span><span class="arg">(id, args)</span></div>
+        <div class="tool-desc">执行 skill,args 透传</div>
+        <div class="tool-badge auto">auto</div>
+      </div>
+      <div class="tool-row">
+        <div class="tool-name"><span class="fn">write</span><span class="arg">(path, content)</span></div>
+        <div class="tool-desc">创建 / 覆盖文件</div>
+        <div class="tool-badge confirm">confirm</div>
+      </div>
+      <div class="tool-row">
+        <div class="tool-name"><span class="fn">edit</span><span class="arg">(path, old, new)</span></div>
+        <div class="tool-desc">精确唯一匹配替换</div>
+        <div class="tool-badge confirm">confirm</div>
+      </div>
+      <div class="tool-row">
+        <div class="tool-name"><span class="fn">bash</span><span class="arg">(command)</span></div>
+        <div class="tool-desc">执行 shell 命令(60s 超时,Defender 拦截危险命令)</div>
+        <div class="tool-badge confirm">confirm</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STATS ===================== -->
+<section class="sec" id="stats">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-num">03 / 数据</div>
+      <h2 class="sec-title">by the numbers<span class="cn">用数字说话</span></h2>
+    </div>
+    <div class="stats reveal">
+      <div class="stat">
+        <div class="big">~3<span class="unit">MB</span></div>
+        <div class="lbl"><b>release 二进制</b><br>单文件,拷贝即用</div>
+      </div>
+      <div class="stat">
+        <div class="big">9<span class="unit">tools</span></div>
+        <div class="lbl"><b>Agent 工具</b><br>read → bash 全链路</div>
+      </div>
+      <div class="stat">
+        <div class="big">78<span class="unit">+</span></div>
+        <div class="lbl"><b>skill 即装即用</b><br>飞书 / 搜索 / 安全…</div>
+      </div>
+      <div class="stat">
+        <div class="big">46<span class="unit">tests</span></div>
+        <div class="lbl"><b>全部通过</b><br>CI: fmt + clippy + test</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== START ===================== -->
+<section class="sec" id="start">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-num">04 / 上手</div>
+      <h2 class="sec-title">three ways to run<span class="cn">三种方式,挑你顺手的</span></h2>
+    </div>
+
+    <div class="ways reveal">
+      <div class="way">
+        <div class="w-num">WAY · 01</div>
+        <h4>本地直接运行</h4>
+        <div class="w-tag">最简单 · 需 Rust</div>
+        <div class="w-code"><span class="c-cm"># 编译 + 启动 Web UI</span>
+<span class="c-sh">$</span> cargo build --release
+<span class="c-sh">$</span> ./target/release/lc serve 9999
+
+<span class="c-cm"># 浏览器打开</span>
+<span class="c-cm"># → http://localhost:9999</span></div>
+      </div>
+      <div class="way">
+        <div class="w-num">WAY · 02</div>
+        <h4>Docker 部署</h4>
+        <div class="w-tag">一键 · 无需本地 Rust</div>
+        <div class="w-code"><span class="c-sh">$</span> docker compose up -d
+
+<span class="c-cm"># → http://localhost:8080</span>
+<span class="c-cm"># 容器内访问宿主 Ollama:</span>
+<span class="c-cm"># base_url 填</span>
+<span class="c-cm"># host.docker.internal:11434/v1</span></div>
+      </div>
+      <div class="way">
+        <div class="w-num">WAY · 03</div>
+        <h4>纯 CLI 工具</h4>
+        <div class="w-tag">不需要模型</div>
+        <div class="w-code"><span class="c-sh">$</span> <span class="c-kw">lc</span> read README.md
+<span class="c-sh">$</span> <span class="c-kw">lc</span> grep <span class="c-st">"async"</span> crates/
+<span class="c-sh">$</span> <span class="c-kw">lc</span> audit .
+<span class="c-sh">$</span> <span class="c-kw">lc</span> skills</div>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top: 36px;">
+      <div class="codeblock">
+        <div class="cb-bar"><span class="fname">配置模型 · 任意 OpenAI 兼容端点</span></div>
+<pre><span class="c-cm"># 浏览器顶部配置栏,或直接编辑 ~/.liteclaw/config.json</span>
+<span class="c-cm"># 支持的后端:</span>
+<span class="c-cm">#   Ollama        http://localhost:11434/v1       (本地 · 免费)</span>
+<span class="c-cm">#   LM Studio     http://localhost:1234/v1        (本地 · GUI)</span>
+<span class="c-cm">#   NewAPI/OneAPI http://your-gateway:port/v1     (自建网关)</span>
+<span class="c-cm">#   OpenAI/GLM/DeepSeek 云端 /v1                  (官方 API)</span>
+<span class="c-cm">#</span>
+<span class="c-cm"># ⚠ 模型须支持 function calling 才能自动调工具(MiniMax-M3 / Qwen3 推荐)</span></pre>
+      </div>
+    </div>
+
+    <div class="sec-head reveal" style="margin-top:64px; margin-bottom:20px;">
+      <div class="sec-num">可拼装 · compose</div>
+      <h2 class="sec-title" style="font-size: clamp(22px,3.6vw,38px);">pipe it together<span class="cn">CLI 工具也能经管道拼装</span></h2>
+    </div>
+    <div class="pipe reveal">
+      <div class="pipe-node"><div class="pn-name"><span class="lc">lc</span> --json read</div><div class="pn-desc">结构化输出</div></div>
+      <div class="pipe-node"><div class="pn-name"><span class="lc">|</span> jq .lines</div><div class="pn-desc">提取字段</div></div>
+      <div class="pipe-node"><div class="pn-name"><span class="lc">|</span> lc grep …</div><div class="pn-desc">再加工</div></div>
+      <div class="pipe-node"><div class="pn-name"><span class="lc">&gt;</span> out.txt</div><div class="pn-desc">落地</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== COMMANDS ===================== -->
+<section class="sec" id="commands">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-num">05 / 命令</div>
+      <h2 class="sec-title">the claws<span class="cn">每只钳子各司其职</span></h2>
+    </div>
+
+    <div class="cmd-table reveal">
+      <div class="cmd-row">
+        <div class="cmd-name"><span class="lc">lc</span> serve <span class="arg">[PORT]</span><span class="new">NEW</span></div>
+        <div class="cmd-desc">启动 Web 对话界面(chat + agent loop),默认 127.0.0.1:8080</div>
+        <div class="cmd-flag n">web</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-name"><span class="lc">lc</span> mcp<span class="new">NEW</span></div>
+        <div class="cmd-desc">作为 MCP server(stdio JSON-RPC)接入 Claude Code / Cursor</div>
+        <div class="cmd-flag n">mcp</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-name"><span class="lc">lc</span> read <span class="arg">&lt;path&gt;</span></div>
+        <div class="cmd-desc">读文件(带行号/截断)或列目录</div>
+        <div class="cmd-flag r">read</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-name"><span class="lc">lc</span> grep <span class="arg">&lt;pattern&gt; [path]</span></div>
+        <div class="cmd-desc">内容搜索,尊重 .gitignore</div>
+        <div class="cmd-flag r">read</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-name"><span class="lc">lc</span> edit <span class="arg">&lt;path&gt; &lt;old&gt; &lt;new&gt;</span></div>
+        <div class="cmd-desc">精确唯一匹配替换,需 --allow-write</div>
+        <div class="cmd-flag w">write</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-name"><span class="lc">lc</span> audit <span class="arg">[path]</span></div>
+        <div class="cmd-desc">扫描安全风险:prompt injection / SSRF / 路径穿越</div>
+        <div class="cmd-flag r">read</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-name"><span class="lc">lc</span> skills</div>
+        <div class="cmd-desc">列出发现的 skill(全局 + 项目本地)</div>
+        <div class="cmd-flag r">read</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-name"><span class="lc">lc</span> skill <span class="arg">&lt;id&gt;</span></div>
+        <div class="cmd-desc">查看 skill 的完整 SKILL.md</div>
+        <div class="cmd-flag r">read</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-name"><span class="lc">lc</span> skill-run <span class="arg">&lt;id&gt; [args]</span></div>
+        <div class="cmd-desc">执行 scripts 型 skill,Defender 前置</div>
+        <div class="cmd-flag w">exec</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-name"><span class="lc">lc</span> claws</div>
+        <div class="cmd-desc">列出所有内置 claw</div>
+        <div class="cmd-flag r">read</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ROADMAP ===================== -->
+<section class="sec" id="roadmap">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-num">06 / 路线图</div>
+      <h2 class="sec-title">milestones<span class="cn">走到哪了</span></h2>
+    </div>
+    <div class="road reveal">
+      <div class="road-item done">
+        <div class="ri-stage">阶段 0</div>
+        <div class="ri-name">骨架</div>
+        <div class="ri-status">✅</div>
+      </div>
+      <div class="road-item done">
+        <div class="ri-stage">阶段 1</div>
+        <div class="ri-name">Model + Chat</div>
+        <div class="ri-status">✅</div>
+      </div>
+      <div class="road-item done">
+        <div class="ri-stage">阶段 2</div>
+        <div class="ri-name">Agent Loop</div>
+        <div class="ri-status">✅</div>
+      </div>
+      <div class="road-item done">
+        <div class="ri-stage">阶段 3</div>
+        <div class="ri-name">Web UI</div>
+        <div class="ri-status">✅</div>
+      </div>
+      <div class="road-item done">
+        <div class="ri-stage">阶段 4</div>
+        <div class="ri-name">MCP Server</div>
+        <div class="ri-status">✅</div>
+      </div>
+      <div class="road-item cur">
+        <div class="ri-stage">阶段 5</div>
+        <div class="ri-name">资源断言</div>
+        <div class="ri-status">🔨</div>
+      </div>
+    </div>
+    <p class="reveal" style="margin-top:24px; color:var(--ink-faint); font-size:13px;">
+      <span class="cmt">// 已落地:</span>
+      <code style="color:var(--green)">read/grep/edit/audit ✅</code> ·
+      <code style="color:var(--green)">skill 系统 ✅</code> ·
+      <code style="color:var(--green)">流式 chat ✅</code> ·
+      <code style="color:var(--green)">agent loop(9 工具)✅</code> ·
+      <code style="color:var(--green)">web UI ✅</code> ·
+      <code style="color:var(--green)">MCP server ✅</code> ·
+      <code style="color:var(--green)">Docker + CI ✅</code>
+    </p>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="wrap foot-inner">
+    <div>
+      <div class="foot-brand">liteclaw<span class="lobster">🦞</span></div>
+      <p style="color:var(--ink-faint); font-size:12px; margin-top:10px;">小龙虾 · 本地 AI 编程助手</p>
+    </div>
+    <div class="foot-meta">
+      MIT Licensed · Rust · v0.1.0<br>
+      <a href="#features">能力</a> · <a href="#agent">Agent</a> · <a href="#commands">命令</a> · <a href="#start">上手</a><br>
+      <span style="color:var(--ink-faint)">built lean · defender-first · agent-driven</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   Terminal demo rotator
+   ============================================================ */
+const DEMOS = {
+  serve: {
+    cmd: ['lc',' ','serve',' ','9999'],
+    flags: {4:'str'},
+    out: [
+      {t:'cmt', html:'liteclaw web UI → http://127.0.0.1:9999'},
+      {t:'cmt', html:'auth: token valid 24h · config: ~/.liteclaw/config.json'},
+      {t:'out', html:''},
+      {t:'ok',  html:'✓ server listening · 9 tools · 78 skills discovered'},
+      {t:'cmt', html:''},
+      {t:'out', html:'  open http://localhost:9999 in your browser'},
+      {t:'out', html:'  login: renault / renault123'},
+    ]
+  },
+  agent: {
+    cmd: ['','you: 帮我看看 main.rs 有没有安全问题'],
+    flags: {},
+    out: [
+      {t:'cmt', html:'─────────────────────────────────────────────'},
+      {t:'tool', html:'⚡ tool_call: read({ path: "src/main.rs" })  [auto]'},
+      {t:'out',  html:'   ↳ 189 lines read'},
+      {t:'tool', html:'⚡ tool_call: audit({ path: "." })           [auto]'},
+      {t:'warn', html:'   ⚠ found: prompt-injection signal in rules.rs:141'},
+      {t:'cmt', html:'─────────────────────────────────────────────'},
+      {t:'out',  html:'🦞 main.rs 本身没问题。但 audit 扫到'},
+      {t:'out',  html:'   rules.rs 里有一条规则匹配 "new system prompt"'},
+      {t:'out',  html:'   ——这是 Defender 自身的检测规则,属预期,'},
+      {t:'out',  html:'   不是真实漏洞。其余 38 个文件均通过。'},
+    ]
+  },
+  mcp: {
+    cmd: ['lc',' ','mcp'],
+    flags: {},
+    out: [
+      {t:'cmt', html:'liteclaw MCP server (stdio JSON-RPC)'},
+      {t:'cmt', html:'waiting for client on stdin...'},
+      {t:'out', html:''},
+      {t:'out', html:'{"jsonrpc":"2.0","method":"initialize",...}'},
+      {t:'ok',  html:'→ tools/list → 9 tools exposed'},
+      {t:'ok',  html:'→ resources/list → skills available'},
+      {t:'cmt', html:''},
+      {t:'out', html:'  connect from Claude Code / Cursor / any MCP client'},
+    ]
+  },
+  audit: {
+    cmd: ['lc',' ','audit',' ','.'],
+    flags: {4:'str'},
+    out: [
+      {t:'cmt', html:'scanning ./  (defender kernel)'},
+      {t:'out', html:''},
+      {t:'warn', html:'⚠ crates/liteclaw-core/src/defender/rules.rs:141'},
+      {t:'out',  html:'  pattern "new system prompt" — prompt-injection signal'},
+      {t:'out',  html:''},
+      {t:'ok',  html:'✓ 0 blockers · 1 warning · 38 files scanned'},
+      {t:'cmt', html:'defender pre-check active on all write paths'},
+    ]
+  },
+};
+
+const termBody = document.getElementById('termBody');
+const tabs = document.querySelectorAll('.term-tab');
+const termEl = document.getElementById('term');
+let current = 'serve';
+let typingTimer = null;
+let outTimer = null;
+let rotateTimer = null;
+
+function renderDemo(key){
+  clearTimeout(typingTimer); clearTimeout(outTimer);
+  current = key;
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.demo===key));
+  const d = DEMOS[key];
+  termBody.innerHTML = '';
+  const lineEl = document.createElement('div');
+  lineEl.className = 'term-line';
+  lineEl.innerHTML = '<span class="prmpt">❯ <span class="path">~/liteclaw</span></span>&nbsp;';
+  const cmdSpan = document.createElement('span');
+  cmdSpan.className = 'cmd';
+  lineEl.appendChild(cmdSpan);
+  termBody.appendChild(lineEl);
+
+  let i = 0;
+  function typeChar(){
+    if(i >= d.cmd.length){ streamOut(d.out, 0); return; }
+    const tok = d.cmd[i];
+    const span = document.createElement('span');
+    if(d.flags[i] === 'str') span.className = 'str';
+    span.textContent = tok;
+    cmdSpan.appendChild(span);
+    i++;
+    typingTimer = setTimeout(typeChar, 50 + Math.random()*50);
+  }
+  typeChar();
+}
+
+function streamOut(lines, idx){
+  if(idx >= lines.length){
+    const cur = document.createElement('span');
+    cur.className = 'cursor';
+    termBody.appendChild(cur);
+    return;
+  }
+  const ln = lines[idx];
+  const el = document.createElement('div');
+  el.className = 'term-line ' + ln.t;
+  el.innerHTML = ln.html;
+  termBody.appendChild(el);
+  termBody.scrollTop = termBody.scrollHeight;
+  outTimer = setTimeout(()=>streamOut(lines, idx+1), 90 + Math.random()*70);
+}
+
+const order = ['serve','agent','mcp','audit'];
+function autoRotate(){
+  let idx = order.indexOf(current);
+  idx = (idx+1) % order.length;
+  renderDemo(order[idx]);
+}
+function startRotate(){ rotateTimer = setInterval(autoRotate, 7000); }
+function stopRotate(){ clearInterval(rotateTimer); }
+
+tabs.forEach(t => t.addEventListener('click', ()=>renderDemo(t.dataset.demo)));
+
+window.addEventListener('load', ()=>{
+  setTimeout(()=>renderDemo('serve'), 600);
+  setTimeout(startRotate, 7500);
+});
+termEl.addEventListener('mouseenter', stopRotate);
+termEl.addEventListener('mouseleave', startRotate);
+
+/* reveal */
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach((el,i)=>{
+  el.style.transitionDelay = (i%4 * 60) + 'ms';
+  io.observe(el);
+});
+</script>
+</body>
+</html>
