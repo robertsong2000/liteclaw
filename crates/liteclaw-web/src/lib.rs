@@ -57,8 +57,8 @@ pub async fn serve(host: &str, port: u16, claws: Vec<Arc<dyn Claw>>, ctx: Ctx) -
         .route("/confirm", axum::routing::post(handlers::confirm))
         .route("/history", axum::routing::get(handlers::list_history))
         .route("/history", axum::routing::post(handlers::save_session))
-        .route("/history/{id}", axum::routing::get(handlers::get_session))
-        .route("/history/{id}", axum::routing::delete(handlers::delete_session))
+        .route("/history/:id", axum::routing::get(handlers::get_session))
+        .route("/history/:id", axum::routing::delete(handlers::delete_session))
         .route_layer(axum::middleware::from_fn_with_state(
             state.clone(),
             auth::require_auth,
