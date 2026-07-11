@@ -262,10 +262,15 @@ fn inject_agents_md(mut messages: Vec<Message>, cwd: &std::path::Path) -> Vec<Me
 
     // Find the first system message and append. If none, prepend a new one.
     if let Some(first) = messages.iter_mut().find(|m| m.role == liteclaw_model::Role::System) {
-        if let Some(c) = &mut first.content {
-            c.push_str(&snippet);
-        } else {
-            first.content = Some(snippet.trim().into());
+        match &first.content {
+            Some(serde_json::Value::String(s)) => {
+                let mut combined = s.clone();
+                combined.push_str(&snippet);
+                first.content = Some(serde_json::Value::String(combined));
+            }
+            _ => {
+                first.content = Some(serde_json::Value::String(snippet.trim().into()));
+            }
         }
     } else {
         messages.insert(0, Message::system(snippet.trim()));

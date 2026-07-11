@@ -37,9 +37,11 @@ pub struct FunctionCall {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Message {
     pub role: Role,
-    /// Text content. Empty for assistant messages that are pure tool calls.
+    /// Content: either a plain string (text) or an array of content parts
+    /// (text + image_url) for multimodal. Using serde_json::Value so we can
+    /// pass both formats through to the model API without a breaking change.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub content: Option<String>,
+    pub content: Option<serde_json::Value>,
     /// Present on assistant messages that request tool execution.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tool_calls: Option<Vec<ToolCall>>,
@@ -52,7 +54,7 @@ impl Message {
     pub fn system(content: impl Into<String>) -> Self {
         Self {
             role: Role::System,
-            content: Some(content.into()),
+            content: Some(serde_json::Value::String(content.into())),
             tool_calls: None,
             tool_call_id: None,
         }
@@ -60,7 +62,7 @@ impl Message {
     pub fn user(content: impl Into<String>) -> Self {
         Self {
             role: Role::User,
-            content: Some(content.into()),
+            content: Some(serde_json::Value::String(content.into())),
             tool_calls: None,
             tool_call_id: None,
         }
@@ -68,7 +70,7 @@ impl Message {
     pub fn assistant_text(content: impl Into<String>) -> Self {
         Self {
             role: Role::Assistant,
-            content: Some(content.into()),
+            content: Some(serde_json::Value::String(content.into())),
             tool_calls: None,
             tool_call_id: None,
         }
@@ -77,7 +79,7 @@ impl Message {
     pub fn tool_result(tool_call_id: impl Into<String>, content: impl Into<String>) -> Self {
         Self {
             role: Role::Tool,
-            content: Some(content.into()),
+            content: Some(serde_json::Value::String(content.into())),
             tool_calls: None,
             tool_call_id: Some(tool_call_id.into()),
         }

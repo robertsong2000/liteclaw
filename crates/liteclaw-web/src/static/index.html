@@ -129,9 +129,16 @@
 <div id="chat"></div>
 
 <footer>
-  <textarea id="input" placeholder="说点什么… (Enter 发送, Shift+Enter 换行)"></textarea>
+  <textarea id="input" placeholder="说点什么… (Enter 发送, Shift+Enter 换行, 可粘贴/拖拽图片)"></textarea>
+  <button id="img-btn" style="background:var(--panel-2);border:1px solid var(--border);padding:0 12px;font-size:16px">📎</button>
+  <input type="file" id="img-file" accept="image/*" style="display:none" />
   <button id="send">发送</button>
 </footer>
+<div id="img-preview" style="display:none;padding:4px 16px;border-top:1px solid var(--border)">
+  <img id="preview-img" style="max-height:80px;border-radius:4px" />
+  <span id="img-name" style="color:var(--muted);font-size:12px;margin-left:8px"></span>
+  <span id="img-remove" style="color:#ef5350;cursor:pointer;margin-left:8px;font-size:12px">✕ 移除</span>
+</div>
 
 <script>
 // --- Auth: token management + login ---
@@ -164,7 +171,9 @@ function newSession() {
   currentSessionId = genSessionId();
   messages = [];
   chat.innerHTML = '';
-  saveCurrentSession();
+  // Don't save here: an empty session (no messages) would be rejected by
+  // saveCurrentSession()'s guard anyway, and we don't want phantom entries
+  // in the sidebar. The session is persisted on the first real exchange.
   loadSessionList();
 }
 
@@ -240,9 +249,14 @@ async function deleteSession(id) {
   try {
     const resp = await fetch('/api/history/' + id, { method: 'DELETE', headers: authHeaders() });
     if (resp.status === 401) { showLogin(); return; }
+    if (!resp.ok && resp.status !== 404) {
+      // 404 is tolerable (session already gone / never persisted); other
+      // errors are unexpected — surface them instead of silently swallowing.
+      console.error('delete failed:', resp.status, await resp.text());
+    }
     if (id === currentSessionId) newSession();
     else loadSessionList();
-  } catch (e) {}
+  } catch (e) { console.error('delete error:', e); }
 }
 
 async function doLogin() {
@@ -489,6 +503,59 @@ const sendBtn = document.getElementById('send');
 let messages = [];
 let busy = false;
 
+// --- Image attachment (multimodal) ---
+let pendingImage = null; // { dataUrl: "data:image/png;base64,...", name: "x.png" }
+
+function setImage(img) {
+  pendingImage = img;
+  document.getElementById('preview-img').src = img.dataUrl;
+  document.getElementById('img-name').textContent = img.name;
+  document.getElementById('img-preview').style.display = 'flex';
+}
+function clearImage() {
+  pendingImage = null;
+  document.getElementById('img-preview').style.display = 'none';
+  document.getElementById('img-file').value = '';
+}
+function readFileAsDataURL(file) {
+  return new Promise((resolve) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.readAsDataURL(file);
+  });
+}
+// File picker
+document.getElementById('img-btn').onclick = () => document.getElementById('img-file').click();
+document.getElementById('img-file').onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const dataUrl = await readFileAsDataURL(file);
+  setImage({ dataUrl, name: file.name });
+};
+document.getElementById('img-remove').onclick = clearImage;
+// Paste image
+document.getElementById('input').addEventListener('paste', async (e) => {
+  for (const item of e.clipboardData.items) {
+    if (item.type.startsWith('image/')) {
+      const file = item.getAsFile();
+      const dataUrl = await readFileAsDataURL(file);
+      setImage({ dataUrl, name: 'pasted.png' });
+      e.preventDefault();
+    }
+  }
+});
+// Drag-drop image
+document.body.addEventListener('dragover', (e) => e.preventDefault());
+document.body.addEventListener('drop', async (e) => {
+  e.preventDefault();
+  for (const file of e.dataTransfer.files) {
+    if (file.type.startsWith('image/')) {
+      const dataUrl = await readFileAsDataURL(file);
+      setImage({ dataUrl, name: file.name });
+    }
+  }
+});
+
 // Prepend a system prompt so the model knows its tools.
 const SYSTEM_PROMPT =
   '你是 liteclaw 助手，一个能执行操作的编程助手。可用工具：\n' +
@@ -571,10 +638,22 @@ let abortCtrl = null;
 async function send() {
   if (busy) return;
   const text = input.value.trim();
-  if (!text) return;
+  if (!text && !pendingImage) return;
   input.value = '';
   addBubble('user', text);
-  messages.push({ role: 'user', content: text });
+
+  // Build message content: if there's an image, use array format (multimodal).
+  let content;
+  if (pendingImage) {
+    content = [
+      { type: 'text', text: text || '请描述这张图片' },
+      { type: 'image_url', image_url: { url: pendingImage.dataUrl } },
+    ];
+    clearImage();
+  } else {
+    content = text;
+  }
+  messages.push({ role: 'user', content: content });
 
   busy = true;
   abortCtrl = new AbortController();

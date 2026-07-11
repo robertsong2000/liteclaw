@@ -92,7 +92,11 @@ pub async fn run_loop(
         // 2. Record the assistant turn.
         messages.push(Message {
             role: liteclaw_model::Role::Assistant,
-            content: if text.is_empty() { None } else { Some(text) },
+            content: if text.is_empty() {
+                None
+            } else {
+                Some(serde_json::Value::String(text))
+            },
             tool_calls: if tool_calls.is_empty() {
                 None
             } else {
