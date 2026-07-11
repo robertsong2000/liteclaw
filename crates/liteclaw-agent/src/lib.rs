@@ -14,6 +14,7 @@
 pub mod backup;
 pub mod events;
 pub mod hooks;
+pub mod mcp_client;
 pub mod tools;
 
 pub use events::AgentEvent;
