@@ -46,7 +46,12 @@ pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -
     } else {
         Some(crate::make_confirm(state.confirms.clone()))
     };
-    let (rx, _handle) = into_stream(model, req.messages, tools, ctx, confirm, 8);
+
+    // Inject AGENTS.md into the system prompt: read from cwd, prepend to the
+    // first system message so the model knows project conventions.
+    let messages = inject_agents_md(req.messages, &ctx.cwd);
+
+    let (rx, _handle) = into_stream(model, messages, tools, ctx, confirm, 8);
 
     // Serialize each AgentEvent as an SSE frame.
     let sse = tokio_stream::wrappers::ReceiverStream::new(rx).map(|event| {
@@ -240,4 +245,30 @@ pub async fn delete_session(axum::extract::Path(id): axum::extract::Path<String>
         Ok(_) => (StatusCode::OK, "deleted").into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, format!("write: {e}")).into_response(),
     }
+}
+
+// ─── AGENTS.md injection ─────────────────────────────────────────────
+
+/// Read AGENTS.md from cwd and prepend its content to the first system message.
+/// If no system message exists, create one. If AGENTS.md is absent, pass through.
+fn inject_agents_md(mut messages: Vec<Message>, cwd: &std::path::Path) -> Vec<Message> {
+    let agents_md = cwd.join("AGENTS.md");
+    let Some(content) = std::fs::read_to_string(&agents_md).ok() else {
+        return messages; // no AGENTS.md, nothing to inject
+    };
+    let snippet = format!(
+        "\n\n--- 项目 AGENTS.md 约定 ---\n{content}\n--- AGENTS.md 结束 ---"
+    );
+
+    // Find the first system message and append. If none, prepend a new one.
+    if let Some(first) = messages.iter_mut().find(|m| m.role == liteclaw_model::Role::System) {
+        if let Some(c) = &mut first.content {
+            c.push_str(&snippet);
+        } else {
+            first.content = Some(snippet.trim().into());
+        }
+    } else {
+        messages.insert(0, Message::system(snippet.trim()));
+    }
+    messages
 }
