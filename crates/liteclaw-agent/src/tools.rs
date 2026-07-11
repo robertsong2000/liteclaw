@@ -51,37 +51,63 @@ impl Tool {
             .collect()
     }
 
-    /// Execute the tool and capture its output as a string. Defender pre-checks
-    /// run via the shared [`Ctx`].
-    ///
-    /// NOTE: claws print to the real stdout, which the agent cannot intercept.
-    /// So for the tools the agent drives (read/grep/audit/edit), we implement
-    /// the logic inline here and return the captured text. This is the string
-    /// that gets fed back to the model as the tool result.
+    /// Execute the tool and capture its output as a string. Runs the Defender
+    /// pre-check via a default hook chain.
     pub async fn execute(&self, args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
-        // Defender: scan the JSON arguments for injection/path-traversal.
-        let raw = args.to_string();
-        let report = ctx.guard_text(&raw);
-        if matches!(report.action, liteclaw_core::defender::Action::Block) {
-            return ToolOutcome::blocked(format!(
-                "Defender blocked ({} score {})",
-                report.severity.label(),
-                report.score
-            ));
-        }
-        match self.name {
-            "read" => exec_read(args, ctx),
-            "grep" => exec_grep(args, ctx),
-            "audit" => exec_audit(args, ctx),
-            "glob" => exec_glob(args, ctx),
-            "fetch" => exec_fetch(args, ctx).await,
-            "edit" => exec_edit(args, ctx).await,
-            "write" => exec_write(args, ctx).await,
-            "bash" => exec_bash(args, ctx).await,
+        self.execute_with_hooks(args, ctx, &crate::hooks::default_hooks()).await
+    }
+
+    /// Execute with a caller-supplied hook chain. PreToolUse hooks run first
+    /// (Defender, custom validators); PostToolUse hooks run after (logging, audit).
+    pub async fn execute_with_hooks(
+        &self,
+        args: &serde_json::Value,
+        ctx: &Ctx,
+        hooks: &crate::hooks::HookChain,
+    ) -> ToolOutcome {
+        // PreToolUse hooks (Defender is one of them).
+        let hc = crate::hooks::HookContext {
+            tool_name: self.name,
+            args,
+            ctx,
+        };
+        let effective_args_owned;
+        let effective_args = match hooks.pre(&hc).await {
+            crate::hooks::PreToolVerdict::Block { reason } => {
+                return ToolOutcome::blocked(reason);
+            }
+            crate::hooks::PreToolVerdict::Allow { modified_args } => {
+                match modified_args {
+                    Some(ma) => {
+                        effective_args_owned = ma;
+                        &effective_args_owned
+                    }
+                    None => args,
+                }
+            }
+        };
+        // Execute the actual tool logic.
+        let mut outcome = match self.name {
+            "read" => exec_read(effective_args, ctx),
+            "grep" => exec_grep(effective_args, ctx),
+            "audit" => exec_audit(effective_args, ctx),
+            "glob" => exec_glob(effective_args, ctx),
+            "fetch" => exec_fetch(effective_args, ctx).await,
+            "edit" => exec_edit(effective_args, ctx).await,
+            "write" => exec_write(effective_args, ctx).await,
+            "bash" => exec_bash(effective_args, ctx).await,
             "skill_list" => exec_skill_list(),
-            "skill_run" => exec_skill_run(args, ctx).await,
+            "skill_run" => exec_skill_run(effective_args, ctx).await,
             other => ToolOutcome::failed(format!("tool '{other}' has no captured executor")),
-        }
+        };
+        // PostToolUse hooks (logging, audit).
+        let post_hc = crate::hooks::HookContext {
+            tool_name: self.name,
+            args: effective_args,
+            ctx,
+        };
+        hooks.post(&post_hc, &mut outcome).await;
+        outcome
     }
 }
 

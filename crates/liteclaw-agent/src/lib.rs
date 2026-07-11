@@ -12,9 +12,11 @@
 //! layer (which implements the human-in-the-loop UI).
 
 pub mod events;
+pub mod hooks;
 pub mod tools;
 
 pub use events::AgentEvent;
+pub use hooks::{default_hooks, DefenderHook, Hook, HookChain, HookContext, LogHook, PreToolVerdict};
 pub use tools::{default_tools, extra_tools, find, skill_tools, to_specs, Approval, Tool, ToolOutcome};
 
 use anyhow::Result;
