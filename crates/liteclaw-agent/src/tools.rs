@@ -98,6 +98,7 @@ impl Tool {
             "bash" => exec_bash(effective_args, ctx).await,
             "skill_list" => exec_skill_list(),
             "skill_run" => exec_skill_run(effective_args, ctx).await,
+            "undo" => crate::backup::undo_last(),
             other => ToolOutcome::failed(format!("tool '{other}' has no captured executor")),
         };
         // PostToolUse hooks (logging, audit).
@@ -827,6 +828,14 @@ pub fn extra_tools(claw: Arc<dyn Claw>) -> Vec<Tool> {
             }),
             approval: Approval::Auto,
             arg_order: &["url"],
+            claw: claw.clone(),
+        },
+        Tool {
+            name: "undo",
+            description: "Undo the most recent write/edit: restore the file from backup.",
+            parameters: serde_json::json!({ "type": "object", "properties": {} }),
+            approval: Approval::Auto,
+            arg_order: &[],
             claw: claw.clone(),
         },
     ]

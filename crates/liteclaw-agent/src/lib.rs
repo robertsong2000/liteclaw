@@ -11,6 +11,7 @@
 //! async confirm callback, so the agent crate stays decoupled from the web
 //! layer (which implements the human-in-the-loop UI).
 
+pub mod backup;
 pub mod events;
 pub mod hooks;
 pub mod tools;

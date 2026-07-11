@@ -36,7 +36,7 @@ pub trait Hook: Send + Sync {
     }
 
     /// Called after a tool executes. Default: passthrough.
-    async fn post_tool_use(&self, _hc: &HookContext<'_>, outcome: &mut ToolOutcome) {}
+    async fn post_tool_use(&self, _hc: &HookContext<'_>, _outcome: &mut ToolOutcome) {}
 }
 
 /// A chain of hooks executed in order. First Block verdict wins.
@@ -157,9 +157,10 @@ impl Hook for LogHook {
     }
 }
 
-/// Build the default hook chain: Defender (pre) + Log (post).
+/// Build the default hook chain: Defender (pre) + Backup (pre) + Log (post).
 pub fn default_hooks() -> HookChain {
     HookChain::new()
         .push(Box::new(DefenderHook))
+        .push(Box::new(crate::backup::BackupHook))
         .push(Box::new(LogHook))
 }
