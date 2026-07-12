@@ -149,15 +149,10 @@ pub async fn confirm(State(state): State<AppState>, Json(req): Json<ConfirmReque
 pub struct Session {
     pub id: String,
     pub title: String,
-    pub messages: Vec<HistoryMessage>,
+    /// Full OpenAI-schema messages, including tool_calls / tool results, so a
+    /// session can be restored with zero context loss on switch.
+    pub messages: Vec<liteclaw_model::Message>,
     pub updated: u64,
-}
-
-/// A message in history (simplified: only role + content, no tool_calls).
-#[derive(serde::Serialize, serde::Deserialize, Clone)]
-pub struct HistoryMessage {
-    pub role: String,
-    pub content: String,
 }
 
 /// The on-disk history file: a list of sessions.
@@ -218,9 +213,13 @@ pub async fn save_session(Json(session): Json<Session>) -> Response {
     let mut h = read_history();
     // Upsert: replace if id exists, else push.
     if let Some(existing) = h.sessions.iter_mut().find(|s| s.id == session.id) {
+        // Update in place: preserve the session's position in the list so the
+        // sidebar doesn't jump around when a conversation gets new messages.
         *existing = session;
     } else {
-        h.sessions.push(session);
+        // New session: prepend so it lands on top (once). Subsequent saves hit
+        // the update-in-place branch above and don't move it.
+        h.sessions.insert(0, session);
     }
     // Keep only the latest 50 sessions.
     if h.sessions.len() > 50 {

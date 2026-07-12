@@ -156,36 +156,74 @@ function showLogin() {
 function hideLogin() {
   document.getElementById('login-overlay').style.display = 'none';
   document.getElementById('sidebar').style.display = 'flex';
-  loadSessionList();
+  // Start a fresh session; newSession() renders the sidebar (showing the
+  // placeholder + any persisted sessions from prior runs).
   newSession();
 }
 
-// --- Session management ---
+// --- Session management (state machine) ---
+//
+// Invariants:
+//   - `messages[]` is the single source of truth for the *current* session.
+//   - Switching sessions is an atomic transaction: persist the old, load the
+//     new, then repaint. Nothing is lost.
+//   - A session is persisted as soon as it has one message, and re-persisted
+//     after every completed reply. Empty sessions stay in-memory only.
+//
 let currentSessionId = null;
+// Track whether the current session exists on the backend yet. An empty
+// "new session" has currentSessionId set but isNewSession=true, so the sidebar
+// shows a placeholder without hitting the API for it.
+let isNewSession = false;
 
 function genSessionId() {
   return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
+/// Derive a human title from the conversation: last user message wins (so the
+/// sidebar reflects where the conversation currently is), fallback to '新会话'.
+function sessionTitle(msgs) {
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    const m = msgs[i];
+    if (m.role === 'user') {
+      const text = typeof m.content === 'string' ? m.content
+        : (m.content && m.content.find) ? (m.content.find(p => p.type === 'text') || {}).text || ''
+        : '';
+      if (text) return text.slice(0, 30);
+    }
+  }
+  return '新会话';
+}
+
+/// Extract plain text from a message content (string or multimodal array).
+function contentText(m) {
+  if (typeof m.content === 'string') return m.content;
+  if (Array.isArray(m.content)) {
+    const t = m.content.find(p => p.type === 'text');
+    return t ? t.text : '';
+  }
+  return '';
+}
+
 function newSession() {
+  // Save the outgoing session first (if it has content), then start fresh.
+  saveCurrentSession();
   currentSessionId = genSessionId();
+  isNewSession = true;
   messages = [];
   chat.innerHTML = '';
-  // Don't save here: an empty session (no messages) would be rejected by
-  // saveCurrentSession()'s guard anyway, and we don't want phantom entries
-  // in the sidebar. The session is persisted on the first real exchange.
-  loadSessionList();
+  renderSidebar();
 }
 
 async function saveCurrentSession() {
   if (!currentSessionId || messages.length === 0) return;
-  const title = messages.find(m => m.role === 'user')?.content?.slice(0, 30) || '新会话';
+  isNewSession = false;
   const session = {
     id: currentSessionId,
-    title: title,
-    messages: messages.filter(m => m.role === 'user' || m.role === 'assistant').map(m => ({
-      role: m.role, content: m.content || ''
-    })),
+    title: sessionTitle(messages),
+    // Persist the FULL message list (incl. tool_calls / tool results) so a
+    // session restores with zero context loss on switch.
+    messages: messages,
     updated: Date.now(),
   };
   try {
@@ -194,55 +232,185 @@ async function saveCurrentSession() {
       headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(session),
     });
-  } catch (e) {}
+  } catch (e) { console.error('save session:', e); }
+  renderSidebar();
 }
 
 async function loadSessionList() {
   try {
     const resp = await fetch('/api/history', { headers: authHeaders() });
     if (resp.status === 401) { showLogin(); return; }
-    if (!resp.ok) return;
+    if (!resp.ok) return [];
     const d = await resp.json();
-    const list = document.getElementById('session-list');
-    list.innerHTML = '';
-    d.sessions.forEach(s => {
-      const item = document.createElement('div');
-      item.style.cssText = 'padding:8px 10px;margin:4px 0;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text);display:flex;justify-content:space-between;align-items:center';
-      if (s.id === currentSessionId) item.style.background = 'var(--panel-2)';
-      item.onmouseenter = () => item.style.background = item.style.background.includes('panel-2') ? 'var(--panel-2)' : 'var(--bg)';
-      item.onmouseleave = () => item.style.background = s.id === currentSessionId ? 'var(--panel-2)' : 'transparent';
-      const label = document.createElement('span');
-      label.textContent = s.title;
-      label.style.overflow = 'hidden'; label.style.textOverflow = 'ellipsis'; label.style.whiteSpace = 'nowrap';
-      label.onclick = () => loadSession(s.id);
-      const del = document.createElement('span');
-      del.textContent = '✕'; del.style.color = 'var(--muted)'; del.style.marginLeft = '6px';
-      del.onclick = async (e) => { e.stopPropagation(); await deleteSession(s.id); };
-      item.appendChild(label); item.appendChild(del);
-      list.appendChild(item);
-    });
-  } catch (e) {}
+    // Preserve insertion order (as stored on disk). Do NOT sort by `updated`:
+    // re-sorting on every render makes sessions jump around when the user just
+    // clicks between them, which is confusing. New sessions are prepended at
+    // save time, so the most recent naturally lands on top — once.
+    return d.sessions || [];
+  } catch (e) { return []; }
 }
 
-async function loadSession(id) {
+/// Render the entire sidebar from the backend list + in-memory current session.
+async function renderSidebar() {
+  const sessions = await loadSessionList();
+  const list = document.getElementById('session-list');
+  list.innerHTML = '';
+
+  // If the current session is new/unsaved, show it as a highlighted placeholder
+  // at the very top so the user sees their new conversation exists.
+  if (isNewSession && currentSessionId) {
+    list.appendChild(makeSessionItem({
+      id: currentSessionId, title: '✦ 新会话', updated: Date.now(),
+    }, true));
+  }
+
+  sessions.forEach(s => list.appendChild(makeSessionItem(s, false)));
+}
+
+function makeSessionItem(s, isNew) {
+  const item = document.createElement('div');
+  const active = s.id === currentSessionId;
+  item.style.cssText = 'padding:8px 10px;margin:4px 0;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text);display:flex;justify-content:space-between;align-items:center' +
+    (active ? ';background:var(--panel-2)' : '');
+  item.onmouseenter = () => {
+    if (!active) item.style.background = 'var(--bg)';
+    editBtn.style.opacity = '1';
+  };
+  item.onmouseleave = () => {
+    item.style.background = active ? 'var(--panel-2)' : 'transparent';
+    editBtn.style.opacity = '0';
+  };
+
+  const label = document.createElement('span');
+  label.textContent = s.title;
+  label.style.overflow = 'hidden'; label.style.textOverflow = 'ellipsis'; label.style.whiteSpace = 'nowrap';
+  label.style.color = isNew ? 'var(--accent)' : 'var(--text)';
+  label.style.flex = '1';
+  label.onclick = () => { if (!active) switchToSession(s.id); };
+
+  // Inline rename: click ✎ → swap label for an <input>, Enter/blur to commit.
+  const editBtn = document.createElement('span');
+  editBtn.textContent = '✎';
+  editBtn.title = '重命名';
+  editBtn.style.color = 'var(--muted)'; editBtn.style.marginLeft = '4px';
+  editBtn.style.cursor = 'pointer'; editBtn.style.flexShrink = '0';
+  editBtn.style.opacity = '0'; editBtn.style.transition = 'opacity .15s';
+  editBtn.onclick = async (e) => {
+    e.stopPropagation();
+    await renameSession(s.id, label, editBtn, del);
+  };
+
+  const del = document.createElement('span');
+  del.textContent = '✕'; del.style.color = 'var(--muted)'; del.style.marginLeft = '4px'; del.style.flexShrink = '0';
+  del.onclick = async (e) => { e.stopPropagation(); await deleteSession(s.id); };
+
+  item.appendChild(label);
+  item.appendChild(editBtn);
+  item.appendChild(del);
+  return item;
+}
+
+/// Inline rename: replace the label with an input field, persist on Enter/blur.
+async function renameSession(id, labelEl, editBtn, delBtn) {
+  const oldTitle = labelEl.textContent;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = oldTitle;
+  input.style.cssText = 'flex:1;background:var(--bg);border:1px solid var(--accent);color:var(--text);padding:2px 6px;border-radius:4px;font-size:13px;font-family:inherit';
+  // Swap the label for the input.
+  labelEl.replaceWith(input);
+  editBtn.style.display = 'none';
+  delBtn.style.display = 'none';
+  input.focus();
+  input.select();
+
+  let committed = false;
+  const commit = async () => {
+    if (committed) return;
+    committed = true;
+    const newTitle = input.value.trim() || oldTitle;
+    // Restore the label with the new title.
+    labelEl.textContent = newTitle;
+    input.replaceWith(labelEl);
+    editBtn.style.display = '';
+    delBtn.style.display = '';
+    if (newTitle === oldTitle) return;
+    // Persist: upsert the session with the new title. We need the full session
+    // body — fetch it, patch the title, save back.
+    try {
+      const resp = await fetch('/api/history/' + id, { headers: authHeaders() });
+      if (!resp.ok) return;
+      const session = await resp.json();
+      session.title = newTitle;
+      await fetch('/api/history', {
+        method: 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(session),
+      });
+    } catch (e) { console.error('rename:', e); }
+  };
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); commit(); }
+    else if (e.key === 'Escape') { input.value = oldTitle; committed = true; labelEl.textContent = oldTitle; input.replaceWith(labelEl); editBtn.style.display = ''; delBtn.style.display = ''; }
+  });
+  input.addEventListener('blur', commit);
+}
+
+/// Atomic switch: save current → load target → repaint. This is the only
+/// function that should change currentSessionId after init.
+async function switchToSession(id) {
+  if (id === currentSessionId) return;
+  // 1. Persist the outgoing session so nothing is lost.
+  await saveCurrentSession();
+  // 2. Fetch the target.
   try {
     const resp = await fetch('/api/history/' + id, { headers: authHeaders() });
     if (resp.status === 401) { showLogin(); return; }
     if (!resp.ok) return;
     const session = await resp.json();
+    // 3. Swap state atomically.
     currentSessionId = session.id;
-    messages = session.messages.map(m => ({ role: m.role, content: m.content }));
-    chat.innerHTML = '';
-    messages.forEach(m => {
-      if (m.role === 'user') addBubble('user', m.content);
-      else if (m.role === 'assistant') {
+    isNewSession = false;
+    messages = session.messages || [];
+    // 4. Repaint the chat area from the full message list.
+    renderChatFromMessages();
+    renderSidebar();
+  } catch (e) { console.error('switch session:', e); }
+}
+
+/// Repaint the entire chat area from `messages[]`, reconstructing user text,
+/// assistant markdown, AND tool-call cards with their results. This is what
+/// makes session switching restore the full conversation visually.
+function renderChatFromMessages() {
+  chat.innerHTML = '';
+  for (const m of messages) {
+    if (m.role === 'user') {
+      addBubble('user', contentText(m));
+    } else if (m.role === 'assistant') {
+      const text = contentText(m);
+      if (text) {
         const d = addBubble('assistant', '');
-        d.innerHTML = renderMarkdown(m.content);
+        d.innerHTML = renderMarkdown(text);
       }
-    });
-    scrollDown();
-    loadSessionList();
-  } catch (e) {}
+      // Reconstruct tool-call cards from tool_calls + matching tool results.
+      if (m.tool_calls) {
+        for (const tc of m.tool_calls) {
+          let args = tc.function?.arguments;
+          try { args = JSON.parse(args); } catch (_) {}
+          const tres = addToolCard(tc.function?.name || 'tool', args, false, null);
+          // Find the matching tool-result message for this call.
+          const result = messages.find(x => x.role === 'tool' && x.tool_call_id === tc.id);
+          if (result && tres) {
+            tres.textContent = '✓ ' + contentText(result);
+            tres.className = 'tres ok';
+          }
+        }
+      }
+    }
+    // role === 'tool' messages are rendered inline above (paired with their
+    // caller). Don't render them standalone.
+  }
+  scrollDown();
 }
 
 async function deleteSession(id) {
@@ -250,12 +418,17 @@ async function deleteSession(id) {
     const resp = await fetch('/api/history/' + id, { method: 'DELETE', headers: authHeaders() });
     if (resp.status === 401) { showLogin(); return; }
     if (!resp.ok && resp.status !== 404) {
-      // 404 is tolerable (session already gone / never persisted); other
-      // errors are unexpected — surface them instead of silently swallowing.
       console.error('delete failed:', resp.status, await resp.text());
     }
-    if (id === currentSessionId) newSession();
-    else loadSessionList();
+    if (id === currentSessionId) {
+      // Deleted the active session: start a fresh one without saving (it's
+      // being deleted, not switched away from).
+      currentSessionId = genSessionId();
+      isNewSession = true;
+      messages = [];
+      chat.innerHTML = '';
+    }
+    renderSidebar();
   } catch (e) { console.error('delete error:', e); }
 }
 
@@ -715,6 +888,9 @@ async function streamChat() {
 
   let assistantDiv = null;
   let assistantText = '';
+  // Stack of in-flight tool calls (awaiting their tool_result event), so we
+  // can pair them into messages[] for correct persistence/restore.
+  let pendingToolCalls = [];
   let thinkFilter = new ThinkFilter();
   // Pending render flag for debounced markdown rendering. Must be declared
   // BEFORE the try block (handleEvent, called inside it, references it).
@@ -812,9 +988,36 @@ async function streamChat() {
         assistantText += tail;
         renderAssistant();
       }
+      // Record the assistant text so far (if any) before the tool call. OpenAI
+      // schema allows an assistant message to carry both content and tool_calls,
+      // but we keep them separate for simpler reconstruction on switch.
+      if (assistantText && assistantText.trim()) {
+        messages.push({ role: 'assistant', content: assistantText });
+      }
       assistantDiv = null; assistantText = '';
+      // Track this tool call in messages[] so it persists across switches.
+      const callId = 'tc_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+      pendingToolCalls.push({ id: callId, name: ev.tool, args: ev.arguments });
+      messages.push({
+        role: 'assistant',
+        content: null,
+        tool_calls: [{
+          id: callId,
+          type: 'function',
+          function: { name: ev.tool, arguments: typeof ev.arguments === 'string' ? ev.arguments : JSON.stringify(ev.arguments) },
+        }],
+      });
       addToolCard(ev.tool, ev.arguments, ev.needs_confirmation, ev.confirm_id);
     } else if (ev.type === 'tool_result') {
+      // Record the tool result in messages[], paired with the last tool call.
+      const lastCall = pendingToolCalls.pop();
+      if (lastCall) {
+        messages.push({
+          role: 'tool',
+          content: ev.summary || '',
+          tool_call_id: lastCall.id,
+        });
+      }
       // Append result to the last tool card (simple heuristic).
       const cards = chat.querySelectorAll('.tool-card .tres');
       const last = cards[cards.length - 1];
