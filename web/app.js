@@ -344,7 +344,11 @@ setInterval(async () => {
 // --- Config persistence (stored in ~/.liteclaw/config.json via backend) ---
 function fillCfg(c) {
   document.getElementById('base_url').value = c.base_url || 'http://172.21.0.1:11434/v1';
-  document.getElementById('model').value = 'qwen3:30b-a3b-nothink';
+  // Respect the saved model; fall back to the fast no-think default on first
+  // visit or when the saved model is no longer in the dropdown.
+  const wanted = c.model || 'qwen3:30b-a3b-nothink';
+  const sel = document.getElementById('model');
+  sel.value = [...sel.options].some(o => o.value === wanted) ? wanted : 'qwen3:30b-a3b-nothink';
   document.getElementById('api_key').value = c.api_key || '';
 }
 async function loadCfg() {
@@ -655,8 +659,7 @@ const SYSTEM_PROMPT =
   '\n【参考来源格式】回答结尾必须附上（最多 4 条，只列实际用到的）：\n' +
   '参考来源:\n- <source> | <section>\n' +
   '严禁编造引用：未经 skill_run 检索，绝不允许输出任何页码或"参考来源"字样。\n' +
-  '\n其他需求先用工具收集信息再行动。简洁回答，操作后报告结果。\n' +
-  '/no_think';
+  '\n其他需求先用工具收集信息再行动。简洁回答，操作后报告结果。';
 
 function scrollDown() { chat.scrollTop = chat.scrollHeight; }
 
@@ -820,6 +823,9 @@ async function streamChat() {
     });
   }
 
+  const ttftStart = performance.now();
+  let ttftMs = null;   // time to first response event (covers prefill + thinking + tool round)
+
   try {
     const resp = await fetch('/api/chat', {
       method: 'POST',
@@ -883,6 +889,7 @@ async function streamChat() {
   }
 
   function handleEvent(ev) {
+    if (ttftMs === null) ttftMs = performance.now() - ttftStart;
     if (ev.type === 'text_delta') {
       // Strip <think>...</think> reasoning blocks (qwen3/deepseek-r1).
       const clean = thinkFilter.feed(ev.text);
@@ -955,7 +962,7 @@ async function streamChat() {
       if (ev.tps) {
         const stat = document.createElement('div');
         stat.style.cssText = 'font-size:12px;color:var(--muted);margin-top:4px;align-self:flex-end';
-        stat.textContent = '⚡ ' + ev.tps.toFixed(1) + ' tok/s · ~' + ev.tokens + ' tok · ' + (ev.elapsed_ms / 1000).toFixed(1) + 's';
+        stat.textContent = '⚡ 首token ' + (ttftMs !== null ? (ttftMs / 1000).toFixed(1) + 's' : '--') + ' · ' + ev.tps.toFixed(1) + ' tok/s · ~' + ev.tokens + ' tok · ' + (ev.elapsed_ms / 1000).toFixed(1) + 's';
         chat.appendChild(stat);
         scrollDown();
       }
