@@ -19,3 +19,5 @@ Cargo.lock.bak
 helloworld
 helloworld.c
 manual/
+
+__pycache__/
