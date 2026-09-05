@@ -1,162 +1,3 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>车书助手 🚗</title>
-<style>
-  :root {
-    --bg: #0f1115; --panel: #1a1d24; --panel-2: #22262f; --border: #2d323d;
-    --text: #e6e6e6; --muted: #8b93a7; --accent: #ff7043; --accent-2: #42a5f5;
-    --user: #2a3a4d; --tool: #3a2f1f;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0 0 0 200px; font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg); color: var(--text); height: 100vh;
-    display: flex; flex-direction: column;
-  }
-  header {
-    background: var(--panel); border-bottom: 1px solid var(--border);
-    padding: 10px 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
-  }
-  header h1 { font-size: 16px; margin: 0; color: var(--accent); }
-  header .cfg { display: flex; gap: 8px; align-items: center; flex: 1; flex-wrap: wrap; }
-  header input {
-    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
-    padding: 5px 8px; border-radius: 4px; font-size: 13px;
-  }
-  header input.url { width: 240px; }
-  header input.model { width: 140px; }
-  header input.key { width: 120px; }
-  header button {
-    background: var(--accent); color: #fff; border: none; padding: 6px 12px;
-    border-radius: 4px; cursor: pointer; font-size: 13px;
-  }
-  header button:hover { opacity: 0.85; }
-  #chat {
-    flex: 1; overflow-y: auto; padding: 16px; display: flex;
-    flex-direction: column; gap: 12px;
-  }
-  .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; white-space: pre-wrap; word-break: break-word; line-height: 1.5; }
-  .msg.user { background: var(--user); align-self: flex-end; }
-  .msg.assistant { background: var(--panel-2); align-self: flex-start; border: 1px solid var(--border); }
-  .tool-card {
-    background: var(--tool); border: 1px solid #5a4520; border-radius: 8px;
-    padding: 8px 12px; align-self: flex-start; max-width: 80%; font-size: 13px;
-  }
-  .tool-card .tname { color: var(--accent); font-weight: 600; }
-  .tool-card .targs { color: var(--muted); margin: 4px 0; font-family: monospace; }
-  .tool-card .tres { margin-top: 4px; }
-  .tool-card .tres.ok { color: #66bb6a; }
-  .tool-card .tres.fail { color: #ef5350; }
-  footer {
-    border-top: 1px solid var(--border); padding: 12px 16px;
-    display: flex; gap: 8px; background: var(--panel);
-  }
-  footer textarea {
-    flex: 1; background: var(--panel-2); border: 1px solid var(--border);
-    color: var(--text); border-radius: 8px; padding: 10px; font-size: 14px;
-    resize: none; height: 48px; font-family: inherit;
-  }
-  footer button {
-    background: var(--accent); color: #fff; border: none; padding: 0 20px;
-    border-radius: 8px; cursor: pointer; font-size: 14px;
-  }
-  footer button:disabled { opacity: 0.4; cursor: default; }
-  #suggestions {
-    display: flex; flex-direction: column; gap: 4px; padding: 8px 16px;
-    background: var(--panel); border-top: 1px solid var(--border); flex-shrink: 0;
-  }
-  .sug-row { display: flex; gap: 8px; overflow-x: auto; align-items: center; }
-  #suggestions button {
-    background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
-    border-radius: 16px; padding: 6px 14px; font-size: 13px; cursor: pointer;
-    white-space: nowrap; font-family: inherit;
-  }
-  #suggestions button:hover { border-color: var(--accent); color: var(--accent); }
-  #suggestions .grp { color: var(--muted); font-size: 12px; align-self: center;
-    white-space: nowrap; user-select: none; }
-  .err { color: #ef5350; font-size: 13px; }
-  /* Markdown rendering inside assistant bubbles */
-  .msg.assistant pre {
-    background: #0d1117; border: 1px solid var(--border); border-radius: 6px;
-    padding: 10px 12px; overflow-x: auto; margin: 8px 0; font-size: 13px;
-  }
-  .msg.assistant pre code { background: none; padding: 0; color: #e6e6e6; }
-  .msg.assistant code {
-    background: #0d1117; padding: 1px 5px; border-radius: 3px;
-    font-family: "SF Mono", Menlo, monospace; font-size: 13px; color: #f0883e;
-  }
-  .msg.assistant ul, .msg.assistant ol { margin: 6px 0; padding-left: 22px; }
-  .msg.assistant li { margin: 3px 0; }
-  .msg.assistant h1, .msg.assistant h2, .msg.assistant h3 {
-    margin: 10px 0 6px; line-height: 1.3;
-  }
-  .msg.assistant h1 { font-size: 17px; } .msg.assistant h2 { font-size: 15px; }
-  .msg.assistant h3 { font-size: 14px; }
-  .msg.assistant p { margin: 6px 0; }
-  .msg.assistant strong { color: #fff; }
-  .msg.assistant blockquote {
-    border-left: 3px solid var(--accent); margin: 6px 0; padding-left: 12px;
-    color: var(--muted);
-  }
-</style>
-</head>
-<body>
-
-<!-- Login overlay -->
-<div id="login-overlay" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999">
-  <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:32px;width:300px;text-align:center">
-    <h2 style="color:var(--accent);margin:0 0 20px">🚗 车书助手</h2>
-    <input id="login-user" placeholder="用户名" style="width:100%;margin-bottom:12px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:6px;box-sizing:border-box" />
-    <input id="login-pass" type="password" placeholder="密码" style="width:100%;margin-bottom:12px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:6px;box-sizing:border-box" />
-    <button id="login-btn" style="width:100%;background:var(--accent);color:#fff;border:none;padding:10px;border-radius:6px;cursor:pointer;font-size:14px">登录</button>
-    <div id="login-err" style="color:#ef5350;margin-top:10px;font-size:13px;display:none">用户名或密码错误</div>
-  </div>
-</div>
-
-<!-- Sidebar: conversation history -->
-<div id="sidebar" style="position:fixed;left:0;top:0;bottom:0;width:200px;background:var(--panel);border-right:1px solid var(--border);display:none;flex-direction:column;z-index:100">
-  <button id="new-session" style="margin:10px;background:var(--accent);color:#fff;border:none;padding:8px;border-radius:6px;cursor:pointer;font-size:13px">＋ 新会话</button>
-  <div id="session-list" style="flex:1;overflow-y:auto;padding:0 8px"></div>
-</div>
-
-<header>
-  <h1>🚗 车书助手</h1>
-  <div class="cfg">
-    <input class="url" id="base_url" placeholder="http://localhost:11434/v1" title="OpenAI-compatible base URL" />
-    <select id="model" class="model" title="选择模型" style="background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:4px;font-size:13px">
-      <option value="qwen3:30b-a3b">Qwen3-30B-A3B</option>
-      <option value="openbmb/minicpm5:latest">MiniCPM5</option>
-      <option value="openbmb/minicpm5:q8_0">MiniCPM5-Q8</option>
-    </select>
-    <input class="key" id="api_key" type="password" placeholder="api key (可选)" title="API key" />
-    <label title="勾选后所有工具(写文件/执行命令)自动执行,不弹确认框" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
-      <input type="checkbox" id="auto_mode" checked /> 自动模式
-    </label>
-    <button id="save_cfg">保存</button>
-    <button id="help_btn" title="怎么提问、能问什么：打开 RAG 问题地图" onclick="window.open('/help','_blank')">❓ Help</button>
-  </div>
-</header>
-
-<div id="chat"></div>
-
-<div id="suggestions"></div>
-
-<footer>
-  <textarea id="input" placeholder="说点什么… (Enter 发送, Shift+Enter 换行, 可粘贴/拖拽图片)"></textarea>
-  <button id="img-btn" style="background:var(--panel-2);border:1px solid var(--border);padding:0 12px;font-size:16px">📎</button>
-  <input type="file" id="img-file" accept="image/*" style="display:none" />
-  <button id="send">发送</button>
-</footer>
-<div id="img-preview" style="display:none;padding:4px 16px;border-top:1px solid var(--border)">
-  <img id="preview-img" style="max-height:80px;border-radius:4px" />
-  <span id="img-name" style="color:var(--muted);font-size:12px;margin-left:8px"></span>
-  <span id="img-remove" style="color:#ef5350;cursor:pointer;margin-left:8px;font-size:12px">✕ 移除</span>
-</div>
-
-<script>
 // --- Auth: token management + login ---
 let authToken = null;
 
@@ -503,7 +344,7 @@ setInterval(async () => {
 // --- Config persistence (stored in ~/.liteclaw/config.json via backend) ---
 function fillCfg(c) {
   document.getElementById('base_url').value = c.base_url || 'http://172.21.0.1:11434/v1';
-  document.getElementById('model').value = 'qwen3:30b-a3b';
+  document.getElementById('model').value = 'qwen3:30b-a3b-nothink';
   document.getElementById('api_key').value = c.api_key || '';
 }
 async function loadCfg() {
@@ -814,7 +655,8 @@ const SYSTEM_PROMPT =
   '\n【参考来源格式】回答结尾必须附上（最多 4 条，只列实际用到的）：\n' +
   '参考来源:\n- <source> | <section>\n' +
   '严禁编造引用：未经 skill_run 检索，绝不允许输出任何页码或"参考来源"字样。\n' +
-  '\n其他需求先用工具收集信息再行动。简洁回答，操作后报告结果。';
+  '\n其他需求先用工具收集信息再行动。简洁回答，操作后报告结果。\n' +
+  '/no_think';
 
 function scrollDown() { chat.scrollTop = chat.scrollHeight; }
 
@@ -1157,6 +999,3 @@ input.addEventListener('keydown', (e) => {
     send();
   }
 });
-</script>
-</body>
-</html>

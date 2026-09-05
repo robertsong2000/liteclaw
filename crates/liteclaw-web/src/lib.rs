@@ -67,6 +67,8 @@ pub async fn serve(host: &str, port: u16, claws: Vec<Arc<dyn Claw>>, ctx: Ctx) -
     let app = axum::Router::new()
         .route("/", axum::routing::get(handlers::index))
         .route("/help", axum::routing::get(handlers::help))
+        .route("/style.css", axum::routing::get(handlers::style_css))
+        .route("/app.js", axum::routing::get(handlers::app_js))
         .route("/api/login", axum::routing::post(auth::login))
         .nest("/api", api)
         .with_state(state);

@@ -72,26 +72,42 @@ pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -
         .into_response()
 }
 
-/// GET / — serve the embedded single-page UI.
-pub async fn index() -> Response {
-    let html = include_str!("static/index.html");
-    (
-        StatusCode::OK,
-        [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
-        html,
-    )
-        .into_response()
+/// Serve a page from the mounted `web/` directory (frontend is not embedded
+/// in the binary; backend and frontend are fully separated).
+fn page(disk_path: &str, content_type: &str) -> Response {
+    match std::fs::read_to_string(disk_path) {
+        Ok(body) => (
+            StatusCode::OK,
+            [(header::CONTENT_TYPE, content_type)],
+            body,
+        )
+            .into_response(),
+        Err(_) => (
+            StatusCode::NOT_FOUND,
+            format!("frontend file missing: {disk_path} (serve the repo's web/ directory)"),
+        )
+            .into_response(),
+    }
 }
 
-/// GET /help — embedded RAG question map: what users can ask and how.
+/// GET / — serve the single-page UI.
+pub async fn index() -> Response {
+    page("web/index.html", "text/html; charset=utf-8")
+}
+
+/// GET /help — RAG question map: what users can ask and how.
 pub async fn help() -> Response {
-    let html = include_str!("static/help.html");
-    (
-        StatusCode::OK,
-        [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
-        html,
-    )
-        .into_response()
+    page("web/help.html", "text/html; charset=utf-8")
+}
+
+/// GET /style.css — UI styles.
+pub async fn style_css() -> Response {
+    page("web/style.css", "text/css; charset=utf-8")
+}
+
+/// GET /app.js — UI logic.
+pub async fn app_js() -> Response {
+    page("web/app.js", "application/javascript; charset=utf-8")
 }
 
 /// Path to the persisted config file: `~/.liteclaw/config.json`.
