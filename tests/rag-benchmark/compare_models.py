@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """RAG 模型对比基准：用车书助手的 14 道边界测试题对多个本地模型打分。
 
-模拟前端完整行为：登录 → 携带 SYSTEM_PROMPT(自动从 index.html 提取) →
+模拟前端完整行为：登录 → 携带 SYSTEM_PROMPT(自动从 web/app.js 提取) →
 POST /api/chat → 字节级解析 SSE 事件流（text_delta / tool_start / tool_result）。
 
 自动评分维度：
@@ -29,7 +29,7 @@ import requests
 
 BASE = os.environ.get("LITECLAW_URL", "http://localhost:9999")
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://172.21.0.1:11434/v1")
-MODELS = ["qwen3:8b", "qwen3:30b-a3b"]
+MODELS = ["qwen3:30b-a3b", "qwen3:30b-a3b-nothink"]
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPORT = os.path.join(HERE, "rag_report.json")
 
@@ -57,7 +57,7 @@ PAGE_RE = re.compile(r"[pP]\.?\s*\d+|第\s*\d+\s*页")
 
 def load_system_prompt():
     """从前端 index.html 提取 SYSTEM_PROMPT，保证与线上行为一致。"""
-    path = os.path.join(HERE, "..", "..", "crates", "liteclaw-web", "src", "static", "index.html")
+    path = os.path.join(HERE, "..", "..", "web", "app.js")
     html = open(path).read()
     m = re.search(r"const SYSTEM_PROMPT =\s*((?:\s*'[^']*'\s*\+?)+);", html)
     parts = re.findall(r"'((?:[^'\\]|\\.)*)'", m.group(1))
