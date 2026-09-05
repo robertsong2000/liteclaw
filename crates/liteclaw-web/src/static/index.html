@@ -128,7 +128,8 @@
     <input class="url" id="base_url" placeholder="http://localhost:11434/v1" title="OpenAI-compatible base URL" />
     <select id="model" class="model" title="选择模型" style="background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:4px;font-size:13px">
       <option value="qwen3:30b-a3b">Qwen3-30B-A3B</option>
-      <option value="qwen3:1.7b">Qwen3-1.7B</option>
+      <option value="openbmb/minicpm5:latest">MiniCPM5</option>
+      <option value="openbmb/minicpm5:q8_0">MiniCPM5-Q8</option>
     </select>
     <input class="key" id="api_key" type="password" placeholder="api key (可选)" title="API key" />
     <label title="勾选后所有工具(写文件/执行命令)自动执行,不弹确认框" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
