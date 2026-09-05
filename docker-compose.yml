@@ -11,7 +11,7 @@ services:
     image: liteclaw:latest
     container_name: liteclaw
     ports:
-      - "8080:8080"
+      - "9999:8080"
     volumes:
       # 工作目录:agent 的 read/write/edit/bash 在这里操作
       - ./:/workspace:rw

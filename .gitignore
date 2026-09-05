@@ -18,3 +18,4 @@ Cargo.lock.bak
 # Test artifacts
 helloworld
 helloworld.c
+manual/
