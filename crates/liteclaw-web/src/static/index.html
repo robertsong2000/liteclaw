@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>liteclaw 🦞</title>
+<title>车书助手 🚗</title>
 <style>
   :root {
     --bg: #0f1115; --panel: #1a1d24; --panel-2: #22262f; --border: #2d323d;
@@ -64,6 +64,19 @@
     border-radius: 8px; cursor: pointer; font-size: 14px;
   }
   footer button:disabled { opacity: 0.4; cursor: default; }
+  #suggestions {
+    display: flex; flex-direction: column; gap: 4px; padding: 8px 16px;
+    background: var(--panel); border-top: 1px solid var(--border); flex-shrink: 0;
+  }
+  .sug-row { display: flex; gap: 8px; overflow-x: auto; align-items: center; }
+  #suggestions button {
+    background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 16px; padding: 6px 14px; font-size: 13px; cursor: pointer;
+    white-space: nowrap; font-family: inherit;
+  }
+  #suggestions button:hover { border-color: var(--accent); color: var(--accent); }
+  #suggestions .grp { color: var(--muted); font-size: 12px; align-self: center;
+    white-space: nowrap; user-select: none; }
   .err { color: #ef5350; font-size: 13px; }
   /* Markdown rendering inside assistant bubbles */
   .msg.assistant pre {
@@ -95,7 +108,7 @@
 <!-- Login overlay -->
 <div id="login-overlay" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999">
   <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:32px;width:300px;text-align:center">
-    <h2 style="color:var(--accent);margin:0 0 20px">🦞 liteclaw</h2>
+    <h2 style="color:var(--accent);margin:0 0 20px">🚗 车书助手</h2>
     <input id="login-user" placeholder="用户名" style="width:100%;margin-bottom:12px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:6px;box-sizing:border-box" />
     <input id="login-pass" type="password" placeholder="密码" style="width:100%;margin-bottom:12px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:6px;box-sizing:border-box" />
     <button id="login-btn" style="width:100%;background:var(--accent);color:#fff;border:none;padding:10px;border-radius:6px;cursor:pointer;font-size:14px">登录</button>
@@ -110,23 +123,25 @@
 </div>
 
 <header>
-  <h1>🦞 liteclaw</h1>
+  <h1>🚗 车书助手</h1>
   <div class="cfg">
     <input class="url" id="base_url" placeholder="http://localhost:11434/v1" title="OpenAI-compatible base URL" />
     <select id="model" class="model" title="选择模型" style="background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:4px;font-size:13px">
       <option value="qwen3:30b-a3b">Qwen3-30B-A3B</option>
-      <option value="qwen3:8b">Qwen3-8B</option>
-      <option value="gemma4:e2b">Gemma4-E2B</option>
+      <option value="qwen3:1.7b">Qwen3-1.7B</option>
     </select>
     <input class="key" id="api_key" type="password" placeholder="api key (可选)" title="API key" />
     <label title="勾选后所有工具(写文件/执行命令)自动执行,不弹确认框" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
-      <input type="checkbox" id="auto_mode" /> 自动模式
+      <input type="checkbox" id="auto_mode" checked /> 自动模式
     </label>
     <button id="save_cfg">保存</button>
+    <button id="help_btn" title="怎么提问、能问什么：打开 RAG 问题地图" onclick="window.open('/help','_blank')">❓ Help</button>
   </div>
 </header>
 
 <div id="chat"></div>
+
+<div id="suggestions"></div>
 
 <footer>
   <textarea id="input" placeholder="说点什么… (Enter 发送, Shift+Enter 换行, 可粘贴/拖拽图片)"></textarea>
@@ -487,7 +502,7 @@ setInterval(async () => {
 // --- Config persistence (stored in ~/.liteclaw/config.json via backend) ---
 function fillCfg(c) {
   document.getElementById('base_url').value = c.base_url || 'http://172.21.0.1:11434/v1';
-  document.getElementById('model').value = c.model || 'qwen3:30b-a3b';
+  document.getElementById('model').value = 'qwen3:30b-a3b';
   document.getElementById('api_key').value = c.api_key || '';
 }
 async function loadCfg() {
@@ -676,6 +691,53 @@ const sendBtn = document.getElementById('send');
 let messages = [];
 let busy = false;
 
+// --- Suggested vehicle questions: click a chip to fill the input box ---
+// Two groups, hover a chip to see its expected outcome (pass criteria).
+// 基础 / hit questions: manual HAS the content -> must answer from retrieved
+//   passages only, with page citations.
+// 边界测试 miss questions: the EV manual can NOT have them (engine oil, fuel
+//   parts) -> explicitly saying "not found in the manual" IS the pass
+//   condition; fabricating an answer is a failure. Full checklist lives in
+//   docs/rag-boundary-tests.md.
+const QUESTION_GROUPS = [
+  { label: '基础', items: [
+    { q: '儿童安全座椅怎么安装？', expect: '预期：按 Child safety 章节作答（ISOFIX 锚点位置、安装要点），结尾附页码引用' },
+    { q: '胎压警告灯亮了怎么办？', expect: '预期：按 Tyre pressure loss warning 章节作答（停车检查冷态胎压、复位），附页码' },
+    { q: '充电需要多长时间？', expect: '预期：说明时间随充电功率不同，引用手册数值/表格并附页码，不编造时间' },
+    { q: '冬天续航里程为什么会下降？', expect: '预期：按手册解释低温对续航的影响并给出建议，附页码' },
+    { q: '保养周期是多久？', expect: '预期：手册将具体周期指向单独保养文档，应如实转述并附页码，不编公里数' },
+    { q: '雾灯怎么开？', expect: '预期：按照明章节说明开启操作与前提条件，附页码' },
+  ]},
+  { label: '边界测试', items: [
+    { q: '轮胎的标准胎压是多少？', expect: '预期（转述）：手册无具体数值（p.332 仅为标签说明图），应指向驾驶员车门 Label A，并转述冷态检查、无法冷测加 0.2–0.3 bar、热胎禁止放气，附页码；编造 bar 数 = 失败' },
+    { q: '千斤顶应该支撑在车底什么位置？', expect: '预期（命中）：指出手册规定的支撑点位置及安全警告，附页码' },
+    { q: '车钥匙电池没电了怎么更换？', expect: '预期（命中）：给出更换步骤与电池型号，附页码' },
+    { q: '12伏蓄电池亏电了怎么办？', expect: '预期（命中）：按手册应急启动/充电说明作答，附页码' },
+    { q: '长途出行前应该检查哪些项目？', expect: '预期（命中）：综合多章节给出检查清单，引用多条页码（≤4 条）' },
+    { q: '发动机机油多久换一次？', expect: '预期（拒答）：纯电手册无此内容，应明确说未找到；编造周期或硬凑无关段落 = 失败' },
+    { q: '汽油滤芯多久换一次？', expect: '预期（拒答）：纯电手册无汽油系统，应明确说未找到；硬答 = 失败' },
+    { q: '油箱盖开关在哪里？', expect: '预期（拒答）：纯电车无油箱，应明确说未找到；硬答 = 失败' },
+  ]},
+];
+const sugBox = document.getElementById('suggestions');
+for (const g of QUESTION_GROUPS) {
+  const row = document.createElement('div');
+  row.className = 'sug-row';
+  const tag = document.createElement('span');
+  tag.className = 'grp';
+  tag.textContent = g.label;
+  row.appendChild(tag);
+  for (const q of g.items) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = q.q;
+    b.title = q.expect;
+    b.onclick = () => { input.value = q.q; send(); };
+    row.appendChild(b);
+  }
+  sugBox.appendChild(row);
+}
+
 // --- Image attachment (multimodal) ---
 let pendingImage = null; // { dataUrl: "data:image/png;base64,...", name: "x.png" }
 
@@ -731,7 +793,7 @@ document.body.addEventListener('drop', async (e) => {
 
 // Prepend a system prompt so the model knows its tools.
 const SYSTEM_PROMPT =
-  '你是 liteclaw 助手，一个能执行操作的编程助手。可用工具：\n' +
+  '你是雷诺 R5 E-Tech 的车辆使用问答助手，也能执行常规编程操作。可用工具：\n' +
   '- read(path): 读文件或列目录\n' +
   '- grep(pattern,path): 搜索文件内容\n' +
   '- glob(pattern,path): 按模式匹配文件(如 **/*.rs)\n' +
@@ -742,8 +804,12 @@ const SYSTEM_PROMPT =
   '- bash(command): 执行 shell 命令(编译、运行、git 等)\n' +
   '- skill_list(): 列出所有可用的 skill(能力扩展)\n' +
   '- skill_run(id,args?): 运行某个 skill(scripts 型执行,prompt 型返回内容)\n' +
-  '遇到用户问题时，先用工具收集信息，再行动。简洁回答，操作后报告结果。\n' +
-  '如果用户的需求匹配某个 skill，优先用 skill_run 调用它。';
+  '\n【车辆问答规则】凡是关于车辆的问题(功能、操作、按钮、警告灯、充电、续航、保养、参数等)，' +
+  '必须先调用 skill_run("manual-rag", "<用户问题>") 查询手册知识库，再根据检索到的原文回答。\n' +
+  '回答只能依据检索到的原文，数字和警告措辞要原样引用；检索不到就明确说手册中没有相关内容，不要编造。\n' +
+  '回答结尾必须附上：\n参考来源:\n- <source> | <section>\n（最多 4 条，只列实际用到的；' +
+  '若没有实际引用任何来源，则整个省略参考来源部分，不要输出空模板）\n' +
+  '\n其他需求先用工具收集信息再行动。简洁回答，操作后报告结果。';
 
 function scrollDown() { chat.scrollTop = chat.scrollHeight; }
 

@@ -83,6 +83,17 @@ pub async fn index() -> Response {
         .into_response()
 }
 
+/// GET /help — embedded RAG question map: what users can ask and how.
+pub async fn help() -> Response {
+    let html = include_str!("static/help.html");
+    (
+        StatusCode::OK,
+        [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
+        html,
+    )
+        .into_response()
+}
+
 /// Path to the persisted config file: `~/.liteclaw/config.json`.
 fn config_path() -> std::path::PathBuf {
     let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
