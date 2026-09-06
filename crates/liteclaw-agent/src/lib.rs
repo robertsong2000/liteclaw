@@ -69,6 +69,7 @@ pub async fn run_loop(
         let mut stream = model.chat_stream(&messages, &specs).await?;
         let mut text = String::new();
         let mut tool_calls = Vec::new();
+        let mut usage: Option<liteclaw_model::openai::Usage> = None;
 
         while let Some(event) = stream.next().await {
             match event? {
@@ -83,8 +84,14 @@ pub async fn run_loop(
                     total_output_chars += chunk.chars().count();
                     let _ = tx.send(AgentEvent::text_delta(chunk)).await;
                 }
-                StreamEvent::Done { tool_calls: calls } => {
+                StreamEvent::Done {
+                    tool_calls: calls,
+                    usage: u,
+                } => {
                     tool_calls = calls;
+                    if u.is_some() {
+                        usage = u;
+                    }
                 }
             }
         }
@@ -113,10 +120,14 @@ pub async fn run_loop(
                 (Some(s), Some(e)) => e.duration_since(s).as_millis(),
                 _ => 0,
             };
-            // Token estimate: CJK-heavy text ≈ 1.5 chars/token (not 3, which
-            // is English-only). The <think> content is included since it's
-            // real generated output.
-            let tokens = ((total_output_chars as f64) / 1.5).round() as usize;
+            // Prefer the provider-reported real token count (Ollama returns
+            // one when stream_options.include_usage is honored); fall back to
+            // the chars/1.5 heuristic for endpoints that don't send usage.
+            // The <think> content is included since it's real generated output.
+            let tokens = match usage.map(|u| u.completion_tokens as usize) {
+                Some(n) if n > 0 => n,
+                _ => ((total_output_chars as f64) / 1.5).round() as usize,
+            };
             let tokens = tokens.max(1);
             let tps = if gen_ms > 0 {
                 Some((tokens as f64) * 1000.0 / (gen_ms as f64))

@@ -962,7 +962,7 @@ async function streamChat() {
       if (ev.tps) {
         const stat = document.createElement('div');
         stat.style.cssText = 'font-size:12px;color:var(--muted);margin-top:4px;align-self:flex-end';
-        stat.textContent = '⚡ 首token ' + (ttftMs !== null ? (ttftMs / 1000).toFixed(1) + 's' : '--') + ' · ' + ev.tps.toFixed(1) + ' tok/s · ~' + ev.tokens + ' tok · ' + (ev.elapsed_ms / 1000).toFixed(1) + 's';
+        stat.textContent = '⚡ 首token ' + (ttftMs !== null ? (ttftMs / 1000).toFixed(1) + 's' : '--') + ' · ' + ev.tps.toFixed(1) + ' tok/s · ' + ev.tokens + ' tok · ' + (ev.elapsed_ms / 1000).toFixed(1) + 's';
         chat.appendChild(stat);
         scrollDown();
       }

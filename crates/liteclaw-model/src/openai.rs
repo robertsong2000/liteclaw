@@ -22,7 +22,21 @@ pub enum StreamEvent {
     /// A chunk of assistant text.
     Delta(String),
     /// The model finished. If it ended with tool calls, they're here.
-    Done { tool_calls: Vec<ToolCall> },
+    /// `usage` carries the provider-reported real token counts when the
+    /// endpoint supports `stream_options.include_usage` (Ollama does).
+    Done {
+        tool_calls: Vec<ToolCall>,
+        usage: Option<Usage>,
+    },
+}
+
+/// Real token usage reported by the provider on the final stream chunk.
+#[derive(Debug, Clone, Copy, Deserialize)]
+pub struct Usage {
+    #[serde(default)]
+    pub prompt_tokens: u64,
+    #[serde(default)]
+    pub completion_tokens: u64,
 }
 
 /// A streaming chat completion client.
@@ -53,6 +67,7 @@ impl OpenAiClient {
             "model": self.cfg.model,
             "messages": messages,
             "stream": true,
+            "stream_options": { "include_usage": true },
         });
         if !tools.is_empty() {
             body["tools"] = serde_json::json!(tools);
@@ -89,6 +104,8 @@ struct SseDecoder<S> {
     buf: String,
     /// Accumulated tool calls indexed by their delta `index`.
     tool_calls: Vec<ToolCallAccum>,
+    /// Provider-reported usage from the final chunk, if it sent one.
+    usage: Option<Usage>,
     /// Set once we've emitted a terminal Done (saw [DONE] or upstream closed).
     /// All subsequent polls return None so the consumer's while-let exits even
     /// if the underlying HTTP keep-alive connection stays open.
@@ -111,6 +128,7 @@ where
             inner,
             buf: String::new(),
             tool_calls: Vec::new(),
+            usage: None,
             finished: false,
         }
     }
@@ -136,7 +154,7 @@ where
                 let frame = this.buf.drain(..idx).collect::<String>();
                 // consume the delimiter
                 this.buf.drain(..2);
-                match handle_frame(&frame, &mut this.tool_calls) {
+                match handle_frame(&frame, &mut this.tool_calls, &mut this.usage) {
                     FrameOutcome::Delta(d) => {
                         return std::task::Poll::Ready(Some(Ok(StreamEvent::Delta(d))));
                     }
@@ -155,6 +173,7 @@ where
                             .collect();
                         return std::task::Poll::Ready(Some(Ok(StreamEvent::Done {
                             tool_calls: calls,
+                            usage: this.usage.take(),
                         })));
                     }
                     FrameOutcome::Ignore => continue,
@@ -189,6 +208,7 @@ where
                         .collect();
                     return std::task::Poll::Ready(Some(Ok(StreamEvent::Done {
                         tool_calls: calls,
+                        usage: this.usage.take(),
                     })));
                 }
                 std::task::Poll::Pending => return std::task::Poll::Pending,
@@ -203,7 +223,11 @@ enum FrameOutcome {
     Ignore,
 }
 
-fn handle_frame(frame: &str, tool_calls: &mut Vec<ToolCallAccum>) -> FrameOutcome {
+fn handle_frame(
+    frame: &str,
+    tool_calls: &mut Vec<ToolCallAccum>,
+    usage_out: &mut Option<Usage>,
+) -> FrameOutcome {
     // An SSE frame is one or more `data:` lines.
     let mut data_lines = Vec::new();
     for line in frame.lines() {
@@ -222,6 +246,10 @@ fn handle_frame(frame: &str, tool_calls: &mut Vec<ToolCallAccum>) -> FrameOutcom
     #[derive(Deserialize)]
     struct Chunk {
         choices: Vec<Choice>,
+        /// Final chunk (Ollama with include_usage) carries real token counts
+        /// and an empty `choices` array.
+        #[serde(default)]
+        usage: Option<Usage>,
     }
     #[derive(Deserialize)]
     struct Choice {
@@ -255,6 +283,9 @@ fn handle_frame(frame: &str, tool_calls: &mut Vec<ToolCallAccum>) -> FrameOutcom
         Ok(c) => c,
         Err(_) => return FrameOutcome::Ignore, // skip keepalives / partials
     };
+    if let Some(u) = chunk.usage {
+        *usage_out = Some(u);
+    }
     let Some(choice) = chunk.choices.into_iter().next() else {
         return FrameOutcome::Ignore;
     };
@@ -331,13 +362,34 @@ mod tests {
         let done = events
             .iter()
             .find_map(|e| match e {
-                Ok(StreamEvent::Done { tool_calls }) => Some(tool_calls.clone()),
+                Ok(StreamEvent::Done { tool_calls, .. }) => Some(tool_calls.clone()),
                 _ => None,
             })
             .expect("a Done event");
         assert_eq!(done.len(), 1);
         assert_eq!(done[0].function.name, "read");
         assert_eq!(done[0].function.arguments, r#"{"path":"Cargo.toml"}"#);
+    }
+
+    #[tokio::test]
+    async fn captures_usage_from_final_chunk() {
+        // Ollama with include_usage sends a final chunk with empty choices +
+        // real token counts, then [DONE].
+        let s = SseDecoder::new(fake_stream(vec![
+            "data: {\"choices\":[{\"delta\":{\"content\":\"ok\"}}]}\n\n".to_string(),
+            "data: {\"choices\":[],\"usage\":{\"prompt_tokens\":14,\"completion_tokens\":19}}\n\n".to_string(),
+            "data: [DONE]\n\n".to_string(),
+        ]));
+        let events: Vec<_> = s.collect::<Vec<_>>().await;
+        let done = events
+            .iter()
+            .find_map(|e| match e {
+                Ok(StreamEvent::Done { usage, .. }) => usage,
+                _ => None,
+            })
+            .expect("a Done event with usage");
+        assert_eq!(done.prompt_tokens, 14);
+        assert_eq!(done.completion_tokens, 19);
     }
 
     #[tokio::test]
