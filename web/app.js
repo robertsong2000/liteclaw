@@ -37,6 +37,45 @@ function genSessionId() {
   return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
+// --- Session history: per-browser (localStorage), not shared server state ---
+// Same rationale as the config store: several people use this deployment and
+// chat history should be private to each browser. The server-side
+// ~/.liteclaw/history.json is only used once to seed a first-time browser.
+const LC_HIST_KEY = 'liteclaw_history';
+const LC_HIST_MIGRATED = 'liteclaw_history_migrated';
+const MAX_SESSIONS = 30;
+
+function histStore() {
+  try { return JSON.parse(localStorage.getItem(LC_HIST_KEY)) || []; }
+  catch (e) { return []; }
+}
+function histSave(arr) {
+  // LRU cap + quota guard: on localStorage overflow, shed the oldest half
+  // and retry until it fits.
+  let arr2 = arr.slice(0, MAX_SESSIONS);
+  while (arr2.length) {
+    try {
+      localStorage.setItem(LC_HIST_KEY, JSON.stringify(arr2));
+      return;
+    } catch (e) {
+      arr2 = arr2.slice(Math.ceil(arr2.length / 2));
+    }
+  }
+  try { localStorage.removeItem(LC_HIST_KEY); } catch (e) {}
+}
+function histUpsert(session) {
+  const arr = histStore();
+  const i = arr.findIndex(s => s.id === session.id);
+  if (i >= 0) arr[i] = session; else arr.unshift(session);
+  histSave(arr);
+}
+function histGet(id) {
+  return histStore().find(s => s.id === id) || null;
+}
+function histDelete(id) {
+  histSave(histStore().filter(s => s.id !== id));
+}
+
 /// Derive a human title from the conversation: last user message wins (so the
 /// sidebar reflects where the conversation currently is), fallback to '新会话'.
 function sessionTitle(msgs) {
@@ -84,27 +123,23 @@ async function saveCurrentSession() {
     updated: Date.now(),
   };
   try {
-    await fetch('/api/history', {
-      method: 'POST',
-      headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(session),
-    });
+    histUpsert(session);
   } catch (e) { console.error('save session:', e); }
   renderSidebar();
 }
 
 async function loadSessionList() {
-  try {
-    const resp = await fetch('/api/history', { headers: authHeaders() });
-    if (resp.status === 401) { showLogin(); return; }
-    if (!resp.ok) return [];
-    const d = await resp.json();
-    // Preserve insertion order (as stored on disk). Do NOT sort by `updated`:
-    // re-sorting on every render makes sessions jump around when the user just
-    // clicks between them, which is confusing. New sessions are prepended at
-    // save time, so the most recent naturally lands on top — once.
-    return d.sessions || [];
-  } catch (e) { return []; }
+  // First visit on this browser: import the existing server-side history once,
+  // then diverge — every browser keeps its own private session list.
+  if (!localStorage.getItem(LC_HIST_KEY) && !localStorage.getItem(LC_HIST_MIGRATED)) {
+    try {
+      const resp = await fetch('/api/history', { headers: authHeaders() });
+      if (resp.status === 401) { showLogin(); return []; }
+      if (resp.ok) histSave((await resp.json()).sessions || []);
+    } catch (e) {}
+    try { localStorage.setItem(LC_HIST_MIGRATED, '1'); } catch (e) {}
+  }
+  return histStore();
 }
 
 /// Render the entire sidebar from the backend list + in-memory current session.
@@ -192,18 +227,12 @@ async function renameSession(id, labelEl, editBtn, delBtn) {
     editBtn.style.display = '';
     delBtn.style.display = '';
     if (newTitle === oldTitle) return;
-    // Persist: upsert the session with the new title. We need the full session
-    // body — fetch it, patch the title, save back.
+    // Persist: upsert the session with the new title, in place.
     try {
-      const resp = await fetch('/api/history/' + id, { headers: authHeaders() });
-      if (!resp.ok) return;
-      const session = await resp.json();
+      const session = histGet(id);
+      if (!session) return;
       session.title = newTitle;
-      await fetch('/api/history', {
-        method: 'POST',
-        headers: authHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(session),
-      });
+      histUpsert(session);
     } catch (e) { console.error('rename:', e); }
   };
   input.addEventListener('keydown', (e) => {
@@ -219,20 +248,16 @@ async function switchToSession(id) {
   if (id === currentSessionId) return;
   // 1. Persist the outgoing session so nothing is lost.
   await saveCurrentSession();
-  // 2. Fetch the target.
-  try {
-    const resp = await fetch('/api/history/' + id, { headers: authHeaders() });
-    if (resp.status === 401) { showLogin(); return; }
-    if (!resp.ok) return;
-    const session = await resp.json();
-    // 3. Swap state atomically.
-    currentSessionId = session.id;
-    isNewSession = false;
-    messages = session.messages || [];
-    // 4. Repaint the chat area from the full message list.
-    renderChatFromMessages();
-    renderSidebar();
-  } catch (e) { console.error('switch session:', e); }
+  // 2. Load the target from this browser's store.
+  const session = histGet(id);
+  if (!session) return;
+  // 3. Swap state atomically.
+  currentSessionId = session.id;
+  isNewSession = false;
+  messages = session.messages || [];
+  // 4. Repaint the chat area from the full message list.
+  renderChatFromMessages();
+  renderSidebar();
 }
 
 /// Repaint the entire chat area from `messages[]`, reconstructing user text,
@@ -272,11 +297,7 @@ function renderChatFromMessages() {
 
 async function deleteSession(id) {
   try {
-    const resp = await fetch('/api/history/' + id, { method: 'DELETE', headers: authHeaders() });
-    if (resp.status === 401) { showLogin(); return; }
-    if (!resp.ok && resp.status !== 404) {
-      console.error('delete failed:', resp.status, await resp.text());
-    }
+    histDelete(id);
     if (id === currentSessionId) {
       // Deleted the active session: start a fresh one without saving (it's
       // being deleted, not switched away from).
@@ -341,9 +362,14 @@ setInterval(async () => {
   } catch (e) {}
 }, 300000); // 5 minutes
 
-// --- Config persistence (stored in ~/.liteclaw/config.json via backend) ---
+// --- Config persistence: per-browser (localStorage), not shared server state ---
+// config.json via /api/config only seeds a first-time browser. Each user's
+// saved model/api_key lives in their own browser, so user A saving a model
+// never changes what user B sees. The ollama endpoint is a fixed deployment
+// value, kept out of the UI on purpose.
+const LC_CFG_KEY = 'liteclaw_cfg';
+const DEFAULT_BASE_URL = 'http://172.21.0.1:11434/v1';
 function fillCfg(c) {
-  document.getElementById('base_url').value = c.base_url || 'http://172.21.0.1:11434/v1';
   // Respect the saved model; fall back to the fast no-think default on first
   // visit or when the saved model is no longer in the dropdown.
   const wanted = c.model || 'qwen3:30b-a3b-nothink';
@@ -352,12 +378,17 @@ function fillCfg(c) {
   document.getElementById('api_key').value = c.api_key || '';
 }
 async function loadCfg() {
+  // Per-browser saved config wins; the server config only bootstraps a
+  // first visit on a new browser.
+  try {
+    const raw = localStorage.getItem(LC_CFG_KEY);
+    if (raw) { fillCfg(JSON.parse(raw)); return; }
+  } catch (e) {}
   try {
     const resp = await fetch('/api/config', { headers: authHeaders() });
     if (resp.status === 401) { showLogin(); return; }
     if (resp.ok) {
-      const c = await resp.json();
-      fillCfg(c);
+      fillCfg(await resp.json());
       return;
     }
   } catch (e) {}
@@ -366,22 +397,16 @@ async function loadCfg() {
 }
 async function saveCfg() {
   const c = {
-    base_url: document.getElementById('base_url').value.trim(),
     model: document.getElementById('model').value.trim(),
     api_key: document.getElementById('api_key').value.trim(),
   };
   const btn = document.getElementById('save_cfg');
   const orig = btn.textContent;
   try {
-    const resp = await fetch('/api/config', {
-      method: 'POST',
-      headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(c),
-    });
-    if (resp.status === 401) { showLogin(); return; }
-    btn.textContent = resp.ok ? '✓ 已保存' : '✗ 失败';
+    localStorage.setItem(LC_CFG_KEY, JSON.stringify(c));
+    btn.textContent = '✓ 已保存(本浏览器)';
   } catch (e) {
-    btn.textContent = '✗ 失败';
+    btn.textContent = '✗ 保存失败';
   }
   setTimeout(() => { btn.textContent = orig; }, 1500);
 }
@@ -786,7 +811,7 @@ function trimContext(msgs) {
 
 async function streamChat() {
   const cfg = {
-    base_url: document.getElementById('base_url').value.trim(),
+    base_url: DEFAULT_BASE_URL,
     api_key: document.getElementById('api_key').value.trim(),
     model: document.getElementById('model').value.trim(),
   };
