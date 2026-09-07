@@ -791,10 +791,25 @@ function estimateChars(msgs) {
   return msgs.reduce((n, m) => n + (m.content || '').length + (m.tool_calls ? JSON.stringify(m.tool_calls).length : 0), 0);
 }
 
+// Slim old tool results (full RAG passages, hundreds of tokens each) to a
+// one-line stub. The newest SLIM_KEEP_MESSAGES messages stay verbatim (~2
+// exchanges), so the model always answers from the CURRENT turn's retrieval
+// instead of being diluted by stale passages from earlier turns.
+const SLIM_KEEP_MESSAGES = 8;
+function slimOldToolResults(msgs) {
+  const cut = Math.max(0, msgs.length - SLIM_KEEP_MESSAGES);
+  return msgs.map((m, i) =>
+    (i < cut && m.role === 'tool')
+      ? { ...m, content: '[已检索: manual-rag 结果(略)]' }
+      : m
+  );
+}
+
 function trimContext(msgs) {
-  // msgs excludes system. Keep newest messages until under budget, but never
-  // start mid-pair: skip leading 'tool' messages (they answer a preceding call).
-  let kept = msgs.slice(); // newest at the end
+  // msgs excludes system. Slim stale tool results first, then keep newest
+  // messages until under budget, but never start mid-pair: skip leading 'tool'
+  // messages (they answer a preceding call).
+  let kept = slimOldToolResults(msgs);
   while (estimateChars(kept) > MAX_CONTEXT_CHARS && kept.length > 2) {
     kept.shift();
   }
