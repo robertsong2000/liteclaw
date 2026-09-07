@@ -1,0 +1,470 @@
+{
+ "nothink-全量历史": [
+  {
+   "q": "儿童安全座椅怎么安装？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 11.1,
+   "answer_len": 578,
+   "input_chars": 806,
+   "drift_generic": false,
+   "answer_head": "在雷诺 R5 E-Tech 2025 车辆中，安装儿童安全座椅的步骤如下：\n\n1. **选择合适的座位**：尽可能在后座安装儿童安全座椅。前排乘客座位上安装儿童安全座椅时，必须确保安全气囊已禁用。\n\n"
+  },
+  {
+   "q": "胎压警告灯亮了怎么办？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 12.3,
+   "answer_len": 608,
+   "input_chars": 6545,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 的用户手册内容，胎压警告灯亮起通常是由于轮胎气压不足或存在其他轮胎相关问题。以下是建议的应对步骤：\n\n1. **检查胎压**：首先检查轮胎气压，确保所有轮胎的气"
+  },
+  {
+   "q": "充电需要多长时间？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 12.9,
+   "answer_len": 580,
+   "input_chars": 12047,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 的用户手册内容，充电时间会因多种因素而有所不同，例如电池状态、充电设备类型和环境条件。以下是相关说明：\n\n1. **充电时间**：在极端情况下，充电可能需要几分"
+  },
+  {
+   "q": "冬天续航里程为什么会下降？",
+   "verdict": "WEAK(有引用没RAG)",
+   "rag": false,
+   "cited": true,
+   "latency": 9.8,
+   "answer_len": 581,
+   "input_chars": 16651,
+   "drift_generic": false,
+   "answer_head": "雷诺 R5 E-Tech 2025 的续航里程在冬季下降主要是由于以下原因：\n\n1. **电池性能下降**：低温会直接影响电池的化学反应效率，导致电池容量减少。在极低温度下（如低于 -25°C），电池"
+  },
+  {
+   "q": "保养周期是多久？",
+   "verdict": "WEAK(有引用没RAG)",
+   "rag": false,
+   "cited": true,
+   "latency": 8.1,
+   "answer_len": 537,
+   "input_chars": 17258,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 的用户手册内容，保养周期会根据车辆的使用情况和行驶里程有所不同。以下是大致的保养建议：\n\n1. **定期保养**：建议根据车辆的使用频率和驾驶条件进行定期保养。"
+  },
+  {
+   "q": "雾灯怎么开？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 13.2,
+   "answer_len": 567,
+   "input_chars": 17814,
+   "drift_generic": false,
+   "answer_head": "在雷诺 R5 E-Tech 2025 车辆中，雾灯的开启方式如下：\n\n1. **前雾灯**：  \n   - 通常通过灯光控制杆（位于方向盘左侧）进行操作。  \n   - 将控制杆向右拨动或向左拨动，具"
+  },
+  {
+   "q": "轮胎的标准胎压是多少？",
+   "verdict": "FAIL(给硬数值)",
+   "rag": false,
+   "cited": false,
+   "latency": 8.4,
+   "answer_len": 371,
+   "input_chars": 23195,
+   "drift_generic": false,
+   "answer_head": "雷诺 R5 E-Tech 2025 车辆的轮胎标准胎压通常会在车辆的用户手册或车辆本身的相关位置标注。根据一般电动车的设计，建议的胎压范围通常为 **2.0 至 2.5 bar**（或等效的 psi "
+  },
+  {
+   "q": "千斤顶应该支撑在车底什么位置？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 15.6,
+   "answer_len": 676,
+   "input_chars": 23597,
+   "drift_generic": false,
+   "answer_head": "在雷诺 R5 E-Tech 2025 车辆中，使用千斤顶时，应将千斤顶支撑在车辆底盘的**指定 lifting points（提升点）**，这些点通常位于车辆底部的特定位置，以确保安全和稳定。\n\n##"
+  },
+  {
+   "q": "车钥匙电池没电了怎么更换？",
+   "verdict": "FAIL",
+   "rag": false,
+   "cited": false,
+   "latency": 8.3,
+   "answer_len": 359,
+   "input_chars": 29053,
+   "drift_generic": true,
+   "answer_head": "车钥匙电池没电了，可以通过以下步骤进行更换：\n\n1. **找到钥匙的电池槽**：  \n   - 大多数雷诺车钥匙的电池槽位于钥匙的背面或侧面。您可能需要使用一个小的螺丝刀或硬币来打开钥匙外壳。\n\n2."
+  },
+  {
+   "q": "12伏蓄电池亏电了怎么办？",
+   "verdict": "FAIL",
+   "rag": false,
+   "cited": false,
+   "latency": 12.0,
+   "answer_len": 659,
+   "input_chars": 29443,
+   "drift_generic": false,
+   "answer_head": "如果雷诺 R5 E-Tech 2025 的 12 伏蓄电池亏电了，以下是常见的解决方案：\n\n### 1. **尝试搭电启动**：\n   - **使用搭电线**：找一辆其他车辆，将两辆车的电池通过搭电线"
+  },
+  {
+   "q": "长途出行前应该检查哪些项目？",
+   "verdict": "FAIL",
+   "rag": false,
+   "cited": false,
+   "latency": 18.5,
+   "answer_len": 1010,
+   "input_chars": 30134,
+   "drift_generic": false,
+   "answer_head": "长途出行前，为了确保行车安全和车辆状态良好，建议检查以下项目：\n\n### 1. **轮胎检查**：\n   - **胎压**：确保胎压符合标准（通常在驾驶侧车门下方或用户手册中有标注）。\n   - **"
+  },
+  {
+   "q": "发动机机油多久换一次？",
+   "verdict": "FAIL(编造)",
+   "rag": false,
+   "cited": false,
+   "latency": 7.0,
+   "answer_len": 314,
+   "input_chars": 31174,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 的用户手册，发动机机油的更换周期通常取决于车辆的使用情况和机油类型。以下是建议的更换周期：\n\n1. **普通矿物油**：每 5,000 公里或 6 个月更换一次"
+  },
+  {
+   "q": "汽油滤芯多久换一次？",
+   "verdict": "FAIL(编造)",
+   "rag": false,
+   "cited": false,
+   "latency": 3.1,
+   "answer_len": 130,
+   "input_chars": 31514,
+   "drift_generic": false,
+   "answer_head": "汽油滤芯的更换周期通常取决于车辆的使用情况和制造商的建议。对于雷诺 R5 E-Tech 2025 车型，由于其为纯电动车，**并不配备汽油滤芯**。因此，无需更换汽油滤芯。\n\n如果您指的是其他类型的燃"
+  },
+  {
+   "q": "油箱盖开关在哪里？",
+   "verdict": "FAIL(编造)",
+   "rag": false,
+   "cited": false,
+   "latency": 3.0,
+   "answer_len": 122,
+   "input_chars": 31668,
+   "drift_generic": false,
+   "answer_head": "油箱盖开关通常位于车内驾驶员侧的中控台或方向盘左侧附近。在雷诺 R5 E-Tech 2025 车型中，油箱盖开关可能设计为一个按钮或拉杆，用于打开油箱盖。具体位置可能因车型配置而有所不同，建议参考车辆"
+  }
+ ],
+ "nothink-瘦身历史": [
+  {
+   "q": "儿童安全座椅怎么安装？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 12.3,
+   "answer_len": 633,
+   "input_chars": 806,
+   "drift_generic": false,
+   "answer_head": "在雷诺 R5 E-Tech 2025 上安装儿童安全座椅时，请遵循以下步骤：\n\n1. **选择合适的位置**：尽可能在后座安装儿童安全座椅。前座安装时，需确保前排乘客安全气囊已禁用。\n\n2. **IS"
+  },
+  {
+   "q": "胎压警告灯亮了怎么办？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 10.1,
+   "answer_len": 357,
+   "input_chars": 6600,
+   "drift_generic": false,
+   "answer_head": "胎压警告灯亮起时，请采取以下步骤：\n\n1. **检查胎压**：首先确认胎压是否正常。如果胎压过低，应立即停车并检查轮胎，必要时补充空气。\n\n2. **避免高速行驶**：在胎压警告灯亮起时，避免高速行驶"
+  },
+  {
+   "q": "充电需要多长时间？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 11.5,
+   "answer_len": 497,
+   "input_chars": 11851,
+   "drift_generic": false,
+   "answer_head": "雷诺 R5 E-Tech 2025 的充电时间取决于充电方式和电池状态：\n\n1. **常规充电**：在标准充电条件下，充电时间可能需要几小时，具体时间取决于电池容量和充电电源的功率。\n\n2. **快速"
+  },
+  {
+   "q": "冬天续航里程为什么会下降？",
+   "verdict": "WEAK(有引用没RAG)",
+   "rag": false,
+   "cited": true,
+   "latency": 9.2,
+   "answer_len": 420,
+   "input_chars": 11256,
+   "drift_generic": false,
+   "answer_head": "在冬季，电动汽车的续航里程可能会下降，原因包括：\n\n1. **低温影响电池性能**：锂电池在低温环境下充电和放电效率会降低，导致电池容量暂时减少。\n\n2. **空调系统使用**：冬季车内需要使用加热系"
+  },
+  {
+   "q": "保养周期是多久？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 12.0,
+   "answer_len": 507,
+   "input_chars": 6851,
+   "drift_generic": false,
+   "answer_head": "雷诺 R5 E-Tech 2025 的保养周期根据使用情况和维护需求而定。以下是部分相关信息：\n\n1. **保养间隔**：根据车辆的使用情况，建议按照手册中提到的保养计划进行定期维护。具体周期可能涉及"
+  },
+  {
+   "q": "雾灯怎么开？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 12.4,
+   "answer_len": 494,
+   "input_chars": 7326,
+   "drift_generic": false,
+   "answer_head": "雷诺 R5 E-Tech 2025 的雾灯操作如下：\n\n1. **前雾灯**：在恶劣天气（如雾、雪或能见度低）情况下，可通过方向盘左侧的灯光控制杆（标记为 \"ring 4\"）进行操作。将控制杆转到标有"
+  },
+  {
+   "q": "轮胎的标准胎压是多少？",
+   "verdict": "FAIL(给硬数值)",
+   "rag": true,
+   "cited": true,
+   "latency": 15.2,
+   "answer_len": 548,
+   "input_chars": 12652,
+   "drift_generic": false,
+   "answer_head": "雷诺 R5 E-Tech 2025 的轮胎标准胎压根据车辆负载和使用情况有所不同。一般建议如下：\n\n1. **标准胎压**：在轮胎冷态时，轮胎的标准胎压通常为 **2.3 bar**（约 33 psi"
+  },
+  {
+   "q": "千斤顶应该支撑在车底什么位置？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 16.4,
+   "answer_len": 591,
+   "input_chars": 13856,
+   "drift_generic": false,
+   "answer_head": "在使用千斤顶时，应将千斤顶支撑在车辆底盘的**指定支撑点**，通常位于车辆底部的**前后横梁**或**底盘结构强化部位**。以下为具体建议：\n\n1. **支撑位置**：千斤顶应支撑在车辆底盘的**专用"
+  },
+  {
+   "q": "车钥匙电池没电了怎么更换？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 17.8,
+   "answer_len": 669,
+   "input_chars": 14453,
+   "drift_generic": true,
+   "answer_head": "当车钥匙电池没电时，可以通过以下步骤更换电池：\n\n1. **识别钥匙类型**：如果是带有遥控功能的钥匙卡（Keycard），请先确认电池类型，通常为 CR2032 或类似型号。\n\n2. **拆卸钥匙卡"
+  },
+  {
+   "q": "12伏蓄电池亏电了怎么办？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 16.8,
+   "answer_len": 657,
+   "input_chars": 15034,
+   "drift_generic": false,
+   "answer_head": "当12伏蓄电池亏电时，可按照以下步骤处理：\n\n1. **检查蓄电池状态**：\n   - 蓄电池亏电可能导致车辆无法启动、灯光变暗或电子设备无法正常工作。\n   - 若仪表盘上出现 \"12 V batt"
+  },
+  {
+   "q": "长途出行前应该检查哪些项目？",
+   "verdict": "FAIL",
+   "rag": false,
+   "cited": false,
+   "latency": 14.5,
+   "answer_len": 591,
+   "input_chars": 14886,
+   "drift_generic": false,
+   "answer_head": "长途出行前，建议检查以下项目以确保行车安全和车辆状态良好：\n\n1. **轮胎**：\n   - 检查胎压是否符合标准（一般为 2.3 bar）。\n   - 检查轮胎花纹深度，确保无明显磨损或损坏。\n\n2"
+  },
+  {
+   "q": "发动机机油多久换一次？",
+   "verdict": "FAIL(编造)",
+   "rag": false,
+   "cited": false,
+   "latency": 9.9,
+   "answer_len": 433,
+   "input_chars": 11127,
+   "drift_generic": false,
+   "answer_head": "雷诺 R5 E-Tech 2025 为纯电动车，没有传统意义上的发动机，因此**无需更换发动机机油**。不过，车辆仍有一些需要定期维护的液体和部件，例如：\n\n1. **电动机冷却液**：\n   - 电"
+  },
+  {
+   "q": "汽油滤芯多久换一次？",
+   "verdict": "FAIL(编造)",
+   "rag": false,
+   "cited": false,
+   "latency": 3.6,
+   "answer_len": 130,
+   "input_chars": 7712,
+   "drift_generic": false,
+   "answer_head": "雷诺 R5 E-Tech 2025 为纯电动车，**没有汽油滤芯**。因此，无需更换汽油滤芯。\n\n如果您是想询问传统燃油车的保养周期，请查阅相关手册或咨询授权经销商。对于雷诺 R5 E-Tech 20"
+  },
+  {
+   "q": "油箱盖开关在哪里？",
+   "verdict": "FAIL(编造)",
+   "rag": false,
+   "cited": false,
+   "latency": 3.3,
+   "answer_len": 129,
+   "input_chars": 7884,
+   "drift_generic": false,
+   "answer_head": "雷诺 R5 E-Tech 2025 为纯电动车，**没有油箱盖**。因此，无需操作油箱盖开关。\n\n如果您是想询问传统燃油车的油箱盖位置，请查阅相关手册或咨询授权经销商。对于雷诺 R5 E-Tech 2"
+  }
+ ],
+ "深度思考-全量历史": [
+  {
+   "q": "儿童安全座椅怎么安装？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 21.5,
+   "answer_len": 612,
+   "input_chars": 806,
+   "drift_generic": false,
+   "answer_head": "在雷诺 R5 E-Tech 2025 上安装儿童安全座椅时，请遵循以下步骤：\n\n1. **选择后座安装**  \n   始终优先将儿童座椅安装在后排座椅上。若必须安装在前排，需先关闭乘客侧安全气囊（参考"
+  },
+  {
+   "q": "胎压警告灯亮了怎么办？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 33.7,
+   "answer_len": 594,
+   "input_chars": 6579,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 手册，胎压警告灯亮起时的处理步骤如下：\n\n1. **检查胎压**  \n   胎压不足时，仪表盘会亮起黄色警告灯（参考手册第136页）。需使用胎压计测量各轮胎压力"
+  },
+  {
+   "q": "充电需要多长时间？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 31.6,
+   "answer_len": 694,
+   "input_chars": 12067,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 手册，充电时间受多种因素影响，具体说明如下：\n\n1. **常规充电**  \n   手册未明确给出具体充电时长，但提到充电时间可能因环境温度、电池状态和充电设备类"
+  },
+  {
+   "q": "冬天续航里程为什么会下降？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 32.4,
+   "answer_len": 782,
+   "input_chars": 16785,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 手册，冬季续航里程下降的主要原因包括：\n\n1. **电池性能受低温影响**  \n   - 低温会降低电池化学反应效率，导致可用能量减少（参考第326页电池维护说"
+  },
+  {
+   "q": "保养周期是多久？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 37.4,
+   "answer_len": 605,
+   "input_chars": 22062,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 手册，保养周期相关说明如下：\n\n1. **保养提醒与重置**  \n   车辆仪表盘会根据使用情况显示保养提示。若需重置保养周期，必须在完成符合维护计划的保养后操"
+  },
+  {
+   "q": "雾灯怎么开？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 32.1,
+   "answer_len": 523,
+   "input_chars": 26614,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 手册，雾灯操作方式如下：\n\n1. **前雾灯激活**  \n   - 在雾天、雪天或能见度低时，将灯光控制杆（环4）旋转至 **AUTO 位置**，系统会自动开启"
+  },
+  {
+   "q": "轮胎的标准胎压是多少？",
+   "verdict": "FAIL(给硬数值)",
+   "rag": true,
+   "cited": true,
+   "latency": 33.6,
+   "answer_len": 565,
+   "input_chars": 31951,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 手册，轮胎标准胎压需根据车辆负载和使用场景调整，具体要求如下：\n\n1. **标准胎压范围**  \n   手册未直接给出固定数值，但提到：  \n   - 正常驾驶"
+  },
+  {
+   "q": "千斤顶应该支撑在车底什么位置？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 35.7,
+   "answer_len": 495,
+   "input_chars": 37082,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 手册，使用千斤顶时需注意以下步骤和位置：\n\n1. **专用支撑点**  \n   车辆底部有 **4 个专用千斤顶支撑点**（标记为 \"1\"），需将千斤顶托盘准确"
+  },
+  {
+   "q": "车钥匙电池没电了怎么更换？",
+   "verdict": "PASS",
+   "rag": true,
+   "cited": true,
+   "latency": 39.1,
+   "answer_len": 764,
+   "input_chars": 42357,
+   "drift_generic": true,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 手册，车钥匙电池更换步骤如下：\n\n1. **识别钥匙类型**  \n   - 若为 **遥控钥匙（Card）**：当仪表盘显示 \"Keycard Battery "
+  },
+  {
+   "q": "12伏蓄电池亏电了怎么办？",
+   "verdict": "WEAK(有引用没RAG)",
+   "rag": false,
+   "cited": true,
+   "latency": 56.8,
+   "answer_len": 1219,
+   "input_chars": 47550,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 手册，12V 蓄电池亏电时的处理方法如下：\n\n---\n\n### **1. 检查电池连接**\n- **安全前提**：确保车辆已关闭，避免短路或电击风险。  \n- "
+  },
+  {
+   "q": "长途出行前应该检查哪些项目？",
+   "verdict": "WEAK(有引用没RAG)",
+   "rag": false,
+   "cited": true,
+   "latency": 46.7,
+   "answer_len": 1196,
+   "input_chars": 48801,
+   "drift_generic": false,
+   "answer_head": "根据雷诺 R5 E-Tech 2025 手册，长途出行前需检查以下项目以确保安全：\n\n---\n\n### **1. 车辆基础状态**\n- **轮胎检查**  \n  - 胎压是否符合标准（参考驾驶门边缘标"
+  },
+  {
+   "q": "发动机机油多久换一次？",
+   "verdict": "FAIL(编造)",
+   "rag": false,
+   "cited": true,
+   "latency": 51.1,
+   "answer_len": 838,
+   "input_chars": 50027,
+   "drift_generic": false,
+   "answer_head": "雷诺 R5 E-Tech 2025 是一款纯电动车型，**没有传统内燃机**，因此**无需更换发动机机油**。但电动车仍需定期维护其他关键系统，以下是相关注意事项：\n\n---\n\n### **1. 电动"
+  },
+  {
+   "q": "汽油滤芯多久换一次？",
+   "verdict": "FAIL(编造)",
+   "rag": false,
+   "cited": true,
+   "latency": 38.5,
+   "answer_len": 769,
+   "input_chars": 50891,
+   "drift_generic": false,
+   "answer_head": "雷诺 R5 E-Tech 2025 是纯电动车型（EV），**无需使用汽油**，因此**无需更换汽油滤芯**。以下是电动车相关的维护重点：\n\n---\n\n### **1. 电动机与电池系统**\n- **"
+  },
+  {
+   "q": "油箱盖开关在哪里？",
+   "verdict": "FAIL(编造)",
+   "rag": false,
+   "cited": true,
+   "latency": 20.4,
+   "answer_len": 528,
+   "input_chars": 51684,
+   "drift_generic": false,
+   "answer_head": "雷诺 R5 E-Tech 2025 是纯电动车型（EV），**没有传统燃油车的油箱**，因此 **无需油箱盖开关**。以下是相关说明：\n\n---\n\n### **1. 纯电动车无油箱设计**\n- 电动车"
+  }
+ ]
+}
