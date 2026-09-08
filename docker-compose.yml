@@ -17,8 +17,8 @@ services:
       - ./:/workspace:rw
       # 配置文件:宿主机 ~/.liteclaw 映射进容器,配置持久化
       - ${HOME}/.liteclaw:/root/.liteclaw:rw
-      # Skill 池:宿主机 ~/.agents/skills 只读映射(只看不改)
-      - ${HOME}/.agents/skills:/root/.agents/skills:ro
+      # Skill 池:直接挂载仓库内 skills/ 目录(仓库为唯一源,随 git 版本管理)
+      - ./skills:/root/.agents/skills:ro
     # host.docker.internal: 让容器内用这个域名访问宿主机服务
     # (如宿主机上的 Ollama / LM Studio)。Linux 需要 extra_hosts 显式映射。
     extra_hosts:
