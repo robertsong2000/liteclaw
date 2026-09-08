@@ -12,6 +12,7 @@
 | `REPORT.md` | 单轮结论报告（qwen3:8b vs qwen3:30b-a3b，含人工复核说明） |
 | `multiturn_chained.py` | 多轮链式测试：14 题在同一对话连续问，历史含完整 RAG 原文真实累积，专测"多轮后漂移" |
 | `rag_multiturn_report.json` | 多轮测试原始数据（nothink 全量/瘦身 × 深度思考 三组对照） |
+| `rag.py` | 线上 `~/.agents/skills/manual-rag/scripts/rag.py` 的留档快照（2026-09-08 版，含中英领域词表 ZH_GLOSSARY 检索增强补丁）。**以线上文件为准**，改线上后记得重新复制留档 |
 
 ## 多轮漂移结论（2026-09-07，详见 rag_multiturn_report.json）
 
