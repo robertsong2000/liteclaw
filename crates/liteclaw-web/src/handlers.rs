@@ -7,8 +7,9 @@ use axum::http::{header, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use futures::StreamExt;
-use liteclaw_agent::{default_tools, extra_tools, into_stream, skill_tools};
-use liteclaw_model::{Message, ModelConfig};
+use liteclaw_agent::{default_tools, extra_tools, into_stream, skill_tools, Tool};
+use liteclaw_core::Ctx;
+use liteclaw_model::{Message, ModelConfig, Role};
 
 /// Request body for POST /api/chat.
 #[derive(serde::Deserialize)]
@@ -19,6 +20,101 @@ pub struct ChatRequest {
     /// waiting for human confirmation.
     #[serde(default)]
     pub auto_mode: bool,
+}
+
+/// AUTO-RAG (vehicle-assistant deployment): run the manual-rag skill
+/// server-side for every turn and compact the LLM payload, so grounding never
+/// depends on the model choosing to retrieve. Disable with LITECLAW_AUTO_RAG=0.
+const AUTO_RAG_SKILL: &str = "manual-rag";
+/// Newest text-only messages kept verbatim in the compacted payload.
+const AUTO_RAG_KEEP: usize = 8;
+/// Cap on older assistant answers kept in the compacted payload.
+const ASSISTANT_TEXT_CAP: usize = 400;
+
+/// Extract plain text from a message content (string or multimodal parts).
+fn message_text(m: &Message) -> String {
+    match &m.content {
+        Some(serde_json::Value::String(s)) => s.clone(),
+        Some(serde_json::Value::Array(parts)) => parts
+            .iter()
+            .find_map(|p| p.get("text").and_then(|t| t.as_str()).map(String::from))
+            .unwrap_or_default(),
+        _ => String::new(),
+    }
+}
+
+/// Compact the LLM payload: system prompt + last `AUTO_RAG_KEEP` text-only
+/// entries. Tool messages and intermediate tool-call rounds are dropped and
+/// long assistant answers truncated — the passages the model needs are
+/// injected fresh for the current turn, so stale ones in history only dilute
+/// attention (measured drift trigger: >10K chars of accumulated context).
+fn compact_history(messages: Vec<Message>) -> Vec<Message> {
+    let mut sys = None;
+    let mut rest: Vec<Message> = Vec::new();
+    for m in messages {
+        match m.role {
+            Role::System if sys.is_none() => sys = Some(m),
+            Role::Tool => continue,
+            Role::Assistant if m.tool_calls.is_some() => continue,
+            Role::Assistant => {
+                let mut m = m;
+                let text = message_text(&m);
+                if text.chars().count() > ASSISTANT_TEXT_CAP {
+                    let head: String = text.chars().take(ASSISTANT_TEXT_CAP).collect();
+                    m.content = Some(serde_json::Value::String(format!("{head}…")));
+                }
+                rest.push(m);
+            }
+            _ => rest.push(m),
+        }
+    }
+    let start = rest.len().saturating_sub(AUTO_RAG_KEEP);
+    let mut out = Vec::with_capacity(rest.len() - start + 1);
+    if let Some(sys) = sys {
+        out.push(sys);
+    }
+    out.extend(rest.split_off(start));
+    out
+}
+
+/// Run the RAG skill for the newest user question and insert the retrieved
+/// passages directly before that question, so the model reads fresh manual
+/// content every turn without needing to initiate retrieval itself.
+async fn inject_rag(messages: &mut Vec<Message>, skill_tool: &Tool, ctx: &Ctx) {
+    let Some(question) = messages
+        .iter()
+        .rev()
+        .find(|m| m.role == Role::User)
+        .map(|m| message_text(m))
+    else {
+        return;
+    };
+    if question.trim().is_empty() {
+        return;
+    }
+    let args = serde_json::json!({ "id": AUTO_RAG_SKILL, "args": question });
+    let outcome = skill_tool.execute(&args, ctx).await;
+    if !outcome.ok || outcome.summary.trim().is_empty() {
+        return;
+    }
+    let grounding = format!(
+        "【本轮手册检索结果——已由系统代为查询,无需再调 skill_run】\n{}\n\
+         以上原文若已覆盖问题,直接作答即可;若未覆盖,可用不同关键词再检索一次;\
+         检索不到的内容明确说手册中没有,不要凭记忆作答。",
+        outcome.summary
+    );
+    let grounding_msg = Message {
+        role: Role::User,
+        content: Some(serde_json::Value::String(grounding)),
+        tool_calls: None,
+        tool_call_id: None,
+    };
+    // Insert right before the trailing user question.
+    let user = messages.pop();
+    messages.push(grounding_msg);
+    if let Some(u) = user {
+        messages.push(u);
+    }
 }
 
 /// POST /api/chat — start an agent turn and stream events back as SSE.
@@ -49,7 +145,17 @@ pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -
 
     // Inject AGENTS.md into the system prompt: read from cwd, prepend to the
     // first system message so the model knows project conventions.
-    let messages = inject_agents_md(req.messages, &ctx.cwd);
+    let mut messages = inject_agents_md(req.messages, &ctx.cwd);
+
+    // AUTO-RAG: retrieve fresh manual passages server-side and compact the
+    // payload, so long conversations never dilute grounding (see inject_rag).
+    let auto_rag = std::env::var("LITECLAW_AUTO_RAG").map(|v| v != "0").unwrap_or(true);
+    if auto_rag {
+        if let Some(t) = tools.iter().find(|t| t.name == "skill_run") {
+            inject_rag(&mut messages, t, &ctx).await;
+            messages = compact_history(messages);
+        }
+    }
 
     let (rx, _handle) = into_stream(model, messages, tools, ctx, confirm, 8);
 
