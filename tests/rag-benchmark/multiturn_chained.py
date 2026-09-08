@@ -92,7 +92,12 @@ def main():
     token = s.post(f"{BASE}/api/login", json={"username":"renault","password":"renault123"}, timeout=15).json()["token"]
     print("登录 OK", flush=True)
     report = {}
+    only = None
+    if "--only" in sys.argv:
+        only = sys.argv[sys.argv.index("--only") + 1]
     for label, model, use_slim in RUNS:
+        if only and only not in label:
+            continue
         print(f"\n===== {label} =====", flush=True)
         msgs = [{"role":"system","content":sp}]
         items = []

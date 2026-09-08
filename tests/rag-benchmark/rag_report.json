@@ -393,53 +393,47 @@
  ],
  "qwen3:30b-a3b-nothink": [
   {
-   "latency_s": 11.2,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
+   "latency_s": 11.3,
+   "tool_calls": [],
+   "rag_called": false,
    "cited": true,
-   "answer": "在雷诺 R5 E-Tech 2025 上安装儿童安全座椅时，请遵循以下步骤：\n\n1. **选择合适的座位**：尽可能将儿童安全座椅安装在后座。前排乘客座椅上安装儿童安全座椅时，必须确保安全气囊已禁用。\n\n2. **使用 ISOFIX 系统**：前排和后排座椅均配备了一个通用的 ISOFIX 固定点，可用于安装前向儿童安全座椅。前排座椅的固定点位于乘客座椅靠背上，后排座椅的固定点位于座椅靠背上。\n\n3. **调整座椅位置**：在安装儿童安全座椅之前，确保座椅靠背调整到合适的位置，以确保儿童安全座椅可以牢固地固定。\n\n4. **检查安全带或安全带**：安装完成后，始终确保儿童安全带或安全带已被正确固定和调整。如需，可相应调整座椅位置。\n\n5. **避免错误安装**：当大靠背折叠到其他座椅上时，禁止在相邻的可用座椅上安装儿童安全座椅。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.108-108\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.102-103\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.91-97",
+   "answer": "根据手册内容，安装儿童安全座椅需要遵循以下步骤和注意事项：\n\n1. 雷诺5 E-Tech 的前排和后排座椅均配备了用于安装通用向前型儿童安全座椅的ISOFIX固定点。前排的固定点位于乘客座椅靠背上，后排的固定点位于长座椅靠背上。\n\n2. 安装儿童安全座椅时，必须确保座椅正确固定，并且安全带或安全带束缚带调整正确。如果有必要，应相应调整座椅的位置。\n\n3. 尽可能将儿童安全座椅安装在后排座椅上。\n\n4. 在安装ISOFIX儿童安全座椅时，如果需要在后排左座安装，应手动解开中央安全带，然后再扣上锁扣。\n\n5. 在安装儿童安全座椅之前，必须检查安全气囊的状态。如在前排乘客座位上安装向后型儿童安全座椅，必须确认安全气囊已被关闭。\n\n6. 使用ISOFIX系统安装儿童安全座椅时，应确保其安装符合车辆制造商的授权要求。请咨询儿童安全座椅制造商的列表，以确认该座椅适用于您的车辆。\n\n7. 如果使用安全带安装儿童安全座椅，需确保座椅安装牢固，不会松动或影响安全带的正常作用。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.108-108\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.102-103\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.91-97",
    "error": null,
    "stream_broken": null,
    "kind": "hit",
    "question": "儿童安全座椅怎么安装？",
-   "verdict": "PASS"
+   "verdict": "WEAK(有引用没RAG)"
   },
   {
-   "latency_s": 7.0,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
+   "latency_s": 4.7,
+   "tool_calls": [],
+   "rag_called": false,
    "cited": true,
-   "answer": "胎压警告灯亮起时，表示车辆的轮胎气压存在问题，可能需要检查轮胎气压是否过低或过高。根据手册建议，您应该在交通条件允许的情况下尽快停车，并检查轮胎状况。如果发现问题，应及时补充或调整胎压。如果无法自行处理，建议联系授权经销商进行检查和维修。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.335-335 | practical-advice > Tyres\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.138-139 | vehicle > Steering",
+   "answer": "手册中提到胎压警告灯的相关信息如下：\n\n- 当胎压警告灯亮起时，表示需要检查轮胎压力。根据手册建议，当胎压警告灯亮起时，应尽快在安全条件下检查轮胎压力，并根据需要充气或调整压力。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.335-335",
    "error": null,
    "stream_broken": null,
    "kind": "hit",
    "question": "胎压警告灯亮了怎么办？",
-   "verdict": "PASS"
+   "verdict": "WEAK(有引用没RAG)"
   },
   {
-   "latency_s": 7.9,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
+   "latency_s": 5.0,
+   "tool_calls": [],
+   "rag_called": false,
    "cited": true,
-   "answer": "根据手册中的信息，充电时间会根据具体情况有所不同。例如：\n\n- 在极端条件下，充电可能需要几分钟才能开始（例如，车辆在低温或高温环境下）。\n- 如果车辆长时间停放（超过七天且温度低于约-25°C），可能无法充电。\n- 在高温环境下，建议将车辆停在阴凉处以避免充电问题。\n\n具体充电时间可能因充电设备、电池状态和环境温度等因素而异。如需更详细的信息，请参考车辆手册。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.22-52\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.42-42\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.43-43",
+   "answer": "根据手册内容，充电所需时间取决于多种因素。例如，当车辆在极端条件下时，充电可能需要几分钟时间才能开始。具体时间可能会根据实际情况有所不同。如果需要更详细的指导，请参考手册中的相关部分或联系授权经销商。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.22-52\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.43-43",
    "error": null,
    "stream_broken": null,
    "kind": "hit",
    "question": "充电需要多长时间？",
-   "verdict": "PASS"
+   "verdict": "WEAK(有引用没RAG)"
   },
   {
-   "latency_s": 5.4,
+   "latency_s": 5.9,
    "tool_calls": [],
    "rag_called": false,
    "cited": true,
-   "answer": "在寒冷的天气中，电动汽车的续航里程可能会下降，这是由于多种因素造成的。以下是一些主要原因：\n\n1. **电池性能下降**：低温会影响电池的化学反应，导致电池容量减少。这会直接影响车辆的续航里程。\n\n2. **空调系统使用**：在寒冷的天气中，驾驶员可能会更多地使用暖风系统，这会增加电力消耗，从而减少续航里程。\n\n3. **电能消耗增加**：在低温条件下，车辆的其他系统（如加热座椅、方向盘等）可能会更加频繁地使用，这也会增加电力消耗。\n\n4. **轮胎压力**：低温可能导致轮胎压力下降，这会增加滚动阻力，从而影响车辆的续航里程。\n\n5. **驾驶习惯**：在寒冷的天气中，驾驶员可能会采取更保守的驾驶方式，如减速和加速更频繁，这可能会增加电力消耗。\n\n参考来源:\n- 手册 | 电池和充电系统\n- 手册 | 空调和暖风系统\n- 手册 | 能源管理和续航里程",
+   "answer": "在冬季，电动车的续航里程可能会下降，这是因为低温会影响电池性能。根据手册中的描述：“当电量降至3.5%或，根据车辆情况，大约5%时，范围值将不再显示。发动机性能逐渐下降，直到车辆停止。” 此外，手册还提到在低温条件下使用热舒适功能（如加热器）会增加能耗，从而影响续航里程。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.118-132\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.22-52",
    "error": null,
    "stream_broken": null,
    "kind": "hit",
@@ -447,41 +441,35 @@
    "verdict": "WEAK(有引用没RAG)"
   },
   {
-   "latency_s": 5.0,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
-   "cited": true,
-   "answer": "手册中没有直接提到保养周期的具体时间。不过，根据手册中的信息，建议按照维护计划进行定期维护，并在需要时咨询授权经销商。此外，手册提到在完成符合维护计划建议的维护后，才能重置服务间隔。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.123-123",
+   "latency_s": 2.2,
+   "tool_calls": [],
+   "rag_called": false,
+   "cited": false,
+   "answer": "手册中没有相关内容",
    "error": null,
    "stream_broken": null,
    "kind": "hit",
    "question": "保养周期是多久？",
-   "verdict": "PASS"
+   "verdict": "FAIL"
   },
   {
-   "latency_s": 6.7,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
+   "latency_s": 6.0,
+   "tool_calls": [],
+   "rag_called": false,
    "cited": true,
-   "answer": "根据手册中的信息，开启雾灯的方法如下：\n\n1. 将灯光拨杆（通常位于方向盘右侧）旋转到标记为“Fog”或“雾灯”的位置。具体操作是将拨杆从“AUTO”位置转到“Fog”位置。\n2. 若需要关闭雾灯，再次将拨杆转回“AUTO”位置即可。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.142-148\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.147-147",
+   "answer": "根据手册中的信息，以下是关于雾灯的操作说明：\n\n1. 要激活后雾灯，需要将环形开关（ring 4）转到 AUTO 符号与标记 3 对齐的位置，然后按下开关 5。\n2. 如果车辆的“See-me-home”功能激活，一旦发动机关闭，需要在拉出杆之前进行操作，以确保雾灯不自动关闭。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.142-148\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.147-147",
    "error": null,
    "stream_broken": null,
    "kind": "hit",
    "question": "雾灯怎么开？",
-   "verdict": "PASS"
+   "verdict": "WEAK(有引用没RAG)"
   },
   {
-   "latency_s": 7.6,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
+   "latency_s": 6.6,
+   "tool_calls": [],
+   "rag_called": false,
    "cited": true,
-   "answer": "手册中没有明确提到轮胎的标准胎压数值。不过，它提到如果在轮胎未冷却时无法检查胎压，建议将指示的胎压值增加0.2到0.3 bar（或3 PSI）。同时，手册强调了定期检查胎压的重要性，建议至少每月检查一次，并在长途旅行前检查（参考车门边缘的标签）。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.182-182\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.181-181\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.328-332",
+   "answer": "手册中没有明确提供轮胎的标准胎压数值。根据手册内容，建议参考车辆车门边缘的标签（Label A）以获取准确的胎压信息。如果在冷胎状态下无法检查胎压，建议将推荐胎压值增加0.2至0.3 bar（3 PSI），但请勿在热胎状态下进行放气操作。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.181-181\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.182-182\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.328-332",
    "error": null,
    "stream_broken": null,
    "kind": "paraphrase",
@@ -489,69 +477,59 @@
    "verdict": "PASS(指出无数值)"
   },
   {
-   "latency_s": 6.3,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
+   "latency_s": 5.1,
+   "tool_calls": [],
+   "rag_called": false,
    "cited": true,
-   "answer": "调用技能以获取相关信息。\n根据手册中的信息，千斤顶应该支撑在车辆底部的四个专用支撑点上。这些支撑点位于车辆下方，以确保在举升车辆时不会对车辆造成损伤或导致受伤风险。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.366-368\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.361-368",
+   "answer": "根据手册中的信息，千斤顶应支撑在车辆底部的四个专用升降点（标记为1）处。这些点位于车辆下方，用于安全地升起车辆以进行更换轮胎等操作。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.366-368\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.361-368",
    "error": null,
    "stream_broken": null,
    "kind": "hit",
    "question": "千斤顶应该支撑在车底什么位置？",
-   "verdict": "PASS"
+   "verdict": "WEAK(有引用没RAG)"
   },
   {
-   "latency_s": 8.3,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
+   "latency_s": 6.3,
+   "tool_calls": [],
+   "rag_called": false,
    "cited": true,
-   "answer": "根据手册内容，车钥匙电池没电时的更换步骤如下：\n\n1. 当“Keycard Battery Low”（钥匙电池低）信息出现在仪表盘上时，需要更换卡电池。\n2. 操作步骤：\n   - 滑动后壳1向下，同时按下区域A；\n   - 根据车辆不同，车门镜可能会自动折叠；\n   - 移除电池盖2；\n   - 通过按压一侧并提起另一侧来移除电池；\n   - 按照说明更换电池。\n\n3. 更换完成后，确保盖子已扣紧。\n\n如果电池更换后仍有问题，请咨询授权经销商。 \n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.61-61\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.63-63",
+   "answer": "参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.61-61\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.63-63\n\n当“Keycard Battery Low”消息出现在仪表盘上时，需要更换卡片电池。操作步骤如下：\n\n1. 滑动后壳体1向下，同时按压区域A；\n2. 移除电池盖2；\n3. 通过按压一侧并提起另一侧来取出电池；\n4. 根据说明替换电池。\n\n更换后，请确保电池盖已正确扣紧。如果需要更换电池，请使用相同或等效类型的电池，并咨询授权经销商。",
    "error": null,
    "stream_broken": null,
    "kind": "hit",
    "question": "车钥匙电池没电了怎么更换？",
-   "verdict": "PASS"
+   "verdict": "WEAK(有引用没RAG)"
   },
   {
-   "latency_s": 8.8,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
+   "latency_s": 5.8,
+   "tool_calls": [],
+   "rag_called": false,
    "cited": true,
-   "answer": "如果12伏蓄电池亏电，建议采取以下步骤：\n\n1. **12V电池放电**：如果车辆的12V电池放电了，可能需要使用充电器进行充电，或者联系授权经销商进行检查和处理。\n\n2. **不要自行操作**：在车辆充电或点火开关打开时，不要在发动机盖下进行任何工作。对于12V电池的任何操作（如拆卸、断开等），必须由专业人员进行。\n\n3. **联系授权经销商**：如果问题持续或不确定如何处理，建议立即联系授权经销商进行检查和维修。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.357-357\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.327-327\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.326-326",
+   "answer": "如果12伏蓄电池亏电了，根据手册中的说明，您需要联系授权的经销商进行处理。手册中提到：“Call an approved Dealer.”（请联系授权的经销商）。此外，还强调了不要自行操作12伏蓄电池，因为这可能涉及车辆的电气系统（如灯光、雨刷、音响系统、等）以及某些安全系统（如制动辅助）。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.327-327\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.326-326",
    "error": null,
    "stream_broken": null,
    "kind": "hit",
    "question": "12伏蓄电池亏电了怎么办？",
-   "verdict": "PASS"
+   "verdict": "WEAK(有引用没RAG)"
   },
   {
-   "latency_s": 8.9,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
-   "cited": true,
-   "answer": "长途出行前应该检查的项目包括：\n\n1. 确保车辆的停车辅助系统（超声波传感器）没有被遮挡，例如 dirt, mud, 或其他障碍物，以便在倒车时能正常工作。\n2. 检查车辆的电子系统，包括充电系统和电池充电系统，确保没有故障指示。\n3. 确保车辆的行驶安全，包括检查车辆周围的物体（如摩托车、自行车、行人等）是否可能对车辆造成影响。\n4. 检查车辆的轮胎、刹车、灯光、雨刷等关键部件是否正常工作。\n\n参考来源:\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.269-269\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.120-120\n- data/raw/official/renault-5-e-tech-2025-owner-manual-en.pdf p.284-284",
+   "latency_s": 3.5,
+   "tool_calls": [],
+   "rag_called": false,
+   "cited": false,
+   "answer": "手册中没有直接提及长途出行前应该检查哪些项目的信息。建议参考车辆用户手册中的“Maintenance and Checks”或“Pre-trip Checklist”相关章节，或联系雷诺授权经销商获取具体指导。",
    "error": null,
    "stream_broken": null,
    "kind": "hit",
    "question": "长途出行前应该检查哪些项目？",
-   "verdict": "PASS"
+   "verdict": "FAIL"
   },
   {
-   "latency_s": 3.3,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
+   "latency_s": 2.3,
+   "tool_calls": [],
+   "rag_called": false,
    "cited": false,
-   "answer": "手册中没有相关内容。",
+   "answer": "手册中没有相关内容",
    "error": null,
    "stream_broken": null,
    "kind": "refuse",
@@ -559,32 +537,28 @@
    "verdict": "PASS(拒答)"
   },
   {
-   "latency_s": 3.5,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
-   "cited": true,
-   "answer": "手册中没有相关内容  \n参考来源:",
+   "latency_s": 2.5,
+   "tool_calls": [],
+   "rag_called": false,
+   "cited": false,
+   "answer": "手册中没有相关内容。",
    "error": null,
    "stream_broken": null,
    "kind": "refuse",
    "question": "汽油滤芯多久换一次？",
-   "verdict": "PASS(拒答+引用)"
+   "verdict": "PASS(拒答)"
   },
   {
-   "latency_s": 5.4,
-   "tool_calls": [
-    "skill_run(manual-rag)"
-   ],
-   "rag_called": true,
-   "cited": true,
-   "answer": "手册中没有关于油箱盖开关位置的明确信息。建议参考车辆的用户手册或联系雷诺经销商获取更详细的指导。\n\n参考来源:\n- r5e-2025-levels-0001#2 | maintenance > Accessing the engine, levels\n- r5e-2025-levels-0002#1 | maintenance > Accessing the engine, levels",
+   "latency_s": 2.6,
+   "tool_calls": [],
+   "rag_called": false,
+   "cited": false,
+   "answer": "手册中没有相关内容。",
    "error": null,
    "stream_broken": null,
    "kind": "refuse",
    "question": "油箱盖开关在哪里？",
-   "verdict": "PASS(拒答+引用)"
+   "verdict": "PASS(拒答)"
   }
  ]
 }
