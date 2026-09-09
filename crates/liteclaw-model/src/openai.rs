@@ -75,7 +75,10 @@ impl OpenAiClient {
     ) -> Result<Pin<Box<dyn Stream<Item = Result<StreamEvent>> + Send>>> {
         let body = self.build_body(messages, tools);
 
-        let mut req = self.http.post(self.cfg.chat_url()).json(&body);
+        let mut req = self.http
+            .post(self.cfg.chat_url())
+            .header("connection", "close")  // SSE 流式响应复用 keep-alive 连接时,上游收尾不干净会让下一个请求秒回空
+            .json(&body);
         if !self.cfg.api_key.is_empty() {
             req = req.bearer_auth(&self.cfg.api_key);
         }

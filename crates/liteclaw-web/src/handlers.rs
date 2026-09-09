@@ -127,15 +127,19 @@ async fn inject_rag(messages: &mut Vec<Message>, skill_tool: &Tool, ctx: &Ctx) {
 /// `model_endpoints` map (gateway-hosted models), override the frontend-
 /// supplied base_url/api_key. Keys stay server-side and never reach the
 /// browser; models not listed keep whatever the frontend sent (local Ollama).
-fn resolve_model_endpoint(cfg: &mut ModelConfig) {
+fn resolve_model_endpoint(cfg: &mut ModelConfig) -> bool {
+    // Returns true when the endpoint sets "tools": false — small models emit
+    // empty tool-call loops instead of answers when tools are offered, and
+    // with auto-RAG injection they don't need tools anyway.
+    let mut disable_tools = false;
     let Ok(text) = std::fs::read_to_string(config_path()) else {
-        return;
+        return disable_tools;
     };
     let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) else {
-        return;
+        return disable_tools;
     };
     let Some(ep) = v.get("model_endpoints").and_then(|m| m.get(&cfg.model)) else {
-        return;
+        return disable_tools;
     };
     if let Some(u) = ep.get("base_url").and_then(|x| x.as_str()) {
         cfg.base_url = u.to_string();
@@ -143,6 +147,10 @@ fn resolve_model_endpoint(cfg: &mut ModelConfig) {
     if let Some(k) = ep.get("api_key").and_then(|x| x.as_str()) {
         cfg.api_key = k.to_string();
     }
+    if ep.get("tools").and_then(|x| x.as_bool()) == Some(false) {
+        disable_tools = true;
+    }
+    disable_tools
 }
 
 /// POST /api/chat — start an agent turn and stream events back as SSE.
@@ -151,7 +159,7 @@ pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -
     // models resolve their base_url/api_key server-side from config.json's
     // model_endpoints map — credentials never live in the browser.
     let mut model_cfg = req.model;
-    resolve_model_endpoint(&mut model_cfg);
+    let disable_tools = resolve_model_endpoint(&mut model_cfg);
     let model = match liteclaw_model::OpenAiClient::new(model_cfg) {
         Ok(m) => m,
         Err(e) => {
@@ -189,6 +197,10 @@ pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -
             inject_rag(&mut messages, t, &ctx).await;
             messages = compact_history(messages);
         }
+    }
+
+    if disable_tools {
+        tools.clear();
     }
 
     let (rx, _handle) = into_stream(model, messages, tools, ctx, confirm, 8);
