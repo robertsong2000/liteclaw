@@ -16,6 +16,19 @@ pub struct ModelConfig {
     /// Model id, e.g. `qwen2.5:7b` (Ollama) or `gpt-4o-mini`.
     #[serde(default = "default_model")]
     pub model: String,
+    /// Extra JSON fields merged into the chat-completions request body —
+    /// gateway knobs local Ollama ignores (e.g. `{"enable_thinking": false}`
+    /// for Qwen flash models behind new-api). Absent = provider defaults.
+    #[serde(default)]
+    pub extra_body: Option<serde_json::Map<String, serde_json::Value>>,
+    /// Disable thinking for models that support it. Sent as
+    /// `reasoning_effort: "none"` in the chat-completions body — Ollama maps
+    /// that to `think: false` for every thinking-capable local model, and
+    /// OpenAI-compatible gateways understand the same field. The frontend
+    /// only sends it for Ollama models; gateway models use `extra_body`
+    /// (`enable_thinking`) instead.
+    #[serde(default)]
+    pub no_think: bool,
 }
 
 fn default_model() -> String {
@@ -32,6 +45,8 @@ impl Default for ModelConfig {
             base_url: default_base_url(),
             api_key: String::new(),
             model: "qwen2.5:7b".to_string(),
+            extra_body: None,
+            no_think: false,
         }
     }
 }
