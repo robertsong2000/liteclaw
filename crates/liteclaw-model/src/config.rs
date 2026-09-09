@@ -29,6 +29,18 @@ pub struct ModelConfig {
     /// (`enable_thinking`) instead.
     #[serde(default)]
     pub no_think: bool,
+    /// Talk to Ollama's native `/api/chat` protocol instead of the
+    /// OpenAI-compatible `/v1` shim. The native protocol carries per-request
+    /// knobs the shim cannot express (`options.num_ctx`, `think`), so local
+    /// Ollama models set it; gateway models stay on `/v1`.
+    #[serde(default)]
+    pub native: bool,
+    /// Requested context window for native-Ollama requests
+    /// (`options.num_ctx`), overriding whatever the model tag baked in —
+    /// lets stock official models run at full context without custom
+    /// Modelfile tags. None = leave the model default.
+    #[serde(default)]
+    pub num_ctx: Option<u64>,
 }
 
 fn default_model() -> String {
@@ -47,6 +59,8 @@ impl Default for ModelConfig {
             model: "qwen2.5:7b".to_string(),
             extra_body: None,
             no_think: false,
+            native: false,
+            num_ctx: None,
         }
     }
 }
@@ -56,5 +70,13 @@ impl ModelConfig {
     pub fn chat_url(&self) -> String {
         let base = self.base_url.trim_end_matches('/');
         format!("{base}/chat/completions")
+    }
+
+    /// Native Ollama chat endpoint, derived from the OpenAI-style `/v1` base
+    /// URL (`http://host:11434/v1` → `http://host:11434/api/chat`).
+    pub fn ollama_chat_url(&self) -> String {
+        let base = self.base_url.trim_end_matches('/');
+        let base = base.strip_suffix("/v1").unwrap_or(base);
+        format!("{base}/api/chat")
     }
 }

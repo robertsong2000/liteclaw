@@ -1,26 +1,29 @@
-//! Streaming OpenAI-compatible client.
+//! Streaming chat client for both backend protocols.
 //!
-//! Sends a chat-completions request with `stream: true` and yields
-//! [`StreamEvent`]s as the model produces them. Works against any
-//! OpenAI-compatible endpoint (cloud, gateway, or local Ollama `/v1`) —
-//! one protocol for every backend.
+//! - OpenAI-compatible `/v1/chat/completions` (cloud, gateways) — SSE in,
+//!   parsed into [`StreamEvent`]s.
+//! - Ollama's native `/api/chat` (local models, [`ModelConfig::native`]) —
+//!   NDJSON in, parsed into the same [`StreamEvent`]s. The native protocol
+//!   carries per-request knobs the `/v1` shim cannot express:
+//!   `options.num_ctx` (context window) and `think`.
 //!
 //! The non-trivial bits:
 //! - SSE line parsing (`data: {...}\n\n`, terminated by `data: [DONE]`).
 //! - Tool-call deltas arrive fragmented across chunks, indexed by
 //!   `tool_calls[i].index`; we accumulate them into complete calls.
 //! - Reasoning models (qwen3/minicpm5 on local Ollama, Qwen flash behind
-//!   new-api) stream their thinking in a separate `reasoning_content`
-//!   field. We wrap it in inline `<think>...</think>` tags so downstream
-//!   consumers see one shape (the chat UI renders those as a collapsible
-//!   "思考过程" block). `no_think` suppresses it upstream via
-//!   `reasoning_effort: "none"`, which Ollama maps to `think: false`.
+//!   new-api) stream their thinking in a separate field (`reasoning_content`
+//!   on /v1, `message.thinking` native). We wrap it in inline
+//!   `<think>...</think>` tags so downstream consumers see one shape (the
+//!   chat UI renders those as a collapsible "思考过程" block). `no_think`
+//!   suppresses it upstream (`reasoning_effort: "none"` on /v1, `think:
+//!   false` native).
 
 use std::collections::VecDeque;
 use std::pin::Pin;
 
 use crate::config::ModelConfig;
-use crate::message::{Message, ToolCall, ToolSpec};
+use crate::message::{Message, Role, ToolCall, ToolSpec};
 use anyhow::{anyhow, Result};
 use futures::Stream;
 use futures::StreamExt;
@@ -68,11 +71,27 @@ impl OpenAiClient {
     /// The returned stream yields [`StreamEvent`]s. The caller drives it to
     /// completion, accumulating text deltas and reading tool calls from the
     /// terminal `Done` event.
+    ///
+    /// Dispatches on [`ModelConfig::native`]: Ollama's native `/api/chat`
+    /// for local models (per-request `num_ctx`/`think`), the
+    /// OpenAI-compatible `/v1` protocol for everything else.
     pub async fn chat_stream(
         &self,
         messages: &[Message],
         tools: &[ToolSpec],
     ) -> Result<Pin<Box<dyn Stream<Item = Result<StreamEvent>> + Send>>> {
+        if self.cfg.native {
+            Ok(Box::pin(self.ollama_chat_stream(messages, tools).await?))
+        } else {
+            Ok(Box::pin(self.openai_chat_stream(messages, tools).await?))
+        }
+    }
+
+    async fn openai_chat_stream(
+        &self,
+        messages: &[Message],
+        tools: &[ToolSpec],
+    ) -> Result<impl Stream<Item = Result<StreamEvent>> + Send> {
         let body = self.build_body(messages, tools);
 
         let mut req = self.http
@@ -95,7 +114,59 @@ impl OpenAiClient {
 
         // Convert the response byte stream into a stream of parsed SSE events.
         let event_stream = SseDecoder::new(resp.bytes_stream());
-        Ok(Box::pin(event_stream))
+        Ok(event_stream)
+    }
+
+    /// Ollama native streaming chat (`/api/chat`, NDJSON) — the protocol
+    /// used for local models because it carries per-request knobs the /v1
+    /// shim cannot express: `options.num_ctx` overrides whatever context the
+    /// model tag baked in, and `think: false` disables thinking (both
+    /// verified: request options beat Modelfile parameters). Messages need
+    /// remapping ([`to_native_messages`]); tool specs share the OpenAI JSON
+    /// shape; the response decodes via [`OllamaDecoder`].
+    async fn ollama_chat_stream(
+        &self,
+        messages: &[Message],
+        tools: &[ToolSpec],
+    ) -> Result<impl Stream<Item = Result<StreamEvent>> + Send> {
+        let body = self.build_native_body(messages, tools);
+
+        let req = self.http
+            .post(self.cfg.ollama_chat_url())
+            .header("connection", "close")
+            .json(&body);
+        let resp = req
+            .send()
+            .await
+            .map_err(|e| anyhow!("request failed: {e}"))?;
+        if !resp.status().is_success() {
+            let status = resp.status();
+            let text = resp.text().await.unwrap_or_default();
+            return Err(anyhow!("model API error {status}: {text}"));
+        }
+        Ok(OllamaDecoder::new(resp.bytes_stream()))
+    }
+
+    /// Assemble the native `/api/chat` request body: remapped messages,
+    /// tool specs, `think: false` when thinking is disabled
+    /// ([`ModelConfig::no_think`]), and `options.num_ctx` when a context
+    /// window is requested ([`ModelConfig::num_ctx`]).
+    fn build_native_body(&self, messages: &[Message], tools: &[ToolSpec]) -> serde_json::Value {
+        let mut body = serde_json::json!({
+            "model": self.cfg.model,
+            "messages": to_native_messages(messages),
+            "stream": true,
+        });
+        if self.cfg.no_think {
+            body["think"] = serde_json::json!(false);
+        }
+        if let Some(num_ctx) = self.cfg.num_ctx {
+            body["options"] = serde_json::json!({ "num_ctx": num_ctx });
+        }
+        if !tools.is_empty() {
+            body["tools"] = serde_json::json!(tools);
+        }
+        body
     }
 
     /// Assemble the chat-completions request body: model + messages + stream
@@ -122,6 +193,86 @@ impl OpenAiClient {
             }
         }
         body
+    }
+}
+
+/// Map OpenAI-style messages onto Ollama's native chat format: multimodal
+/// parts collapse to text plus base64 `images`, assistant tool-call
+/// arguments become a JSON object, tool results keep only their content.
+fn to_native_messages(messages: &[Message]) -> Vec<serde_json::Value> {
+    messages
+        .iter()
+        .map(|m| {
+            let mut msg = serde_json::json!({ "role": m.role });
+            match m.role {
+                Role::User => {
+                    msg["content"] = serde_json::Value::String(text_of(&m.content));
+                    let images = images_of(&m.content);
+                    if !images.is_empty() {
+                        msg["images"] = serde_json::Value::Array(
+                            images.into_iter().map(serde_json::Value::String).collect(),
+                        );
+                    }
+                }
+                Role::Assistant => {
+                    if let Some(c) = &m.content {
+                        msg["content"] = c.clone();
+                    }
+                    if let Some(calls) = &m.tool_calls {
+                        let native: Vec<serde_json::Value> = calls
+                            .iter()
+                            .map(|c| {
+                                let args: serde_json::Value = serde_json::from_str(
+                                    &c.function.arguments,
+                                )
+                                .unwrap_or(serde_json::Value::Object(Default::default()));
+                                serde_json::json!({
+                                    "function": {
+                                        "name": c.function.name,
+                                        "arguments": args,
+                                    }
+                                })
+                            })
+                            .collect();
+                        msg["tool_calls"] = serde_json::Value::Array(native);
+                    }
+                }
+                _ => {
+                    msg["content"] = serde_json::Value::String(text_of(&m.content));
+                }
+            }
+            msg
+        })
+        .collect()
+}
+
+/// Plain text of a content value (string or multimodal parts).
+fn text_of(content: &Option<serde_json::Value>) -> String {
+    match content {
+        Some(serde_json::Value::String(s)) => s.clone(),
+        Some(serde_json::Value::Array(parts)) => parts
+            .iter()
+            .filter_map(|p| p.get("text").and_then(|t| t.as_str()))
+            .collect::<Vec<_>>()
+            .join(""),
+        _ => String::new(),
+    }
+}
+
+/// Base64 payloads of multimodal image parts (data-URL prefix stripped).
+fn images_of(content: &Option<serde_json::Value>) -> Vec<String> {
+    match content {
+        Some(serde_json::Value::Array(parts)) => parts
+            .iter()
+            .filter_map(|p| {
+                p.get("image_url")
+                    .and_then(|i| i.get("url"))
+                    .and_then(|u| u.as_str())
+            })
+            .filter_map(|u| u.split("base64,").nth(1))
+            .map(String::from)
+            .collect(),
+        _ => Vec::new(),
     }
 }
 
@@ -407,6 +558,202 @@ fn handle_frame(
     FrameOutcome::Ignore
 }
 
+/// Decode Ollama's native NDJSON chat stream into [`StreamEvent`]s.
+///
+/// Each line is one JSON object:
+/// `{"message":{"thinking"/"content"/"tool_calls"},"done":bool}`; the final
+/// line carries `done: true` plus `prompt_eval_count`/`eval_count`. Tool
+/// calls arrive complete (no index fragmentation). `thinking` deltas are
+/// wrapped in `<think>` tags, exactly like gateway `reasoning_content`.
+struct OllamaDecoder<S> {
+    inner: S,
+    buf: String,
+    tool_calls: Vec<ToolCall>,
+    in_reasoning: bool,
+    usage: Option<Usage>,
+    pending: VecDeque<StreamEvent>,
+    finished: bool,
+}
+
+#[derive(Deserialize)]
+struct OllamaChunk {
+    #[serde(default)]
+    message: Option<OllamaMessage>,
+    #[serde(default)]
+    done: bool,
+    #[serde(default)]
+    prompt_eval_count: Option<u64>,
+    #[serde(default)]
+    eval_count: Option<u64>,
+}
+
+#[derive(Deserialize)]
+struct OllamaMessage {
+    #[serde(default)]
+    content: Option<String>,
+    #[serde(default)]
+    thinking: Option<String>,
+    #[serde(default)]
+    tool_calls: Option<Vec<OllamaToolCall>>,
+}
+
+#[derive(Deserialize)]
+struct OllamaToolCall {
+    function: OllamaFunction,
+}
+
+#[derive(Deserialize)]
+struct OllamaFunction {
+    name: String,
+    /// Native arguments are a JSON *object* (OpenAI uses a JSON string).
+    #[serde(default)]
+    arguments: Option<serde_json::Value>,
+}
+
+impl<S> OllamaDecoder<S> {
+    fn new(inner: S) -> Self {
+        Self {
+            inner,
+            buf: String::new(),
+            tool_calls: Vec::new(),
+            in_reasoning: false,
+            usage: None,
+            pending: VecDeque::new(),
+            finished: false,
+        }
+    }
+}
+
+impl<S> Stream for OllamaDecoder<S>
+where
+    S: Stream<Item = Result<bytes::Bytes, reqwest::Error>> + Unpin + Send,
+{
+    type Item = Result<StreamEvent>;
+
+    fn poll_next(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        let this = self.get_mut();
+        loop {
+            // Deliver queued events first — order matters (think wrap, text,
+            // terminal Done).
+            if let Some(ev) = this.pending.pop_front() {
+                if matches!(ev, StreamEvent::Done { .. }) {
+                    this.finished = true;
+                }
+                return std::task::Poll::Ready(Some(Ok(ev)));
+            }
+            if this.finished {
+                return std::task::Poll::Ready(None);
+            }
+            // NDJSON frames are single newline-separated JSON objects.
+            if let Some(idx) = this.buf.find('\n') {
+                let line = this.buf.drain(..idx).collect::<String>();
+                this.buf.drain(..1);
+                if handle_ollama_line(
+                    &line,
+                    &mut this.tool_calls,
+                    &mut this.usage,
+                    &mut this.pending,
+                    &mut this.in_reasoning,
+                ) {
+                    queue_done(
+                        std::mem::take(&mut this.tool_calls),
+                        &mut this.usage,
+                        &mut this.in_reasoning,
+                        &mut this.pending,
+                    );
+                }
+                continue;
+            }
+            match this.inner.poll_next_unpin(cx) {
+                std::task::Poll::Ready(Some(Ok(chunk))) => {
+                    this.buf.push_str(std::str::from_utf8(&chunk).unwrap_or(""));
+                    continue;
+                }
+                std::task::Poll::Ready(Some(Err(e))) => {
+                    return std::task::Poll::Ready(Some(Err(anyhow!("stream error: {e}"))));
+                }
+                std::task::Poll::Ready(None) => {
+                    // Upstream ended: close any open <think> block and emit
+                    // the terminal Done so the agent loop exits cleanly.
+                    queue_done(
+                        std::mem::take(&mut this.tool_calls),
+                        &mut this.usage,
+                        &mut this.in_reasoning,
+                        &mut this.pending,
+                    );
+                    this.finished = true;
+                    continue;
+                }
+                std::task::Poll::Pending => return std::task::Poll::Pending,
+            }
+        }
+    }
+}
+
+/// Handle one NDJSON line; returns true when it was the terminal `done` line
+/// (the caller then queues the Done event).
+fn handle_ollama_line(
+    line: &str,
+    tool_calls: &mut Vec<ToolCall>,
+    usage_out: &mut Option<Usage>,
+    pending: &mut VecDeque<StreamEvent>,
+    in_reasoning: &mut bool,
+) -> bool {
+    let Ok(chunk) = serde_json::from_str::<OllamaChunk>(line) else {
+        return false; // skip keepalives / partial lines
+    };
+    // The terminal done line can ALSO carry the final message — including
+    // the model's tool call. Process message fields before the done check,
+    // otherwise the tool call is silently dropped and the agent sees none.
+    if let Some(msg) = chunk.message {
+        if let Some(t) = msg.thinking {
+            if !t.is_empty() {
+                if !*in_reasoning {
+                    pending.push_back(StreamEvent::Delta("<think>".into()));
+                    *in_reasoning = true;
+                }
+                pending.push_back(StreamEvent::Delta(t));
+            }
+        }
+        if let Some(c) = msg.content {
+            if !c.is_empty() {
+                if *in_reasoning {
+                    pending.push_back(StreamEvent::Delta("</think>".into()));
+                    *in_reasoning = false;
+                }
+                pending.push_back(StreamEvent::Delta(c));
+            }
+        }
+        if let Some(calls) = msg.tool_calls {
+            for tc in calls {
+                let args = serde_json::to_string(&tc.function.arguments.clone().unwrap_or_default())
+                    .unwrap_or_else(|_| "{}".into());
+                tool_calls.push(ToolCall {
+                    id: format!("call_{}", tool_calls.len()),
+                    call_type: "function".into(),
+                    function: crate::message::FunctionCall {
+                        name: tc.function.name,
+                        arguments: args,
+                    },
+                });
+            }
+        }
+    }
+    if chunk.done {
+        if chunk.prompt_eval_count.is_some() || chunk.eval_count.is_some() {
+            *usage_out = Some(Usage {
+                prompt_tokens: chunk.prompt_eval_count.unwrap_or(0),
+                completion_tokens: chunk.eval_count.unwrap_or(0),
+            });
+        }
+        return true;
+    }
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -582,6 +929,42 @@ mod tests {
     }
 
     #[test]
+    fn native_body_carries_think_and_num_ctx() {
+        // Native Ollama requests must express the /v1-inexpressible knobs:
+        // think:false (disable thinking) and options.num_ctx (context window
+        // override, so stock official models run without custom tags).
+        let cfg = ModelConfig {
+            native: true,
+            no_think: true,
+            num_ctx: Some(32768),
+            ..Default::default()
+        };
+        let client = OpenAiClient::new(cfg).unwrap();
+        let body = client.build_native_body(
+            &[Message::system("你是车辆助手"), Message::user("hi")],
+            &[],
+        );
+        assert_eq!(body["think"], serde_json::json!(false));
+        assert_eq!(body["options"]["num_ctx"], serde_json::json!(32768));
+        assert_eq!(body["messages"][0]["role"], "system");
+        assert!(body.get("reasoning_effort").is_none());
+    }
+
+    #[test]
+    fn native_body_omits_optional_knobs() {
+        // Defaults: no think key (model keeps its own default behavior) and
+        // no options key (model tag keeps its own context length).
+        let cfg = ModelConfig {
+            native: true,
+            ..Default::default()
+        };
+        let client = OpenAiClient::new(cfg).unwrap();
+        let body = client.build_native_body(&[Message::user("hi")], &[]);
+        assert!(body.get("think").is_none());
+        assert!(body.get("options").is_none());
+    }
+
+    #[test]
     fn extra_body_overrides_no_think() {
         // An explicit gateway knob must win over the no_think default.
         let cfg = ModelConfig {
@@ -598,6 +981,120 @@ mod tests {
         let body = client.build_body(&[], &[]);
         assert_eq!(body["reasoning_effort"], serde_json::json!("none"));
         assert_eq!(body["enable_thinking"], serde_json::json!(true));
+    }
+
+    #[test]
+    fn ollama_url_derived_from_v1_base() {
+        let cfg = ModelConfig {
+            base_url: "http://172.21.0.1:11434/v1".into(),
+            ..Default::default()
+        };
+        assert_eq!(cfg.ollama_chat_url(), "http://172.21.0.1:11434/api/chat");
+    }
+
+    #[test]
+    fn native_messages_conversion() {
+        use crate::message::{FunctionCall, ToolCall as Tc};
+        let messages = vec![
+            Message::system("你是车辆助手"),
+            Message {
+                role: Role::User,
+                content: Some(serde_json::json!([
+                    {"type": "text", "text": "看图"},
+                    {"type": "image_url", "image_url": {"url": "data:image/png;base64,QUJD"}},
+                ])),
+                tool_calls: None,
+                tool_call_id: None,
+            },
+            Message {
+                role: Role::Assistant,
+                content: None,
+                tool_calls: Some(vec![Tc {
+                    id: "call_0".into(),
+                    call_type: "function".into(),
+                    function: FunctionCall {
+                        name: "skill_run".into(),
+                        arguments: r#"{"id":"manual-rag"}"#.into(),
+                    },
+                }]),
+                tool_call_id: None,
+            },
+            Message::tool_result("call_0", "[]"),
+        ];
+        let native = to_native_messages(&messages);
+        assert_eq!(native[0]["role"], "system");
+        assert_eq!(native[1]["content"], "看图");
+        assert_eq!(native[1]["images"][0], "QUJD");
+        // Arguments must be a native JSON object, not an encoded string.
+        assert_eq!(native[2]["tool_calls"][0]["function"]["arguments"]["id"], "manual-rag");
+        assert_eq!(native[3]["role"], "tool");
+        assert_eq!(native[3]["content"], "[]");
+    }
+
+    #[tokio::test]
+    async fn ollama_decoder_thinking_and_usage() {
+        // NDJSON lines are newline-terminated, like real Ollama output.
+        let s = OllamaDecoder::new(fake_stream(vec![
+            r#"{"message":{"thinking":"想一想"},"done":false}"#.to_string() + "\n",
+            r#"{"message":{"content":"答案是"},"done":false}"#.to_string() + "\n",
+            r#"{"message":{"content":"2"},"done":false}"#.to_string() + "\n",
+            r#"{"message":{},"done":true,"prompt_eval_count":11,"eval_count":22}"#.to_string() + "\n",
+        ]));
+        let (text, done, usage) = collect_ollama(s).await;
+        assert_eq!(text, "<think>想一想</think>答案是2");
+        assert!(done);
+        assert_eq!(usage.map(|u| (u.prompt_tokens, u.completion_tokens)), Some((11, 22)));
+    }
+
+    #[tokio::test]
+    async fn ollama_decoder_tool_call_on_done_line() {
+        // Ollama puts the model's tool call ON the terminal done line —
+        // dropping it there silently kills agent tool use (the model looks
+        // like it "never calls tools").
+        let s = OllamaDecoder::new(fake_stream(vec![
+            r#"{"message":{"thinking":"想一想"},"done":false}"#.to_string() + "\n",
+            r#"{"message":{"content":"调用工具"},"done":false}"#.to_string() + "\n",
+            r#"{"message":{"tool_calls":[{"function":{"name":"skill_list","arguments":{}}}]},"done":true,"prompt_eval_count":5,"eval_count":6}"#.to_string() + "\n",
+        ]));
+        let mut text = String::new();
+        let mut calls = Vec::new();
+        let mut done = false;
+        let mut stream = s;
+        while let Some(ev) = stream.next().await {
+            match ev.unwrap() {
+                StreamEvent::Delta(d) => text.push_str(&d),
+                StreamEvent::Done { tool_calls: c, usage } => {
+                    calls = c;
+                    done = true;
+                    assert_eq!(usage.map(|u| (u.prompt_tokens, u.completion_tokens)), Some((5, 6)));
+                }
+            }
+        }
+        assert_eq!(text, "<think>想一想</think>调用工具");
+        assert!(done);
+        assert_eq!(calls.len(), 1);
+        assert_eq!(calls[0].function.name, "skill_list");
+        assert_eq!(calls[0].function.arguments, "{}");
+    }
+
+    /// Drain an OllamaDecoder into (text, saw Done, terminal usage).
+    async fn collect_ollama(
+        s: impl Stream<Item = Result<StreamEvent>> + Unpin,
+    ) -> (String, bool, Option<Usage>) {
+        let mut text = String::new();
+        let mut done = false;
+        let mut usage = None;
+        let mut stream = s;
+        while let Some(ev) = stream.next().await {
+            match ev.unwrap() {
+                StreamEvent::Delta(d) => text.push_str(&d),
+                StreamEvent::Done { usage: u, .. } => {
+                    done = true;
+                    usage = u;
+                }
+            }
+        }
+        (text, done, usage)
     }
 
     /// Drain a decoder into (concatenated text deltas, saw terminal Done).
