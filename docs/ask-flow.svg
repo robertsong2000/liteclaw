@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1050" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC',sans-serif">
+  <defs>
+    <marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#58a6ff"/></marker>
+    <marker id="arrP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a78bfa"/></marker>
+    <marker id="arrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3fb950"/></marker>
+    <marker id="arrO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f0883e"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="1240" height="1050" fill="#0f1115"/>
+
+  <text x="620" y="46" text-anchor="middle" font-size="25" font-weight="700" fill="#e6edf3">车书助手 · 一次问答的完整旅程</text>
+  <text x="620" y="72" text-anchor="middle" font-size="13" fill="#8b949e">从点击发送到流式回答 —— 浏览器 / liteclaw 服务端 / ollama / RAG 手册库 四方协作全景</text>
+
+  <!-- 泳道标题 -->
+  <rect x="50"   y="94" width="200" height="58" rx="14" fill="#16283f" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="150"  y="118" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">浏览器</text>
+  <text x="150"  y="139" text-anchor="middle" font-size="11" fill="#8b949e">车书助手 前端</text>
+
+  <rect x="420"  y="94" width="200" height="58" rx="14" fill="#241f3d" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="520"  y="118" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">liteclaw 服务端</text>
+  <text x="520"  y="139" text-anchor="middle" font-size="11" fill="#8b949e">axum 服务端 · Agent Loop</text>
+
+  <rect x="750"  y="94" width="200" height="58" rx="14" fill="#12291a" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="850"  y="118" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">ollama 推理引擎</text>
+  <text x="850"  y="139" text-anchor="middle" font-size="11" fill="#8b949e">qwen3:30b-a3b（MoE·3B 激活）</text>
+
+  <rect x="1005" y="94" width="200" height="58" rx="14" fill="#33200f" stroke="#f0883e" stroke-width="1.5"/>
+  <text x="1105" y="118" text-anchor="middle" font-size="16" font-weight="700" fill="#e6edf3">手册知识库</text>
+  <text x="1105" y="139" text-anchor="middle" font-size="11" fill="#8b949e">manual-rag · 1.2MB jsonl</text>
+
+  <!-- 生命线 -->
+  <line x1="150"  y1="152" x2="150"  y2="975" stroke="#3a4150" stroke-width="1.5" stroke-dasharray="5 6"/>
+  <line x1="520"  y1="152" x2="520"  y2="975" stroke="#3a4150" stroke-width="1.5" stroke-dasharray="5 6"/>
+  <line x1="850"  y1="152" x2="850"  y2="975" stroke="#3a4150" stroke-width="1.5" stroke-dasharray="5 6"/>
+  <line x1="1105" y1="152" x2="1105" y2="975" stroke="#3a4150" stroke-width="1.5" stroke-dasharray="5 6"/>
+
+  <!-- ① 输入问题 -->
+  <rect x="35" y="176" width="230" height="52" rx="10" fill="#131c2b" stroke="#58a6ff" stroke-width="1.2"/>
+  <text x="150" y="197" text-anchor="middle" font-size="12.5" font-weight="600" fill="#e6edf3">① 输入问题 · 点击发送</text>
+  <text x="150" y="215" text-anchor="middle" font-size="11" fill="#9aa4b2">例：儿童安全座椅怎么安装？</text>
+
+  <!-- ② POST -->
+  <text x="337" y="258" text-anchor="middle" font-size="12" font-weight="600" fill="#e6edf3">② POST /api/chat（SSE 流式）</text>
+  <line x1="262" y1="268" x2="512" y2="268" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrB)"/>
+  <text x="337" y="288" text-anchor="middle" font-size="11" fill="#8b949e">SYSTEM_PROMPT + 本地历史 + 本轮问题</text>
+
+  <!-- ③ 发给 ollama -->
+  <text x="685" y="326" text-anchor="middle" font-size="12" font-weight="600" fill="#e6edf3">③ 组装 prompt → ollama</text>
+  <line x1="530" y1="336" x2="840" y2="336" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrP)"/>
+  <text x="685" y="356" text-anchor="middle" font-size="11" fill="#8b949e">prefill：逐 token 读入长上下文 （首token 计时开始）</text>
+
+  <!-- ④ 生成工具调用 -->
+  <rect x="735" y="380" width="230" height="52" rx="10" fill="#12241a" stroke="#3fb950" stroke-width="1.2"/>
+  <text x="850" y="401" text-anchor="middle" font-size="12.5" font-weight="600" fill="#e6edf3">④ 生成工具调用</text>
+  <text x="850" y="419" text-anchor="middle" font-size="11" fill="#9aa4b2">skill_run("manual-rag", 问题)</text>
+  <text x="850" y="452" text-anchor="middle" font-size="12" font-weight="700" fill="#f0883e">首 token 2.0s（TTFT 停表）</text>
+  <line x1="838" y1="474" x2="530" y2="474" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrP)"/>
+  <text x="684" y="464" text-anchor="middle" font-size="11" fill="#8b949e">tool_start 事件先行推送 → 前端停表</text>
+
+  <!-- ⑤ 调 skill -->
+  <text x="880" y="508" text-anchor="middle" font-size="12" font-weight="600" fill="#e6edf3">⑤ skill_run(manual-rag, 问题)</text>
+  <line x1="530" y1="518" x2="1095" y2="518" stroke="#f0883e" stroke-width="2" marker-end="url(#arrO)"/>
+  <text x="880" y="538" text-anchor="middle" font-size="11" fill="#8b949e">服务端执行 skill · Defender→Backup→Log 钩子链</text>
+
+  <!-- ⑥ RAG 检索 -->
+  <rect x="990" y="566" width="230" height="52" rx="10" fill="#2a1c10" stroke="#f0883e" stroke-width="1.2"/>
+  <text x="1105" y="587" text-anchor="middle" font-size="12.5" font-weight="600" fill="#e6edf3">⑥ RAG 检索手册</text>
+  <text x="1105" y="605" text-anchor="middle" font-size="11" fill="#9aa4b2">python3 扫描 1.2MB 手册 jsonl（约 1s）</text>
+  <text x="880" y="650" text-anchor="middle" font-size="12" font-weight="600" fill="#e6edf3">返回原文段落 + 页码（top-k）</text>
+  <line x1="1095" y1="660" x2="530" y2="660" stroke="#f0883e" stroke-width="2" marker-end="url(#arrO)"/>
+
+  <!-- ⑦ 回填二轮 -->
+  <text x="685" y="694" text-anchor="middle" font-size="12" font-weight="600" fill="#e6edf3">⑦ 检索结果回填消息 → 第二轮请求</text>
+  <line x1="530" y1="704" x2="840" y2="704" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrP)"/>
+  <text x="685" y="724" text-anchor="middle" font-size="11" fill="#8b949e">再次 prefill（含检索原文）+ 开始生成</text>
+
+  <!-- ⑧ 流式生成 -->
+  <rect x="735" y="748" width="230" height="52" rx="10" fill="#12241a" stroke="#3fb950" stroke-width="1.2"/>
+  <text x="850" y="769" text-anchor="middle" font-size="12.5" font-weight="600" fill="#e6edf3">⑧ 流式生成回答</text>
+  <text x="850" y="787" text-anchor="middle" font-size="11" fill="#9aa4b2">只依据检索原文 · 数字措辞原样引用 · 附页码</text>
+  <text x="685" y="830" text-anchor="middle" font-size="12" font-weight="600" fill="#e6edf3">text_delta 增量流</text>
+  <line x1="838" y1="840" x2="530" y2="840" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrP)"/>
+  <text x="337" y="864" text-anchor="middle" font-size="12" font-weight="600" fill="#e6edf3">SSE 推送：text_delta / tool_result / done</text>
+  <line x1="510" y1="874" x2="262" y2="874" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrB)"/>
+
+  <!-- ⑨ 渲染与保存 -->
+  <rect x="35" y="892" width="230" height="68" rx="10" fill="#131c2b" stroke="#58a6ff" stroke-width="1.2"/>
+  <text x="150" y="913" text-anchor="middle" font-size="12.5" font-weight="600" fill="#e6edf3">⑨ 流式渲染</text>
+  <text x="150" y="930" text-anchor="middle" font-size="11" fill="#9aa4b2">Markdown 气泡 · 参考来源 · 统计条</text>
+  <text x="150" y="947" text-anchor="middle" font-size="11" fill="#9aa4b2">完成后自动保存 → localStorage</text>
+
+  <!-- 图例 -->
+  <rect x="60"  y="1000" width="14" height="14" rx="3" fill="#16283f" stroke="#58a6ff"/>
+  <text x="82"  y="1012" font-size="12" fill="#c9d1d9">浏览器前端</text>
+  <rect x="230" y="1000" width="14" height="14" rx="3" fill="#241f3d" stroke="#a78bfa"/>
+  <text x="252" y="1012" font-size="12" fill="#c9d1d9">liteclaw 服务端</text>
+  <rect x="430" y="1000" width="14" height="14" rx="3" fill="#12291a" stroke="#3fb950"/>
+  <text x="452" y="1012" font-size="12" fill="#c9d1d9">ollama 推理</text>
+  <rect x="600" y="1000" width="14" height="14" rx="3" fill="#33200f" stroke="#f0883e"/>
+  <text x="622" y="1012" font-size="12" fill="#c9d1d9">RAG 手册检索</text>
+  <text x="790" y="1012" font-size="12" fill="#f0883e">首 token 2.0s = prefill + 工具调用决策（不含 skill 检索）</text>
+  <text x="620" y="1040" text-anchor="middle" font-size="11.5" fill="#8b949e">配置与会话均保存在各浏览器 localStorage —— 服务端只负责推理与检索</text>
+</svg>
