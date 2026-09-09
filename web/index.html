@@ -22,6 +22,12 @@
 <!-- Sidebar: conversation history -->
 <div id="sidebar" style="position:fixed;left:0;top:0;bottom:0;width:200px;background:var(--panel);border-right:1px solid var(--border);display:none;flex-direction:column;z-index:100">
   <button id="new-session" style="margin:10px;background:var(--accent);color:var(--lime);border:none;padding:8px;border-radius:6px;cursor:pointer;font-size:13px">＋ 新会话</button>
+  <div id="suggestions">
+    <div class="sug-title">常见问题</div>
+    <select id="sug-select">
+      <option value="">选择问题，点击即发送…</option>
+    </select>
+  </div>
   <div id="session-list" style="flex:1;overflow-y:auto;padding:0 8px"></div>
 </div>
 
@@ -29,14 +35,18 @@
   <h1>🚗 车书助手</h1>
   <div class="cfg">
     <select id="model" class="model" title="选择模型" style="background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:4px;font-size:13px">
-      <option value="qwen3:30b-a3b-nothink">Qwen3-30B-A3B</option>
-      <option value="qwen3:30b-a3b">Qwen3-30B-A3B(深度思考)</option>
-      <option value="openbmb/minicpm5:latest">MiniCPM5</option>
-      <option value="openbmb/minicpm5:q8_0">MiniCPM5-Q8</option>
+      <option value="qwen3:30b-a3b">Qwen3-30B-A3B</option>
+      <option value="minicpm5-2b:32k">MiniCPM5-2B</option>
+      <option value="qwen3.8-flash">Qwen3.8-Flash (NewAPI)</option>
     </select>
-    <input class="key" id="api_key" type="password" placeholder="api key (可选)" title="API key" />
     <label title="勾选后所有工具(写文件/执行命令)自动执行,不弹确认框" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
       <input type="checkbox" id="auto_mode" checked /> 自动模式
+    </label>
+    <label title="思考开关:勾选后对所有模型发送禁思考指令。会思考的模型(MiniCPM5-2B、Qwen3-30B-A3B 默认思考)将直接回答,更快更省 token;不会思考的模型无变化。" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
+      <input type="checkbox" id="no_think" /> 禁用思考
+    </label>
+    <label title="默认关闭:模型自己调用 skill 检索手册(界面能看到工具调用卡片)。勾选后改为服务器每次提问前自动检索并注入给模型(界面看不到检索过程)。" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
+      <input type="checkbox" id="auto_rag" /> 自动检索
     </label>
     <button id="save_cfg">保存</button>
     <button id="help_btn" title="怎么提问、能问什么：打开 RAG 问题地图" onclick="window.open('/help','_blank')">❓ Help</button>
@@ -44,8 +54,6 @@
 </header>
 
 <div id="chat"></div>
-
-<div id="suggestions"></div>
 
 <footer>
   <textarea id="input" placeholder="说点什么… (Enter 发送, Shift+Enter 换行, 可粘贴/拖拽图片)"></textarea>

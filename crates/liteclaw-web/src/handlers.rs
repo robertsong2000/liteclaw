@@ -20,6 +20,12 @@ pub struct ChatRequest {
     /// waiting for human confirmation.
     #[serde(default)]
     pub auto_mode: bool,
+    /// When true, the server retrieves manual passages before the model turn
+    /// (AUTO-RAG injection, tool cards stay hidden). Defaults to false: the
+    /// model drives retrieval itself via skill_list/skill_run, which surfaces
+    /// the tool-call cards in the UI.
+    #[serde(default)]
+    pub auto_rag: bool,
 }
 
 /// AUTO-RAG (vehicle-assistant deployment): run the manual-rag skill
@@ -117,10 +123,36 @@ async fn inject_rag(messages: &mut Vec<Message>, skill_tool: &Tool, ctx: &Ctx) {
     }
 }
 
+/// Server-side model endpoint registry: for models listed in config.json's
+/// `model_endpoints` map (gateway-hosted models), override the frontend-
+/// supplied base_url/api_key. Keys stay server-side and never reach the
+/// browser; models not listed keep whatever the frontend sent (local Ollama).
+fn resolve_model_endpoint(cfg: &mut ModelConfig) {
+    let Ok(text) = std::fs::read_to_string(config_path()) else {
+        return;
+    };
+    let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) else {
+        return;
+    };
+    let Some(ep) = v.get("model_endpoints").and_then(|m| m.get(&cfg.model)) else {
+        return;
+    };
+    if let Some(u) = ep.get("base_url").and_then(|x| x.as_str()) {
+        cfg.base_url = u.to_string();
+    }
+    if let Some(k) = ep.get("api_key").and_then(|x| x.as_str()) {
+        cfg.api_key = k.to_string();
+    }
+}
+
 /// POST /api/chat — start an agent turn and stream events back as SSE.
 pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -> Response {
-    // Build the model client from the frontend-supplied config.
-    let model = match liteclaw_model::OpenAiClient::new(req.model) {
+    // Build the model client from the frontend-supplied config. Gateway
+    // models resolve their base_url/api_key server-side from config.json's
+    // model_endpoints map — credentials never live in the browser.
+    let mut model_cfg = req.model;
+    resolve_model_endpoint(&mut model_cfg);
+    let model = match liteclaw_model::OpenAiClient::new(model_cfg) {
         Ok(m) => m,
         Err(e) => {
             return (StatusCode::BAD_REQUEST, format!("bad model config: {e}")).into_response();
@@ -147,10 +179,12 @@ pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -
     // first system message so the model knows project conventions.
     let mut messages = inject_agents_md(req.messages, &ctx.cwd);
 
-    // AUTO-RAG: retrieve fresh manual passages server-side and compact the
-    // payload, so long conversations never dilute grounding (see inject_rag).
-    let auto_rag = std::env::var("LITECLAW_AUTO_RAG").map(|v| v != "0").unwrap_or(true);
-    if auto_rag {
+    // AUTO-RAG (opt-in, default off): retrieve fresh manual passages
+    // server-side and compact the payload. When off, the model drives
+    // retrieval itself via skill_list/skill_run — visible as tool cards in
+    // the UI. LITECLAW_AUTO_RAG=0 still force-disables it for everyone.
+    let env_on = std::env::var("LITECLAW_AUTO_RAG").map(|v| v != "0").unwrap_or(true);
+    if req.auto_rag && env_on {
         if let Some(t) = tools.iter().find(|t| t.name == "skill_run") {
             inject_rag(&mut messages, t, &ctx).await;
             messages = compact_history(messages);

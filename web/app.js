@@ -282,9 +282,8 @@ function renderChatFromMessages() {
           const tres = addToolCard(tc.function?.name || 'tool', args, false, null);
           // Find the matching tool-result message for this call.
           const result = messages.find(x => x.role === 'tool' && x.tool_call_id === tc.id);
-          if (result && tres) {
-            tres.textContent = '✓ ' + contentText(result);
-            tres.className = 'tres ok';
+          if (result && tres && tres.setResult) {
+            tres.setResult(true, contentText(result));
           }
         }
       }
@@ -364,18 +363,25 @@ setInterval(async () => {
 
 // --- Config persistence: per-browser (localStorage), not shared server state ---
 // config.json via /api/config only seeds a first-time browser. Each user's
-// saved model/api_key lives in their own browser, so user A saving a model
-// never changes what user B sees. The ollama endpoint is a fixed deployment
-// value, kept out of the UI on purpose.
+// saved model/checkboxes live in their own browser, so user A saving a model
+// never changes what user B sees. Model endpoints and keys are a fixed
+// deployment value, kept out of the UI on purpose.
 const LC_CFG_KEY = 'liteclaw_cfg';
 const DEFAULT_BASE_URL = 'http://172.21.0.1:11434/v1';
+// Gateway-hosted models: base_url/api_key resolve server-side from
+// config.json's model_endpoints map — credentials never live in the
+// frontend. This list only decides which 禁思考 parameter a model gets
+// (gateway → enable_thinking via extra_body; every other model is local
+// Ollama → no_think, which the backend sends as reasoning_effort:"none").
+const GATEWAY_MODELS = ['qwen3.8-flash'];
 function fillCfg(c) {
-  // Respect the saved model; fall back to the fast no-think default on first
-  // visit or when the saved model is no longer in the dropdown.
-  const wanted = c.model || 'qwen3:30b-a3b-nothink';
+  // Respect the saved model; fall back to the fast default on first visit or
+  // when the saved model is no longer in the dropdown.
+  const wanted = c.model || 'minicpm5-2b:latest';
   const sel = document.getElementById('model');
-  sel.value = [...sel.options].some(o => o.value === wanted) ? wanted : 'qwen3:30b-a3b-nothink';
-  document.getElementById('api_key').value = c.api_key || '';
+  sel.value = [...sel.options].some(o => o.value === wanted) ? wanted : 'minicpm5-2b:latest';
+  document.getElementById('no_think').checked = !!c.no_think;
+  document.getElementById('auto_rag').checked = !!c.auto_rag;
 }
 async function loadCfg() {
   // Per-browser saved config wins; the server config only bootstraps a
@@ -398,7 +404,8 @@ async function loadCfg() {
 async function saveCfg() {
   const c = {
     model: document.getElementById('model').value.trim(),
-    api_key: document.getElementById('api_key').value.trim(),
+    no_think: document.getElementById('no_think').checked,
+    auto_rag: document.getElementById('auto_rag').checked,
   };
   const btn = document.getElementById('save_cfg');
   const orig = btn.textContent;
@@ -503,8 +510,8 @@ function renderMarkdown(md) {
   let inBlockquote = false;
   const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
   const closeBq = () => { if (inBlockquote) { html += '</blockquote>'; inBlockquote = false; } };
-  for (let raw of lines) {
-    const line = raw;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     // Code-block placeholder on its own line.
     const cbMatch = line.match(/^\u0000CB(\d+)\u0000$/);
     if (cbMatch) { closeList(); closeBq(); html += codeBlocks[parseInt(cbMatch[1])]; continue; }
@@ -514,6 +521,27 @@ function renderMarkdown(md) {
     // Headings.
     const h = line.match(/^(#{1,3})\s+(.*)/);
     if (h) { closeList(); closeBq(); html += '<h' + h[1].length + '>' + inline(h[2]) + '</h' + h[1].length + '>'; continue; }
+    // GFM pipe table: a | row followed by a delimiter row (|---|:--:|).
+    // Consumes all consecutive | rows so cells never leak into paragraphs.
+    if (/^\s*\|/.test(line) && i + 1 < lines.length && isDelimRow(lines[i + 1])) {
+      closeList(); closeBq();
+      const aligns = splitRow(lines[i + 1]).map(c =>
+        /^:-+:$/.test(c) ? 'center' : /-+:$/.test(c) ? 'right' : /^:-+/.test(c) ? 'left' : '');
+      const cellTag = (c, tag, j) => {
+        const a = aligns[j] ? ' style="text-align:' + aligns[j] + '"' : '';
+        return '<' + tag + a + '>' + inline(c) + '</' + tag + '>';
+      };
+      html += '<table><thead><tr>' +
+        splitRow(line).map((c, j) => cellTag(c, 'th', j)).join('') + '</tr></thead><tbody>';
+      i += 2;
+      while (i < lines.length && /^\s*\|/.test(lines[i])) {
+        html += '<tr>' + splitRow(lines[i]).map((c, j) => cellTag(c, 'td', j)).join('') + '</tr>';
+        i++;
+      }
+      html += '</tbody></table>';
+      i--; // compensate for the for-loop's i++ landing past the table
+      continue;
+    }
     // Unordered list.
     if (/^\s*[-*]\s+/.test(line)) { closeBq(); if (!inList) { html += '<ul>'; inList = true; } html += '<li>' + inline(line.replace(/^\s*[-*]\s+/, '')) + '</li>'; continue; }
     // Ordered list.
@@ -534,6 +562,16 @@ function renderMarkdown(md) {
   // Restore think-block placeholders.
   html = html.replace(/\u0000TB(\d+)\u0000/g, (m, i) => thinkBlocks[parseInt(i)]);
   return html;
+}
+
+// GFM table helpers: the delimiter row (|---|:--:|-—:|) marks a table; rows
+// split on unescaped pipes. \| inside a cell is a literal pipe.
+function isDelimRow(line) {
+  return /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/.test(line);
+}
+function splitRow(line) {
+  return line.trim().replace(/^\|/, '').replace(/\|\s*$/, '')
+    .replace(/\\\|/g, '\u0002').split('|').map(c => c.trim().replace(/\u0002/g, '|'));
 }
 
 // Inline transforms: bold, italic, inline code, links. Order matters: code
@@ -571,6 +609,13 @@ let busy = false;
 //   condition; fabricating an answer is a failure. Full checklist lives in
 //   docs/rag-boundary-tests.md.
 const QUESTION_GROUPS = [
+  { label: '常见问题', items: [
+    { q: '车辆如何启动？仪表上出现 READY 代表什么？', expect: '预期：启动步骤与 READY 指示含义，引用 driving 章节，附页码' },
+    { q: 'R5 E-Tech 支持哪些充电方式？如何开始和结束充电？', expect: '预期：按 EV 章节说明 AC/DC 充电方式与插拔流程，附页码' },
+    { q: 'D 挡和 B 挡有什么区别？如何切换？', expect: '预期：按 Gear control 章节说明 D/B 挡差异与能量回收关联，附页码' },
+    { q: '仪表上的警告灯是什么意思？', expect: '预期：说明警告灯分类并指向 Warning lights 章节，附页码' },
+    { q: 'V2L 对外放电如何使用？', expect: '预期：按 V2L 章节说明用法与限制，附页码' },
+  ]},
   { label: '基础', items: [
     { q: '儿童安全座椅怎么安装？', expect: '预期：按 Child safety 章节作答（ISOFIX 锚点位置、安装要点），结尾附页码引用' },
     { q: '胎压警告灯亮了怎么办？', expect: '预期：按 Tyre pressure loss warning 章节作答（停车检查冷态胎压、复位），附页码' },
@@ -589,25 +634,49 @@ const QUESTION_GROUPS = [
     { q: '汽油滤芯多久换一次？', expect: '预期（拒答）：纯电手册无汽油系统，应明确说未找到；硬答 = 失败' },
     { q: '油箱盖开关在哪里？', expect: '预期（拒答）：纯电车无油箱，应明确说未找到；硬答 = 失败' },
   ]},
+  { label: '驾驶辅助', items: [
+    { q: '自适应巡航在堵车时能用吗？', expect: '预期：按 Stop and Go 章节说明跟车/停走功能与激活限制，附页码' },
+    { q: '车道保持辅助怎么开启？', expect: '预期：按 Active driver assist 章节说明开启方式与工作条件，附页码' },
+    { q: '倒车雷达和倒车影像怎么用？', expect: '预期：按 Parking aids 章节说明雷达提示音与影像使用，附页码' },
+    { q: '自动泊车功能怎么触发？', expect: '预期：按 Parking aids 章节说明触发条件与操作步骤，附页码' },
+    { q: '能量回收强度怎么调节？', expect: '预期：按 Regenerative braking 章节说明换拨片/模式调节，附页码' },
+  ]},
+  { label: '车辆功能', items: [
+    { q: '车窗起雾怎么快速除雾？', expect: '预期：按空调/除雾章节说明除雾按钮与风量设置，附页码' },
+    { q: '补胎工具包怎么使用？', expect: '预期：按 Tyre repair kit 章节说明打胶步骤与 15 分钟/1.8 bar 判定阈值语境，附页码' },
+    { q: '后排童锁怎么设置？', expect: '预期：按 Child safety 章节说明童锁位置与操作，附页码' },
+    { q: '洗车需要注意什么？', expect: '预期：按 Cleaning 章节说明高压水枪距离与禁止事项，附页码' },
+    { q: '紧急呼叫 SOS 是怎么工作的？', expect: '预期：按 Emergency call 章节说明触发方式与工作原理，附页码' },
+  ]},
+  { label: '扩展边界', items: [
+    { q: '火花塞多久换一次？', expect: '预期（拒答）：纯电车无火花塞，应明确说未找到；硬答 = 失败' },
+    { q: '正时皮带多少公里换一次？', expect: '预期（拒答）：纯电车无正时皮带，应明确说未找到；硬答 = 失败' },
+    { q: '变速箱油需要更换吗？', expect: '预期（谨慎）：电驱减速器油如手册未提及更换周期应如实说明；编造公里数 = 失败' },
+    { q: '电池质保是多少年？', expect: '预期（转述）：手册通常指向单独质保文档，应如实转述不编年限' },
+    { q: '百公里加速需要几秒？', expect: '预期（边界）：按手册技术规格如实回答，规格无此数据应明确说明；编造秒数 = 失败' },
+  ]},
 ];
-const sugBox = document.getElementById('suggestions');
+// Suggested questions render as ONE dropdown (grouped by optgroup): picks a
+// question, sends it, then resets so the same question can be picked again.
+const sugSelect = document.getElementById('sug-select');
 for (const g of QUESTION_GROUPS) {
-  const row = document.createElement('div');
-  row.className = 'sug-row';
-  const tag = document.createElement('span');
-  tag.className = 'grp';
-  tag.textContent = g.label;
-  row.appendChild(tag);
+  const og = document.createElement('optgroup');
+  og.label = g.label;
   for (const q of g.items) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = q.q;
-    b.title = q.expect;
-    b.onclick = () => { input.value = q.q; send(); };
-    row.appendChild(b);
+    const o = document.createElement('option');
+    o.value = q.q;
+    o.textContent = q.q;
+    o.title = q.expect;
+    og.appendChild(o);
   }
-  sugBox.appendChild(row);
+  sugSelect.appendChild(og);
 }
+sugSelect.addEventListener('change', () => {
+  if (!sugSelect.value) return;
+  input.value = sugSelect.value;
+  sugSelect.selectedIndex = 0;
+  send();
+});
 
 // --- Image attachment (multimodal) ---
 let pendingImage = null; // { dataUrl: "data:image/png;base64,...", name: "x.png" }
@@ -706,9 +775,36 @@ function addToolCard(tool, args, needsConfirm, confirmId) {
   div.innerHTML =
     '<div class="tname">🔧 ' + tool + (needsConfirm ? ' ⚠️ 需确认' : '') + '</div>' +
     '<div class="targs">' + (typeof args === 'string' ? args : JSON.stringify(args)) + '</div>' +
+    '<div class="tres-toggle" hidden></div>' +
     '<div class="tres"></div>';
   chat.appendChild(div);
   const tres = div.querySelector('.tres');
+  const toggle = div.querySelector('.tres-toggle');
+
+  // Results longer than this start folded behind a "click to expand" line,
+  // so a full RAG retrieval doesn't flood the chat with JSON passages.
+  const FOLD_THRESHOLD = 200;
+  let folded = true;
+  let lastOk = true, lastText = '';
+  const fmtChars = (n) => (n >= 1000 ? (n / 1000).toFixed(1) + 'K 字符' : n + ' 字符');
+  toggle.onclick = () => { folded = !folded; tres.setResult(lastOk, lastText); };
+  tres.setResult = (ok, text) => {
+    lastOk = ok; lastText = text || '';
+    const cls = ' ' + (ok ? 'ok' : 'fail');
+    if (lastText.length > FOLD_THRESHOLD) {
+      toggle.hidden = false;
+      toggle.className = 'tres-toggle' + cls;
+      toggle.textContent = (folded ? '▶' : '▼') + ' ' + (ok ? '✓' : '✗') + ' 结果 ' +
+        fmtChars(lastText.length) + ' · 点击' + (folded ? '展开' : '收起');
+      tres.hidden = folded;
+      tres.textContent = lastText;
+    } else {
+      toggle.hidden = true;
+      tres.hidden = false;
+      tres.textContent = (ok ? '✓ ' : '✗ ') + lastText;
+    }
+    tres.className = 'tres' + cls;
+  };
 
   // For tools needing confirmation, show allow/deny buttons.
   if (needsConfirm && confirmId) {
@@ -828,11 +924,24 @@ function trimContext(msgs) {
 }
 
 async function streamChat() {
+  const model = document.getElementById('model').value.trim();
+  // base_url/api_key: Ollama is a fixed deployment value; gateway models are
+  // resolved server-side from config.json (model_endpoints). Nothing to send.
   const cfg = {
     base_url: DEFAULT_BASE_URL,
-    api_key: document.getElementById('api_key').value.trim(),
-    model: document.getElementById('model').value.trim(),
+    model,
   };
+  // 禁思考: gateway models get the enable_thinking body param (server resolves
+  // their real endpoint); everything else is local Ollama — the backend
+  // translates no_think into reasoning_effort:"none" on the same /v1 path.
+  // Harmless no-op on Ollama models without thinking support.
+  if (document.getElementById('no_think').checked) {
+    if (GATEWAY_MODELS.includes(model)) {
+      cfg.extra_body = { enable_thinking: false };
+    } else {
+      cfg.no_think = true;
+    }
+  }
 
   // Trim history to stay within the context budget.
   const nonSystem = messages.filter(m => m.role !== 'system');
@@ -878,6 +987,7 @@ async function streamChat() {
         messages: reqMessages,
         model: cfg,
         auto_mode: document.getElementById('auto_mode').checked,
+        auto_rag: document.getElementById('auto_rag').checked,
       }),
     });
     if (resp.status === 401) { showLogin(); return; }
@@ -984,9 +1094,8 @@ async function streamChat() {
       // Append result to the last tool card (simple heuristic).
       const cards = chat.querySelectorAll('.tool-card .tres');
       const last = cards[cards.length - 1];
-      if (last) {
-        last.textContent = (ev.ok ? '✓ ' : '✗ ') + ev.summary;
-        last.className = 'tres ' + (ev.ok ? 'ok' : 'fail');
+      if (last && last.setResult) {
+        last.setResult(ev.ok, ev.summary);
       }
     } else if (ev.type === 'done') {
       const tail = thinkFilter.flush();
