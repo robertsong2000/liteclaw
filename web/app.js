@@ -370,18 +370,20 @@ const LC_CFG_KEY = 'liteclaw_cfg';
 const DEFAULT_BASE_URL = 'http://172.21.0.1:11434/v1';
 // Gateway-hosted models: base_url/api_key resolve server-side from
 // config.json's model_endpoints map — credentials never live in the
-// frontend. This list only decides which 禁思考 parameter a model gets
-// (gateway → enable_thinking via extra_body; every other model is local
-// Ollama → no_think, which the backend sends as reasoning_effort:"none").
+// frontend. This list decides the protocol and the 禁思考 parameter:
+// gateway → /v1 + enable_thinking via extra_body; every other model is
+// local Ollama → NATIVE /api/chat + think:false + per-request num_ctx.
 const GATEWAY_MODELS = ['qwen3.8-flash'];
 function fillCfg(c) {
   // Respect the saved model; fall back to the fast default on first visit or
   // when the saved model is no longer in the dropdown.
-  const wanted = c.model || 'minicpm5-2b:latest';
+  const wanted = c.model || 'openbmb/minicpm5-2b:latest';
   const sel = document.getElementById('model');
-  sel.value = [...sel.options].some(o => o.value === wanted) ? wanted : 'minicpm5-2b:latest';
+  sel.value = [...sel.options].some(o => o.value === wanted) ? wanted : 'openbmb/minicpm5-2b:latest';
   document.getElementById('no_think').checked = !!c.no_think;
-  document.getElementById('auto_rag').checked = !!c.auto_rag;
+  // 自动检索默认开启: MiniCPM5-2B 自主调工具不可靠(幻觉路径/参数格式错),
+  // 服务端注入检索才是稳定路径。显式保存过 false 的老配置予以尊重。
+  document.getElementById('auto_rag').checked = c.auto_rag === undefined ? true : !!c.auto_rag;
 }
 async function loadCfg() {
   // Per-browser saved config wins; the server config only bootstraps a
@@ -931,14 +933,20 @@ async function streamChat() {
     base_url: DEFAULT_BASE_URL,
     model,
   };
-  // 禁思考: gateway models get the enable_thinking body param (server resolves
-  // their real endpoint); everything else is local Ollama — the backend
-  // translates no_think into reasoning_effort:"none" on the same /v1 path.
-  // Harmless no-op on Ollama models without thinking support.
-  if (document.getElementById('no_think').checked) {
-    if (GATEWAY_MODELS.includes(model)) {
+  // 禁思考 + 协议选择: gateway models get the enable_thinking body param on
+  // /v1 (server resolves their real endpoint); every other model is local
+  // Ollama and goes over its NATIVE /api/chat protocol — that carries
+  // per-request num_ctx (stock official models get full context without
+  // custom tags) and think:false for 禁思考. num_ctx=32768 fits this box's
+  // GPU; lower it there if a bigger model needs the VRAM.
+  if (GATEWAY_MODELS.includes(model)) {
+    if (document.getElementById('no_think').checked) {
       cfg.extra_body = { enable_thinking: false };
-    } else {
+    }
+  } else {
+    cfg.native = true;
+    cfg.num_ctx = 32768;
+    if (document.getElementById('no_think').checked) {
       cfg.no_think = true;
     }
   }
