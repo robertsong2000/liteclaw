@@ -347,6 +347,9 @@ ZH_GLOSSARY = {
     "附件": "accessories",
     "车架号": "VIN",
     "识别码": "VIN",
+    "质保": "warranty",
+    "保修": "warranty",
+    "质保期": "warranty period",
 }
 
 def augment_query(query):
