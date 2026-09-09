@@ -28,7 +28,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 GOLDEN_FILE = os.path.join(HERE, "golden.jsonl")
 BASELINE_FILE = os.path.join(HERE, "baseline.json")
 OLLAMA = os.environ.get("OLLAMA_NATIVE_URL", "http://localhost:11434")
-JUDGE_MODEL = os.environ.get("JUDGE_MODEL", "qwen3:30b-a3b-nothink")
+JUDGE_MODEL = os.environ.get("JUDGE_MODEL", "qwen3:30b-a3b")
 NUM_CTX = 16384
 VERDICT_RANK = {"PASS": 2, "WEAK": 1, "FAIL": 0, "ERROR": -1, "NO_GOLDEN": -2}
 
@@ -74,7 +74,7 @@ def ask_judge(question, golden, answer, kind, must_points=None):
                                  golden=golden, answer=answer)
     r = requests.post(f"{OLLAMA}/api/chat", json={
         "model": JUDGE_MODEL, "messages": [{"role": "user", "content": prompt}],
-        "format": "json", "stream": False,
+        "format": "json", "stream": False, "think": False,
         "options": {"temperature": 0, "num_ctx": NUM_CTX},
     }, timeout=600)
     r.raise_for_status()

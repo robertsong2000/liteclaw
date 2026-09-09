@@ -30,7 +30,9 @@ import requests
 
 BASE = os.environ.get("LITECLAW_URL", "http://localhost:9999")
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://172.21.0.1:11434/v1")
-MODELS = ["qwen3:30b-a3b-nothink", "qwen3:8b", "minicpm5-2b:latest"]
+MODELS = ["qwen3:30b-a3b", "qwen3:8b", "minicpm5-2b:32k"]
+# 生产快答模式:原版模型 + no_think(动态关思考,等价于已退役的 -nothink 变体)。
+NO_THINK = {"qwen3:30b-a3b"}
 HERE = os.path.dirname(os.path.abspath(__file__))
 CASES_FILE = os.path.join(HERE, "cases.jsonl")
 RUNS_DIR = os.path.join(HERE, "runs")
@@ -63,7 +65,8 @@ def chat_stream(s, token, model, messages):
     """POST /api/chat 并解析 SSE。返回 (工具事件, 工具结果摘要, 回答全文, 错误, 断流)。"""
     payload = {
         "messages": messages,
-        "model": {"base_url": OLLAMA_URL, "api_key": "", "model": model},
+        "model": {"base_url": OLLAMA_URL, "api_key": "", "model": model,
+                  "no_think": model in NO_THINK},
         "auto_mode": True,
     }
     tools, results, answer, err, broken = [], [], [], None, None

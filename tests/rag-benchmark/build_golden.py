@@ -29,7 +29,7 @@ MANUAL_FILE = os.path.join(REPO, "manual", "renault-5-e-tech-2025.jsonl")
 RAG_SCRIPT = os.path.join(REPO, "skills", "manual-rag", "scripts", "rag.py")
 MANUAL_DIR = os.environ.get("LITECLAW_MANUAL_DIR", os.path.join(REPO, "manual"))
 OLLAMA = os.environ.get("OLLAMA_NATIVE_URL", "http://localhost:11434")
-GOLDEN_MODEL = os.environ.get("GOLDEN_MODEL", "qwen3:30b-a3b-nothink")
+GOLDEN_MODEL = os.environ.get("GOLDEN_MODEL", "qwen3:30b-a3b")
 TOP_K = 8
 NUM_CTX = 16384
 
@@ -80,7 +80,7 @@ def retrieve(rag, query, top_k=TOP_K):
 def ask_ollama(prompt, model=GOLDEN_MODEL):
     r = requests.post(f"{OLLAMA}/api/chat", json={
         "model": model, "messages": [{"role": "user", "content": prompt}],
-        "format": "json", "stream": False,
+        "format": "json", "stream": False, "think": False,
         "options": {"temperature": 0, "num_ctx": NUM_CTX},
     }, timeout=600)
     r.raise_for_status()

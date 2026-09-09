@@ -54,8 +54,8 @@ python3 judge.py runs/<再新> --vs baseline         # 日常：只跟基线比
   judge 自动识别：仅当本次运行其他题出现过 `skill_run` 事件（agent 模式）时，
   某题没调检索才判 FAIL 0 分；AUTO-RAG 模式下不以此扣分。
 - **回答为空/报错 → ERROR**。
-- **LLM 评审**（默认 `qwen3:30b-a3b-nothink`，temperature=0，直连 ollama、无工具可调，
-  与被评模型物理隔离）：对照 golden 逐条核对 `must_points` 覆盖
+- **LLM 评审**（默认 `qwen3:30b-a3b` + `think:false` 动态免思考，temperature=0，直连 ollama、无工具可调，
+  与被评模型物理隔离；2026-09-09 前用已删除的 `-nothink` 静态变体，行为等价）：对照 golden 逐条核对 `must_points` 覆盖
   （covered/partial/missing）+ 编造检测（fabrication 强制 FAIL、分数压到 ≤3）+ 引用检查。
   引用页码与 golden 不同但内容一致不算编造（检索召回相邻页是正常的）。
 - 分数锚点：9-10 全覆盖零编造 / 7-8 小遗漏 / 4-6 明显缺失 / 0-3 编造或答非所问。
