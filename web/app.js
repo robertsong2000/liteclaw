@@ -752,9 +752,16 @@ const SYSTEM_PROMPT =
   '第3步：检索不到就明确回答"手册中没有相关内容"，此时省略参考来源部分。\n' +
   '示例流程：\n用户：雾灯怎么开？\n正确做法：先调用 skill_run("manual-rag", "雾灯怎么开？")，再基于返回的原文段落回答，结尾附参考来源。\n' +
   '错误做法：不调用任何工具、凭记忆直接回答车辆问题。\n' +
-  '\n【参考来源格式】回答结尾必须附上（最多 4 条，只列实际用到的）：\n' +
-  '参考来源:\n- <source> | <section>\n' +
-  '严禁编造引用：未经 skill_run 检索，绝不允许输出任何页码或"参考来源"字样。\n' +
+  '\n【回答风格——你是车主的随车助手，不是知识库查询界面】\n' +
+  '- 用自然、友好的口吻直接告诉车主怎么操作，像随车顾问一样说话；\n' +
+  '- 绝对不要出现"根据手册""第X页""章节""检索""chunk""知识库"这类词，也不要复述检索过程；\n' +
+  '- 直接说操作步骤和注意事项；内容只覆盖部分时，自然回答已覆盖的部分，不要声明"检索未覆盖"；\n' +
+  '- 复杂操作用简短的编号步骤说明。\n' +
+  '\n【参考来源格式】回答结尾附上（最多 4 条，只列实际用到的，面向车主的简洁写法）：\n' +
+  '参考来源:\n- 用户手册 p.<页码>（<中文主题>）\n' +
+  '示例：- 用户手册 p.148（灯光与信号）\n' +
+  '严禁编造引用：未经 skill_run 检索，绝不允许输出任何页码或"参考来源"字样；\n' +
+  '禁止把文件路径、chunk 编号写进参考来源。\n' +
   '【数值转述纪律】引用任何数值时，必须连同原文的限定条件（所属章节、场景、前提）一起原样转述；' +
   '不得把特定场景的数值泛化为通用参数（例如补胎流程中的压力阈值不是标准胎压）；' +
   '凡手册写明以车门标签(Label A)为准的参数，必须提示用户查看车门标签。\n' +
@@ -977,6 +984,8 @@ async function streamChat() {
     requestAnimationFrame(() => {
       renderPending = false;
       if (assistantDiv) {
+        // 无可见内容(还在检索/思考)时隐藏气泡, 避免空白占位框
+        assistantDiv.style.display = assistantText.trim() ? '' : 'none';
         assistantDiv.innerHTML = renderMarkdown(assistantText);
         scrollDown();
       }
@@ -994,7 +1003,7 @@ async function streamChat() {
       body: JSON.stringify({
         messages: reqMessages,
         model: cfg,
-        auto_mode: document.getElementById('auto_mode').checked,
+        auto_mode: true,
         auto_rag: document.getElementById('auto_rag').checked,
       }),
     });
@@ -1074,6 +1083,10 @@ async function streamChat() {
       // but we keep them separate for simpler reconstruction on switch.
       if (assistantText && assistantText.trim()) {
         messages.push({ role: 'assistant', content: assistantText });
+      }
+      // 纯占位气泡(只有飘动圆点、还没产生内容)直接移除,不能留在页面上
+      if (assistantDiv && !assistantText.trim()) {
+        assistantDiv.remove();
       }
       assistantDiv = null; assistantText = '';
       // Track this tool call in messages[] so it persists across switches.

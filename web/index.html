@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>车书助手 🚗 v2</title>
-<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css?v=20260908d" />
 </head>
 <body>
 
@@ -39,14 +39,11 @@
       <option value="openbmb/minicpm5-2b:latest">MiniCPM5-2B</option>
       <option value="qwen3.8-flash">Qwen3.8-Flash (NewAPI)</option>
     </select>
-    <label title="勾选后所有工具(写文件/执行命令)自动执行,不弹确认框" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
-      <input type="checkbox" id="auto_mode" checked /> 自动模式
-    </label>
     <label title="思考开关:勾选后对所有模型发送禁思考指令。会思考的模型(MiniCPM5-2B、Qwen3-30B-A3B 默认思考)将直接回答,更快更省 token;不会思考的模型无变化。" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
       <input type="checkbox" id="no_think" /> 禁用思考
     </label>
-    <label title="默认开启:服务器每次提问前自动检索手册并注入给模型,答案更稳(界面看不到检索过程)。关闭后改为模型自主调用 skill 检索(界面能看到工具卡片,但小模型常出现幻觉路径/参数格式错,不建议)。" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
-      <input type="checkbox" id="auto_rag" /> 自动检索
+    <label title="开启 = 每轮提问强制先触发一轮 RAG 检索:服务器代查手册原文并注入给模型,回答只依据检索内容,更稳定(检索过程界面不可见)。关闭 = 模型自行决定是否调 skill 检索(界面能看到工具卡片),小模型容易漏检或编造参数,不建议关闭。默认:开启。" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
+      <input type="checkbox" id="auto_rag" checked /> 强制RAG检索
     </label>
     <button id="save_cfg">保存</button>
     <button id="help_btn" title="怎么提问、能问什么：打开 RAG 问题地图" onclick="window.open('/help','_blank')">❓ Help</button>
@@ -67,6 +64,6 @@
   <span id="img-remove" style="color:#ef5350;cursor:pointer;margin-left:8px;font-size:12px">✕ 移除</span>
 </div>
 
-<script src="app.js"></script>
+<script src="app.js?v=20260908d"></script>
 </body>
 </html>

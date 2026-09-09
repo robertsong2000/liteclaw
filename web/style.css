@@ -129,4 +129,3 @@ footer button:disabled { opacity: 0.4; cursor: default; }
 }
 .msg.assistant th { background: var(--panel-2); font-weight: 700; }
 .msg.assistant td { vertical-align: top; }
-
