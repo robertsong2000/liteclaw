@@ -95,7 +95,10 @@ def normalize(judged):
     return judged
 
 
-def judge_run(run_dir, force=False, agent_gate=False):
+def judge_run(run_dir, force=False, agent_gate=None):
+    """agent_gate=None 时自动识别：本次运行全部记录都标了 auto_rag=false
+    （模型自主调工具模式）才启用"没调检索"门禁；AUTO-RAG 运行（true 或无此字段的
+    历史数据）一律不启用。--agent-mode 可强制开启。"""
     answers = [json.loads(l) for l in open(os.path.join(run_dir, "answers.jsonl"), encoding="utf-8") if l.strip()]
     golden = {}
     for l in open(GOLDEN_FILE, encoding="utf-8"):
@@ -111,9 +114,11 @@ def judge_run(run_dir, force=False, agent_gate=False):
                 done[(j["model"], j["id"])] = j
 
     n_unreviewed = sum(1 for g in golden.values() if not g.get("reviewed"))
-    # "没调检索"门禁默认关闭：AUTO-RAG 架构下工具事件是可选的（模型可自行调用也可依赖
-    # 服务端注入），事件有无不能说明是否检索过。只有 --agent-mode 显式开启
-    # （对应 LITECLAW_AUTO_RAG=0、模型必须自己调工具的部署）才启用该门禁。
+    # "没调检索"门禁：AUTO-RAG 下工具事件是可选的（模型可自行调用也可依赖服务端注入），
+    # 事件有无不能说明是否检索过。仅当全部记录 auto_rag=false（自主调工具模式）时
+    # 自动启用；--agent-mode 可强制开启。
+    if agent_gate is None:
+        agent_gate = bool(answers) and all(r.get("auto_rag") is False for r in answers)
     out, n_new = [], 0
     for rec in answers:
         key = (rec["model"], rec["id"])
@@ -230,7 +235,8 @@ def main():
         return 2
     run_dir = sys.argv[1].rstrip("/")
     force = "--force" in sys.argv
-    records, n_unreviewed = judge_run(run_dir, force, agent_gate="--agent-mode" in sys.argv)
+    records, n_unreviewed = judge_run(run_dir, force,
+                                      agent_gate=True if "--agent-mode" in sys.argv else None)
     summary = summarize(records, n_unreviewed)
     write_summary(run_dir, summary)
     print(f"摘要 -> {os.path.join(run_dir, 'summary.md')}")

@@ -30,9 +30,12 @@ import requests
 
 BASE = os.environ.get("LITECLAW_URL", "http://localhost:9999")
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://172.21.0.1:11434/v1")
-MODELS = ["qwen3:30b-a3b", "qwen3:8b", "minicpm5-2b:32k"]
+MODELS = ["qwen3:30b-a3b", "qwen3:8b", "openbmb/minicpm5-2b:latest"]
 # 生产快答模式:原版模型 + no_think(动态关思考,等价于已退役的 -nothink 变体)。
 NO_THINK = {"qwen3:30b-a3b"}
+# 走 ollama 原生 API 的模型:":32k" 标签已删,上下文改按请求传(num_ctx 覆盖标签默认值),
+# native=true 直连 /api/chat(base_url 带 /v1 时服务端会自动剥掉再拼 /api/chat)。
+NATIVE_MODELS = {"openbmb/minicpm5-2b:latest": {"native": True, "num_ctx": 32768}}
 HERE = os.path.dirname(os.path.abspath(__file__))
 CASES_FILE = os.path.join(HERE, "cases.jsonl")
 RUNS_DIR = os.path.join(HERE, "runs")
@@ -61,13 +64,19 @@ def load_cases():
     return cases
 
 
-def chat_stream(s, token, model, messages):
-    """POST /api/chat 并解析 SSE。返回 (工具事件, 工具结果摘要, 回答全文, 错误, 断流)。"""
+def chat_stream(s, token, model, messages, auto_rag=True):
+    """POST /api/chat 并解析 SSE。返回 (工具事件, 工具结果摘要, 回答全文, 错误, 断流, 耗时)。
+    auto_rag 与前端"自动检索"复选框同源（ChatRequest.auto_rag，按请求传参，无需重启）：
+      True  = 服务端每轮自动检索注入（工具被清空，一般无工具事件）；
+      False = 模型自主调 skill_run（有工具事件，可配 judge.py --agent-mode 门禁）。"""
+    cfg = {"base_url": OLLAMA_URL, "api_key": "", "model": model,
+           "no_think": model in NO_THINK}
+    cfg.update(NATIVE_MODELS.get(model, {}))
     payload = {
         "messages": messages,
-        "model": {"base_url": OLLAMA_URL, "api_key": "", "model": model,
-                  "no_think": model in NO_THINK},
+        "model": cfg,
         "auto_mode": True,
+        "auto_rag": auto_rag,
     }
     tools, results, answer, err, broken = [], [], [], None, None
     t0 = time.time()
@@ -144,10 +153,10 @@ def precheck(kind, hs):
     return "PASS?(有检索有引用)" if hs["cited"] else "WEAK?(无引用)"
 
 
-def ask(s, token_box, model, messages):
+def ask(s, token_box, model, messages, auto_rag=True):
     """带自愈的请求：服务中途重启会作废内存态登录 token，检测到请求瞬时失败
     （HTTP 4xx 或连接断流且无内容）就重新登录再试一次。"""
-    tools, results, full, err, broken, lat = chat_stream(s, token_box[0], model, messages)
+    tools, results, full, err, broken, lat = chat_stream(s, token_box[0], model, messages, auto_rag)
     if not full and (broken or (err and err.startswith("HTTP 4"))):
         try:
             r = s.post(f"{BASE}/api/login",
@@ -157,31 +166,32 @@ def ask(s, token_box, model, messages):
             print("  (服务重启过，已重新登录并重试本条)", flush=True)
         except Exception:
             pass
-        tools, results, full, err, broken, lat = chat_stream(s, token_box[0], model, messages)
+        tools, results, full, err, broken, lat = chat_stream(s, token_box[0], model, messages, auto_rag)
     return tools, results, full, err, broken, lat
 
 
-def run_question(s, token, model, q, system_prompt):
+def run_question(s, token, model, q, system_prompt, auto_rag=True):
     """单轮：直接发一问。保留旧签名（multiturn_chained.py 复用）。"""
     messages = [{"role": "system", "content": system_prompt},
                 {"role": "user", "content": q}]
-    tools, results, full, err, broken, lat = chat_stream(s, token, model, messages)
+    tools, results, full, err, broken, lat = chat_stream(s, token, model, messages, auto_rag)
     return {"latency_s": lat, "tool_calls": [f"{x['tool']}({x['id']})" for x in tools],
             **hard_signals(tools, full),
             "answer": full, "error": err, "stream_broken": broken}
 
 
-def run_chain(s, token_box, model, case, system_prompt):
+def run_chain(s, token_box, model, case, system_prompt, auto_rag=True):
     """链式用例：同一对话连续追问，历史含每轮完整 RAG 结果真实累积。"""
     history = [{"role": "system", "content": system_prompt}]
     turns = []
     for i, t in enumerate(case["turns"], 1):
         input_chars = sum(len(str(m.get("content") or "")) for m in history) + len(t["question"])
         send = history + [{"role": "user", "content": t["question"]}]
-        tools, results, full, err, broken, lat = ask(s, token_box, model, send)
+        tools, results, full, err, broken, lat = ask(s, token_box, model, send, auto_rag)
         hs = hard_signals(tools, full)
         turns.append({"id": f"{case['id']}#{i}", "kind": t["kind"], "question": t["question"],
                       "turn": i, "latency_s": lat, "input_chars": input_chars,
+                      "auto_rag": auto_rag,
                       "tool_calls": [f"{x['tool']}({x['id']})" for x in tools],
                       "rag_called": hs["rag_called"], "cited": hs["cited"], "refused": hs["refused"],
                       "answer": full, "error": err, "stream_broken": broken,
@@ -219,6 +229,10 @@ def main():
     retry_dir = None
     if "--retry" in sys.argv:
         retry_dir = sys.argv[sys.argv.index("--retry") + 1].rstrip("/")
+    # 自动检索按请求传参（与前端"自动检索"复选框同源），默认开；--no-auto-rag 测
+    # "模型自主调工具"模式（结果建议配 judge.py --agent-mode 评审）。
+    auto_rag = "--no-auto-rag" not in sys.argv
+    print(f"auto_rag={auto_rag}（按请求传参）", flush=True)
 
     run_dir = retry_dir
     keep = []
@@ -271,7 +285,7 @@ def main():
                 if not any(need(model, f"{case['id']}#{i}") for i in range(1, len(case["turns"]) + 1)):
                     continue
                 print(f"[{model}] chain {case['id']}（{len(case['turns'])} 轮）", flush=True)
-                for rec in run_chain(s, token_box, model, case, system_prompt):
+                for rec in run_chain(s, token_box, model, case, system_prompt, auto_rag):
                     rec.update({"model": model})
                     n += 1
                     save(rec)
@@ -283,10 +297,11 @@ def main():
                 print(f"[{model}] {case['id']} ({case['kind']}) {case['question']}", flush=True)
                 messages = [{"role": "system", "content": system_prompt},
                             {"role": "user", "content": case["question"]}]
-                tools, _, full, err, broken, lat = ask(s, token_box, model, messages)
+                tools, _, full, err, broken, lat = ask(s, token_box, model, messages, auto_rag)
                 hs = hard_signals(tools, full)
                 rec = {"id": case["id"], "model": model, "kind": case["kind"],
                        "question": case["question"], "turn": None, "latency_s": lat,
+                       "auto_rag": auto_rag,
                        "tool_calls": [f"{x['tool']}({x['id']})" for x in tools],
                        "answer": full, "error": err, "stream_broken": broken,
                        **hs, "precheck": precheck(case["kind"], hs)}

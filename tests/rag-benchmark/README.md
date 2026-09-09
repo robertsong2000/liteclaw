@@ -31,9 +31,10 @@ python3 build_golden.py                 # 全量；--id <case_id> 单题重建�
 
 # 2. 跑模型答题（默认 3 模型 × 35 题，约 1.5~3 小时）
 python3 compare_models.py                          # 全量
-python3 compare_models.py --model openbmb/minicpm5:latest --tag minicpm
+python3 compare_models.py --model openbmb/minicpm5-2b:latest --tag minicpm
 python3 compare_models.py --kind refuse,paraphrase # 只跑指定类型（快速回归）
 python3 compare_models.py --retry runs/<旧目录>    # 只补答断流/空回答的记录（链式断一轮整链重跑）
+python3 compare_models.py --no-auto-rag            # 关自动检索：模型自主调 skill_run（有工具卡片）
 python3 compare_models.py --smoke                  # 单模型单题冒烟
 
 # 3. LLM 评审打分（未调检索的题直接判 0，不耗评审调用）
@@ -48,11 +49,14 @@ python3 judge.py runs/<再新> --vs baseline         # 日常：只跟基线比
 
 ## 评审口径
 
-- **架构自适应**：2026-09-08 起服务端启用 AUTO-RAG（`liteclaw-web/src/handlers.rs`，
-  `LITECLAW_AUTO_RAG=0` 可关）——每轮由服务端自动跑 `manual-rag` 注入检索结果，
-  SSE 流里不再有 tool 事件，"没看到工具事件"≠"没检索"。
-  judge 自动识别：仅当本次运行其他题出现过 `skill_run` 事件（agent 模式）时，
-  某题没调检索才判 FAIL 0 分；AUTO-RAG 模式下不以此扣分。
+- **auto_rag 按请求传参**：与前端"自动检索"复选框同源（`ChatRequest.auto_rag`），
+  无需重启服务。`compare_models.py` 默认 `auto_rag=true`（服务端每轮注入检索，无工具事件），
+  `--no-auto-rag` 切到"模型自主调 skill_run"模式（有工具事件）。
+  `LITECLAW_AUTO_RAG=0` 只是服务器级总闸（改它才要重建容器），评测用不到。
+- **"没调检索"门禁自动识别**：judged 记录里 `auto_rag` 字段已经说明运行模式——
+  全部 `auto_rag=false` 的运行才启用"没调检索 → FAIL 0 分"门禁（judge.py `--agent-mode`
+  可强制开启）；AUTO-RAG 运行不以此扣分，"没看到工具事件"≠"没检索"。
+  每条 answers 记录都带 `auto_rag` 字段，跨模式对比时不会混。
 - **回答为空/报错 → ERROR**。
 - **LLM 评审**（默认 `qwen3:30b-a3b` + `think:false` 动态免思考，temperature=0，直连 ollama、无工具可调，
   与被评模型物理隔离；2026-09-09 前用已删除的 `-nothink` 静态变体，行为等价）：对照 golden 逐条核对 `must_points` 覆盖
