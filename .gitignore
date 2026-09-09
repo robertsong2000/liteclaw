@@ -18,6 +18,8 @@ Cargo.lock.bak
 # Test artifacts
 helloworld
 helloworld.c
+bubble
+bubble.c
 manual/
 
 __pycache__/
