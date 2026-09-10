@@ -1,0 +1,32 @@
+{
+ "cluster": "safety",
+ "questions": [
+  {
+   "id": "hit-fuse-box",
+   "question": "保险丝盒在哪里？保险丝坏了怎么检查更换？",
+   "must_points": [
+    "保险丝盒位置",
+    "检查/更换要点",
+    "附页码"
+   ]
+  },
+  {
+   "id": "hit-emergency-call",
+   "question": "紧急呼叫（SOS）功能是怎么工作的？",
+   "must_points": [
+    "触发方式",
+    "呼叫流程/工作方式",
+    "附页码"
+   ]
+  },
+  {
+   "id": "hit-demist",
+   "question": "前挡风玻璃起雾怎么除雾？",
+   "must_points": [
+    "除雾功能操作方式",
+    "相关注意事项",
+    "附页码"
+   ]
+  }
+ ]
+}

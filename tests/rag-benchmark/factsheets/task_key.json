@@ -1,0 +1,39 @@
+{
+ "cluster": "key",
+ "questions": [
+  {
+   "id": "hit-key-battery",
+   "question": "车钥匙电池没电了怎么更换？",
+   "must_points": [
+    "更换步骤",
+    "电池型号",
+    "附页码"
+   ]
+  },
+  {
+   "id": "hit-key-dead-start",
+   "question": "车钥匙卡片没电了怎么启动车辆？",
+   "must_points": [
+    "钥匙没电时的应急启动方式",
+    "附页码"
+   ]
+  },
+  {
+   "id": "chain-key#2",
+   "question": "钥匙没电的情况下怎么启动车辆？",
+   "must_points": [
+    "应急启动方式",
+    "附页码"
+   ]
+  },
+  {
+   "id": "chain-key#3",
+   "question": "数字钥匙是什么？怎么用？",
+   "must_points": [
+    "数字钥匙功能说明",
+    "开通/使用方式",
+    "附页码"
+   ]
+  }
+ ]
+}

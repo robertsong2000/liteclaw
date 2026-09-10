@@ -1,0 +1,15 @@
+{
+ "cluster": "childseat",
+ "questions": [
+  {
+   "id": "hit-child-seat",
+   "question": "儿童安全座椅怎么安装？",
+   "must_points": [
+    "ISOFIX 锚点位置（座椅背与坐垫间环形标记，p.91-98）",
+    "后排安装优先/前排限制条件",
+    "安装步骤要点",
+    "附页码引用"
+   ]
+  }
+ ]
+}

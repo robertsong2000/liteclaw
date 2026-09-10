@@ -1,0 +1,41 @@
+{
+ "cluster": "driving",
+ "questions": [
+  {
+   "id": "hit-gear-p",
+   "question": "挡位怎么挂入P挡？",
+   "must_points": [
+    "指出手册换挡杆没有 P 挡（只有 R/N/D/B）",
+    "正确说明停车程序：施加电子驻车制动并经指示灯确认",
+    "附页码引用 p.161-163"
+   ]
+  },
+  {
+   "id": "hit-cruise-control",
+   "question": "定速巡航怎么设置巡航车速？",
+   "must_points": [
+    "设置/调整巡航车速的操作步骤",
+    "激活/暂停条件",
+    "附页码"
+   ]
+  },
+  {
+   "id": "hit-eco-driving",
+   "question": "有哪些经济驾驶省电的技巧？",
+   "must_points": [
+    "ECO 模式/经济驾驶要点",
+    "影响能耗的因素",
+    "附页码"
+   ]
+  },
+  {
+   "id": "hit-winter-range",
+   "question": "冬天续航里程为什么会下降？",
+   "must_points": [
+    "按手册解释低温对续航的影响",
+    "给出手册中的建议",
+    "附页码"
+   ]
+  }
+ ]
+}

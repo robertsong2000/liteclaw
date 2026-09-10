@@ -30,7 +30,9 @@ import requests
 
 BASE = os.environ.get("LITECLAW_URL", "http://localhost:9999")
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://172.21.0.1:11434/v1")
-MODELS = ["qwen3:30b-a3b", "qwen3:8b", "openbmb/minicpm5-2b:latest"]
+MODELS = ["qwen3:30b-a3b", "openbmb/minicpm5-2b:latest"]
+# qwen3:8b 已于 2026-09-10 从默认评测名单移除（历史 run 中的结果保留可查）；
+# 需要时可用 --model qwen3:8b 单独跑。
 # 生产快答模式:原版模型 + no_think(动态关思考,等价于已退役的 -nothink 变体)。
 NO_THINK = {"qwen3:30b-a3b"}
 # 走 ollama 原生 API 的模型:":32k" 标签已删,上下文改按请求传(num_ctx 覆盖标签默认值),
@@ -229,10 +231,13 @@ def main():
     retry_dir = None
     if "--retry" in sys.argv:
         retry_dir = sys.argv[sys.argv.index("--retry") + 1].rstrip("/")
+    # --think: 本次运行关闭动态免思考（深度思考模式），用于与默认 no_think 做同权重对照
+    if "--think" in sys.argv:
+        NO_THINK.clear()
     # 自动检索按请求传参（与前端"自动检索"复选框同源），默认开；--no-auto-rag 测
     # "模型自主调工具"模式（结果建议配 judge.py --agent-mode 评审）。
     auto_rag = "--no-auto-rag" not in sys.argv
-    print(f"auto_rag={auto_rag}（按请求传参）", flush=True)
+    print(f"auto_rag={auto_rag}（按请求传参）, no_think 模型: {sorted(NO_THINK) or '无(全部深度思考)'}", flush=True)
 
     run_dir = retry_dir
     keep = []

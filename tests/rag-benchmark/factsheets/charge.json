@@ -1,0 +1,124 @@
+{
+ "cluster": "charge",
+ "questions": [
+  {
+   "id": "para-charge-time",
+   "question": "充电需要多长时间？",
+   "facts": [
+    {"fact": "手册没有给出任何具体充电小时数，官方表述为：牵引电池（traction battery）的充电时间取决于电池剩余能量（amount of energy remaining）和充电终端输出的功率（power delivered by the charging terminal）。", "layer": "core", "pages": "p.45-46", "source_chunk": "r5e-2025-topic-electric-vehicle-0015"},
+    {"fact": "充电开始时组合仪表会显示剩余充电时间估计（an estimate of the remaining charging time）；当电量充至约 95% 后，该估计时间不再显示。", "layer": "core", "pages": "p.44-45", "source_chunk": "r5e-2025-topic-electric-vehicle-0014"},
+    {"fact": "手册明确提示：某些条件下实际充电时间可能长于仪表盘显示的充电时间，取决于——电网质量（quality of the electrical network）、初始电量（initial charge level）、外界温度过低（exterior temperature is too cold）等。", "layer": "core", "pages": "p.45-46", "source_chunk": "r5e-2025-topic-electric-vehicle-0015"},
+    {"fact": "充电时间随所连接的专用壁挂插座（specific wall unit socket）或公共充电终端（public terminal）的类型而变化；且无需等电池降到备用电量（reserve level）才充电，可随时补充电。", "layer": "core", "pages": "p.26-27", "source_chunk": "r5e-2025-topic-electric-vehicle-0002"},
+    {"fact": "极端温度条件下，充电开始前可能需要等待几分钟（牵引电池冷却或升温所需的时间）。", "layer": "supplementary", "pages": "p.42-43", "source_chunk": "r5e-2025-topic-electric-vehicle-0012"},
+    {"fact": "开启空调（air-conditioning）会增加所需充电时间；充电可以在雨天或雪天进行。", "layer": "supplementary", "pages": "p.43-44", "source_chunk": "r5e-2025-topic-electric-vehicle-0013"},
+    {"fact": "日常使用建议将车辆充电至 80% 以改善电池使用寿命；避免在极端温度（过热或过冷）下充电和停放车辆。", "layer": "supplementary", "pages": "p.42-43", "source_chunk": "r5e-2025-topic-electric-vehicle-0012"},
+    {"fact": "温度与停放时长对充电的影响：约 -25°C 以下停放超过 7 天，牵引电池可能无法充电；接近零电量停放超过 3 个月，电池可能无法充电；建议在行驶后、温和气温下充电，否则充电时间可能更长甚至无法充电；电量低（<25%）且气温为负时最好在行驶后立即充电；高温时尽量停在阴凉/遮蔽处充电。", "layer": "supplementary", "pages": "p.42-43", "source_chunk": "r5e-2025-topic-electric-vehicle-0012"},
+    {"fact": "可用能量取决于电池温度：电池冷/热状态不同，车辆停用再启动之间可用能量可能变化。", "layer": "supplementary", "pages": "p.42-43", "source_chunk": "r5e-2025-topic-electric-vehicle-0012"},
+    {"fact": "充电期间仪表盘还会显示：电池能量刻度（battery indicator）、电池电量百分比、车辆已接通电源的指示灯；仪表显示几秒后消失，打开车门后会重新出现。", "layer": "supplementary", "pages": "p.44-45", "source_chunk": "r5e-2025-topic-electric-vehicle-0014"},
+    {"fact": "充电完成（one charging is complete）后充电口指示灯 9 常亮绿色。", "layer": "supplementary", "pages": "p.44-45", "source_chunk": "r5e-2025-topic-electric-vehicle-0014"},
+    {"fact": "充电口指示灯 9 各状态含义（口盖内侧标签 13）：白色闪烁=充电线已插入车辆端、系统自检中；蓝色常亮=充电程序（programming）已激活；蓝色闪烁=充电进行中或车辆正使用市电运行（如乘客舱空调）；绿色常亮=已充满；绿色闪烁=V2G/V2L 对外放电启用；红色常亮=运行故障（需联系授权经销商）。", "layer": "supplementary", "pages": "p.46", "source_chunk": "r5e-2025-topic-electric-vehicle-0016"},
+    {"fact": "行驶中松开加速踏板或踩下制动踏板时，电机在减速过程中发电，这些能量用于给电池回充（regenerative braking 能量回收）——这也是车辆日常补充电能的方式之一。", "layer": "supplementary", "pages": "p.27-28", "source_chunk": "r5e-2025-topic-electric-vehicle-0003"},
+    {"fact": "若刚通过多媒体系统接受了系统更新，牵引电池充电会被延迟或取消——须等更新完成后再连接充电线。", "layer": "supplementary", "pages": "p.43-44", "source_chunk": "r5e-2025-topic-electric-vehicle-0013"},
+    {"fact": "若已设定延迟充电（deferred charge）而想立即充电，可按充电口盖内的按钮 7 立即开始充电（充电编程详见手册 p.302/多媒体说明）。", "layer": "supplementary", "pages": "p.44-45", "source_chunk": "r5e-2025-topic-electric-vehicle-0014"},
+    {"fact": "无法充电的常见原因（操作故障表）：室外温度低于 -26°C（应在更合适的环境充电）；壁挂插座无电流或线缆与家用插座接触不良（检查断路器、定时器等及充电口连接）；充电线故障（到授权经销商更换）；充电线未正确锁止在车辆上（重新正确连接）。", "layer": "supplementary", "pages": "p.356-357", "source_chunk": "r5e-2025-topic-operating-faults-0001"},
+    {"fact": "车辆配备 connected services（联网服务）：可通过手机、平板等外部设备或多媒体屏查看车辆充电状态（含低电量警告）、对牵引电池充电进行编程、查看剩余续航等；订阅或扩展服务需咨询授权经销商。", "layer": "supplementary", "pages": "p.22-26", "source_chunk": "r5e-2025-topic-electric-vehicle-0001"},
+    {"fact": "空调系统用于冷却牵引电池；为延长牵引电池寿命，若发现空调性能下降应由专业人员检查空调系统。", "layer": "supplementary", "pages": "p.26-27", "source_chunk": "r5e-2025-topic-electric-vehicle-0002"},
+    {"fact": "车辆续航里程（range）取决于牵引电池电量和驾驶风格（eco-driving 相关章节另述）。", "layer": "supplementary", "pages": "p.26-27", "source_chunk": "r5e-2025-topic-electric-vehicle-0002"},
+    {"fact": "充电线出现故障时，建议更换与原装完全相同（identical to the original）的线缆，并咨询授权经销商。", "layer": "supplementary", "pages": "p.45-46", "source_chunk": "r5e-2025-topic-electric-vehicle-0015"}
+   ]
+  },
+  {
+   "id": "chain-charge#1",
+   "question": "在家里用家用插座充电，有什么需要注意的？",
+   "facts": [
+    {"fact": "车辆配有两条专用充电线（存放于行李舱储物格）：charging lead B 专为连接壁挂插座或公共充电终端、对牵引电池做标准充电而设计；charging lead A 正常用于车辆专用插座（14 A/16 A 充电），也可偶尔（例如外出不在家时）用家用插座（domestic socket）以 8 A 充电。", "layer": "core", "pages": "p.35-37", "source_chunk": "r5e-2025-topic-electric-vehicle-0008"},
+    {"fact": "无论哪种情况，插座都必须按 charging lead B 附带说明的要求安装；且必须仔细阅读充电线 B 的用户说明以了解使用注意事项和技术规格。", "layer": "core", "pages": "p.35-37", "source_chunk": "r5e-2025-topic-electric-vehicle-0008"},
+    {"fact": "家用充电（domestic charging）时，必须请合格专业人员检查每个要接充电线的插座，确认其符合所在国的现行标准法规，并符合手册“Power supply systems（电源系统）”所述规格；专用壁挂插座（wall socket）应由合格专业人员安装。", "layer": "core", "pages": "p.37", "source_chunk": "r5e-2025-topic-electric-vehicle-0009"},
+    {"fact": "电源系统要求：只使用符合 IEC 61851-1 标准的充电终端，且连接点须有——该插座专用的 Type A 30 mA 剩余电流保护装置（residual current device）、过流保护装置（overcurrent protection）、雷暴多发地区的雷击过电压防护（IEC 62305-4）、符合所在国标准的接地。", "layer": "core", "pages": "p.37-40", "source_chunk": "r5e-2025-topic-electric-vehicle-0010"},
+    {"fact": "严禁将充电线插入适配器（adapter）、多位插座（multiple socket）或延长线（extension lead）——有火灾危险；禁止使用发电机（generators）。", "layer": "core", "pages": "p.34", "source_chunk": "r5e-2025-topic-electric-vehicle-0007"},
+    {"fact": "充电插头接头或车辆充电口内有水、腐蚀痕迹或异物时，禁止充电（火灾危险）；不得触摸充电线触点、家用插座或车辆充电口，不得向其中插入任何物体。", "layer": "core", "pages": "p.34", "source_chunk": "r5e-2025-topic-electric-vehicle-0007"},
+    {"fact": "不得拆卸或更换车辆充电口或充电线（火灾危险）；充电线、供电装置或车辆充电口损坏（腐蚀、变色、切口等）时应停用，到授权经销商处更换。", "layer": "core", "pages": "p.34", "source_chunk": "r5e-2025-topic-electric-vehicle-0007"},
+    {"fact": "充电过程中若发生故障（充电装置 D 上出现红色警示灯），必须立即停止充电；详见充电线缆说明书。", "layer": "core", "pages": "p.35-37", "source_chunk": "r5e-2025-topic-electric-vehicle-0008"},
+    {"fact": "充电期间不得对车辆做任何操作（如洗车、在发动机舱内工作等）；充电期间不得对充电设施做任何改动或操作。", "layer": "core", "pages": "p.34", "source_chunk": "r5e-2025-topic-electric-vehicle-0007"},
+    {"fact": "不要让插座悬吊在线缆上，应使用挂钩 C 挂起。", "layer": "supplementary", "pages": "p.35-37", "source_chunk": "r5e-2025-topic-electric-vehicle-0008"},
+    {"fact": "插入充电线前核对颜色和字母匹配：输入插座 1 与线缆端 4 对应、车辆插座 3 与线缆端 5 对应（充电口盖上有标签图示）；不符合欧洲标准充电类型的情况请咨询授权经销商。", "layer": "supplementary", "pages": "p.37-40", "source_chunk": "r5e-2025-topic-electric-vehicle-0010"},
+    {"fact": "随车标准充电线为本车专门设计，可防致命触电或火灾；不得使用以往车辆的充电线（不适配）；出于安全原因，严禁使用制造商不推荐的充电线，否则有致命火灾或触电风险；适合本车的充电线请咨询授权经销商。", "layer": "supplementary", "pages": "p.37", "source_chunk": "r5e-2025-topic-electric-vehicle-0009"},
+    {"fact": "爱护充电线：不要踩踏、浸水、拉拽或让物体撞击；定期检查充电线是否完好。", "layer": "supplementary", "pages": "p.34", "source_chunk": "r5e-2025-topic-electric-vehicle-0007"},
+    {"fact": "充电前务必将充电线完全展开（fully uncoil），以限制其发热。", "layer": "supplementary", "pages": "p.44-45", "source_chunk": "r5e-2025-topic-electric-vehicle-0014"},
+    {"fact": "充电连接步骤页再次强调：不得使用延长线、多位插座或适配器——火灾危险。", "layer": "supplementary", "pages": "p.44-45", "source_chunk": "r5e-2025-topic-electric-vehicle-0014"},
+    {"fact": "清洁充电线前先确认已断开连接；用微湿布擦拭，布不可接触线缆两端（接头、充电针），以免腐蚀。", "layer": "supplementary", "pages": "p.35-37", "source_chunk": "r5e-2025-topic-electric-vehicle-0008"},
+    {"fact": "充电时不要洗车；不要用高压水冲洗发动机舱、充电接口或牵引电池（会损坏电路，有触电致命风险）；充电线未连接时也不要清洗线缆和插头，以防充电针腐蚀。", "layer": "supplementary", "pages": "p.29-34", "source_chunk": "r5e-2025-topic-electric-vehicle-0006"},
+    {"fact": "车辆正在充电或点火开关接通时，不要在发动机舱内做任何作业。", "layer": "supplementary", "pages": "p.326-327", "source_chunk": "r5e-2025-topic-battery-0001"},
+    {"fact": "日常充电建议充至 80% 以改善电池使用寿命；避免在极端温度下充电和停车；高温时尽量停在阴凉/遮蔽处充电。", "layer": "supplementary", "pages": "p.42-43", "source_chunk": "r5e-2025-topic-electric-vehicle-0012"},
+    {"fact": "充电中或点火关闭后空调压缩机和通风扇可能运转，用于调节系统温度，不一定是故障；若点火关闭后风扇运转超过 30 分钟，应咨询授权经销商。", "layer": "supplementary", "pages": "p.357-360", "source_chunk": "r5e-2025-table-operating-faults-0003"},
+    {"fact": "对充电所需设备有任何疑问时，应询问授权经销商（充电系统示意图页）。", "layer": "supplementary", "pages": "p.29-34", "source_chunk": "r5e-2025-topic-electric-vehicle-0006"},
+    {"fact": "充电线缆故障时建议更换与原装完全相同的线缆并咨询授权经销商；口盖锁止机构未激活或充电口自行解锁异常时应联系授权经销商。", "layer": "supplementary", "pages": "p.45-46", "source_chunk": "r5e-2025-topic-electric-vehicle-0015"}
+   ]
+  },
+  {
+   "id": "chain-charge#2",
+   "question": "那用快充呢？直流快充的功率是多少？",
+   "facts": [
+    {"fact": "车辆配备两个充电接口，位于车辆前部：socket E 用于最高 11 kW（up to 11 kW）的交流（AC）充电。", "layer": "core", "pages": "p.40-43", "source_chunk": "r5e-2025-topic-electric-vehicle-0011"},
+    {"fact": "socket F（视车型 depending on the vehicle）与 socket E 并存，用于快充（fast charging）。", "layer": "core", "pages": "p.42-43", "source_chunk": "r5e-2025-topic-electric-vehicle-0012"},
+    {"fact": "手册全篇只给出 E 口 11 kW 这一个充电功率数值；对直流快充（DC fast charging）未给出任何具体 kW 功率数值——回答时不得编造直流快充功率。", "layer": "core", "pages": "p.40-43", "source_chunk": "r5e-2025-topic-electric-vehicle-0011"},
+    {"fact": "直流快充（DC）时，车辆与充电终端之间的充电线不得超过 30 米（must not exceed 30 metres）；对线缆长度有疑问时，应咨询充电终端的所有者。", "layer": "core", "pages": "p.40-42", "source_chunk": "r5e-2025-topic-electric-vehicle-0011"},
+    {"fact": "若充电口盖上有标注信息，须按标注操作；插充电线前确认车辆充电口 3 与充电线端 5 的颜色和字母一致（直流快充同样适用）。", "layer": "supplementary", "pages": "p.40-42", "source_chunk": "r5e-2025-topic-electric-vehicle-0011"},
+    {"fact": "视车型，socket F 由盲盖（blanking cover）保护；向 socket E 插入充电线前，必须确认 socket F 的盲盖已装好到位。", "layer": "supplementary", "pages": "p.40-42", "source_chunk": "r5e-2025-topic-electric-vehicle-0011"},
+    {"fact": "快充插电时注意：盲盖的塑料绳（plastic wire 11）不要夹在充电线接头与电源之间。", "layer": "supplementary", "pages": "p.43-44", "source_chunk": "r5e-2025-topic-electric-vehicle-0013"},
+    {"fact": "充电口盖内侧标签列出符合欧洲标准的充电类型：交流（AC）充电终端/充电线/车辆接口的匹配关系，以及直流（DC）车辆接口/充电线匹配关系；不符合欧洲标准的情况请咨询授权经销商。", "layer": "supplementary", "pages": "p.37-42", "source_chunk": "r5e-2025-topic-electric-vehicle-0010"},
+    {"fact": "充电口盖右侧标签注明：可连接家用插座、交流充电终端或快充终端（quick charging terminal）；充电相关信息查阅车辆用户手册。", "layer": "supplementary", "pages": "p.46", "source_chunk": "r5e-2025-topic-electric-vehicle-0016"},
+    {"fact": "充电终端同样须符合 IEC 61851-1 标准并具备相应电源保护（Type A 30 mA 剩余电流装置、过流保护、雷电过压防护、合规接地）。", "layer": "supplementary", "pages": "p.37-40", "source_chunk": "r5e-2025-topic-electric-vehicle-0010"},
+    {"fact": "极端条件下充电开始前可能需几分钟（牵引电池冷却/升温）；充电时间还受电网质量、初始电量、过低外界温度影响，实际时间可能长于仪表显示。", "layer": "supplementary", "pages": "p.42-46", "source_chunk": "r5e-2025-topic-electric-vehicle-0015"},
+    {"fact": "无法充电且充电口指示灯红闪的可能原因之一是室外温度低于 -26°C（直流快充口同样会在低温下停止工作），应在更合适的环境充电。", "layer": "supplementary", "pages": "p.356-357", "source_chunk": "r5e-2025-topic-operating-faults-0001"},
+    {"fact": "注意区分：车辆前部充电口还支持 V2L 对外放电（Vehicle to Load），输出交流电最高 16 A/3.7 kW——这是对外供电功率，不是充电功率，勿与快充功率混淆。", "layer": "supplementary", "pages": "p.47-48", "source_chunk": "r5e-2025-topic-electric-vehicle-0017"},
+    {"fact": "若已通过多媒体设置了充电程序（延迟充电），可按口盖内按钮 7 中止程序并立即开始充电。", "layer": "supplementary", "pages": "p.44-45", "source_chunk": "r5e-2025-topic-electric-vehicle-0014"}
+   ]
+  },
+  {
+   "id": "chain-charge#3",
+   "question": "充电口盖是怎么打开的？",
+   "facts": [
+    {"fact": "打开方式：车辆静止、点火关闭，按压（press）充电口盖 8 即可解锁，充电口指示灯 9 随即亮白灯。", "layer": "core", "pages": "p.43-44", "source_chunk": "r5e-2025-topic-electric-vehicle-0013"},
+    {"fact": "完整充电连接流程（车辆静止、点火关闭）：从行李舱储物格取出充电线 2 → 按压充电口盖 8 解锁（指示灯 9 亮白）→ 先把线缆端插入供电电源 → 握住手柄 10 将车端插头插入车辆充电口（指示灯 9 白色闪烁）→ 听到锁止咔哒声后轻拉手柄 10 确认插头已锁好；若已编程延迟充电而想立即充电，按按钮 7。", "layer": "core", "pages": "p.43-45", "source_chunk": "r5e-2025-topic-electric-vehicle-0013"},
+    {"fact": "关闭方式：拔下充电线后，必须关上充电口盖 8 并按压使其锁止；然后再拔电源端、把线缆收纳回行李舱储物格。", "layer": "core", "pages": "p.45-46", "source_chunk": "r5e-2025-topic-electric-vehicle-0015"},
+    {"fact": "视车型：充电口盖打开或未正确关闭时，组合仪表会显示“Charging flap opened”信息。", "layer": "core", "pages": "p.43-44", "source_chunk": "r5e-2025-topic-electric-vehicle-0013"},
+    {"fact": "不要用充电口盖 8 在充电时悬挂充电线 2。", "layer": "supplementary", "pages": "p.43-44", "source_chunk": "r5e-2025-topic-electric-vehicle-0013"},
+    {"fact": "充电口盖内有两颗按钮：按钮 6 用于解锁充电线；按钮 7 用于中止已配置的充电程序、立即开始充电。", "layer": "supplementary", "pages": "p.42-43", "source_chunk": "r5e-2025-topic-electric-vehicle-0012"},
+    {"fact": "充电口盖标签提示：车辆静止时充电阀（valve）与口盖可以打开；车辆行驶时充电阀与口盖必须关闭。", "layer": "supplementary", "pages": "p.46", "source_chunk": "r5e-2025-topic-electric-vehicle-0016"},
+    {"fact": "行驶时不得让充电口盖 9 处于打开状态（V2L 章节强调）；V2L 接头断开后务必确认口盖已正确关闭。", "layer": "supplementary", "pages": "p.51-52", "source_chunk": "r5e-2025-topic-electric-vehicle-0022"},
+    {"fact": "充电口盖和/或充电阀哪怕受到轻微碰撞，也应尽快到授权经销商检查。", "layer": "supplementary", "pages": "p.29-34", "source_chunk": "r5e-2025-topic-electric-vehicle-0006"},
+    {"fact": "口盖锁止机构未激活和/或车辆充电口自行解锁时，请联系授权经销商。", "layer": "supplementary", "pages": "p.34", "source_chunk": "r5e-2025-topic-electric-vehicle-0007"},
+    {"fact": "下雪环境：插拔充电线前先清除车辆充电口周围的积雪——雪进入充电口可能卡住充电线插头无法插入。", "layer": "supplementary", "pages": "p.40-42", "source_chunk": "r5e-2025-topic-electric-vehicle-0011"},
+    {"fact": "拔线必须严格按顺序操作：按按钮 6（或长按车卡解锁键）解锁充电线 → 握手柄 10 → 先从车辆上拔下线缆 → 关闭口盖并按压落锁 → 再从电源端拔下 → 收纳线缆；按了解锁按钮后约 30 秒内必须拔出，否则线缆会重新锁止。", "layer": "supplementary", "pages": "p.45-46", "source_chunk": "r5e-2025-topic-electric-vehicle-0015"},
+    {"fact": "充电线插入车辆后会被自动锁止，充电期间无法拔出；解锁时须按按钮 6 或长按车卡解锁按钮。", "layer": "supplementary", "pages": "p.44-45", "source_chunk": "r5e-2025-topic-electric-vehicle-0014"},
+    {"fact": "长时间充电刚结束后线缆可能发热，拔线时请握持手柄操作。", "layer": "supplementary", "pages": "p.45-46", "source_chunk": "r5e-2025-topic-electric-vehicle-0015"},
+    {"fact": "不要用高压水枪冲洗充电口盖（口盖右侧标签提示）。", "layer": "supplementary", "pages": "p.46", "source_chunk": "r5e-2025-topic-electric-vehicle-0016"},
+    {"fact": "口盖内侧标签 13 详述指示灯 9 状态含义：白闪=车端已插入、系统自检；蓝常亮=充电程序已激活；蓝闪=充电中或车辆用市电运行（如空调）；绿常亮=已充满；绿闪=V2G/V2L 启用；红常亮=故障。", "layer": "supplementary", "pages": "p.46", "source_chunk": "r5e-2025-topic-electric-vehicle-0016"},
+    {"fact": "视车型，发动机盖前部有电量指示器（charge level indicator 14）：检测到免提卡且车辆解锁时自动点亮显示充电状态；点亮约 1 分钟后、启动发动机或锁车后自动熄灭。", "layer": "supplementary", "pages": "p.47-48", "source_chunk": "r5e-2025-topic-electric-vehicle-0017"},
+    {"fact": "充电系统示意图：1=专用壁挂插座或充电终端，2=充电线，3=车辆充电接口；设备选型有疑问时咨询授权经销商。", "layer": "supplementary", "pages": "p.29-34", "source_chunk": "r5e-2025-topic-electric-vehicle-0006"}
+   ]
+  },
+  {
+   "id": "hit-12v-battery",
+   "question": "12伏蓄电池亏电了怎么办？",
+   "facts": [
+    {"fact": "手册明确（Breakdown recovery 应急救援章节）：为避免损坏车辆，不得用外接电池充电器（external battery charger）给 12 V 蓄电池充电，也不得用其他车辆的电池充电——应联系授权经销商（Call an approved Dealer）。也就是说手册不提供自行搭电/跨接充电的方法。", "layer": "core", "pages": "p.327", "source_chunk": "r5e-2025-topic-battery-0002"},
+    {"fact": "应急救援时禁止断开（disconnect）12 V 蓄电池——有严重灼伤或触电风险；并须遵守蓄电池上的各项标识。", "layer": "core", "pages": "p.327", "source_chunk": "r5e-2025-topic-battery-0002"},
+    {"fact": "不得用本电动车为其他车辆的 12 V 蓄电池救援启动（restart）——电动车的 12 V 电量不足以完成该操作，有损坏车辆的风险。", "layer": "core", "pages": "p.327", "source_chunk": "r5e-2025-topic-battery-0002"},
+    {"fact": "出于安全和电气设备正常工作（灯光、雨刮、ABS 等）考虑，对 12 V 蓄电池的任何操作（拆卸、断开等）必须由合格专业人员进行——有严重灼伤或触电风险；更换须遵守保养文档规定的更换周期（不得超期）并使用同型号蓄电池，联系授权经销商。", "layer": "core", "pages": "p.326-327", "source_chunk": "r5e-2025-topic-battery-0001"},
+    {"fact": "12 V 蓄电池的作用：为车辆设备（灯光、雨刮、音响等）及制动辅助等安全系统供电；不可自行打开蓄电池或添加电解液。", "layer": "core", "pages": "p.326-327", "source_chunk": "r5e-2025-topic-battery-0001"},
+    {"fact": "12 V 蓄电池电量下降的常见诱因：外界气温下降时使用车辆；点火关闭状态下长时间使用大功率（耗电）设备。", "layer": "supplementary", "pages": "p.326-327", "source_chunk": "r5e-2025-topic-battery-0001"},
+    {"fact": "电动车专属风险提示：驱动系统使用约 400 V 直流电压，点火关闭后该系统仍可能发热；严禁对 400 V 电气系统（部件、线缆、接头、牵引电池）做任何操作或改装——有致命灼伤/触电风险；发动机舱内冷却风扇可能随时启动（有受伤风险）。自行处理蓄电池时切勿触碰 400 V 部件与橙色线缆。", "layer": "supplementary", "pages": "p.326-327", "source_chunk": "r5e-2025-topic-battery-0001"},
+    {"fact": "蓄电池上的标识含义：禁止明火与吸烟；需佩戴护目镜；远离儿童；爆炸物；参阅手册；腐蚀性物质。", "layer": "supplementary", "pages": "p.327", "source_chunk": "r5e-2025-topic-battery-0002"},
+    {"fact": "车辆正在充电或点火接通时，不要在发动机舱内做任何作业（检查 12 V 蓄电池时适用）。", "layer": "supplementary", "pages": "p.326-327", "source_chunk": "r5e-2025-topic-battery-0001"},
+    {"fact": "12 V 蓄电池亏电时，免提卡（card）可能无法锁止/解锁车门——操作故障表给出的应急措施是使用卡内应急钥匙（built-in key）操作驾驶侧车门锁。", "layer": "supplementary", "pages": "p.356-357", "source_chunk": "r5e-2025-topic-operating-faults-0001"},
+    {"fact": "卡片电池没电时仍可锁止/解锁并启动车辆（更换电池即可）；仪表出现“Place the card near the START button”时，可将卡放到专用感应区（杯架）再按 START 同步/启动。", "layer": "supplementary", "pages": "p.356-358", "source_chunk": "r5e-2025-topic-operating-faults-0002"},
+    {"fact": "免提（hands-free）功能失效的常见原因包括：卡电池耗尽、12 V 蓄电池放电（亏电）等。", "layer": "supplementary", "pages": "p.159-160", "source_chunk": "r5e-2025-topic-start-stop-0002"},
+    {"fact": "组合仪表“12 V battery charge warning light（12 V 蓄电池充电警告灯）”亮起（伴随驻车/制动警告灯和蜂鸣声）表示电气电路过充或放电——提示查阅 p.324 的 12 V 蓄电池章节处理。", "layer": "supplementary", "pages": "p.137", "source_chunk": "r5e-2025-topic-warning-lights-0006"},
+    {"fact": "12 V 蓄电池位于发动机舱内（机舱概览图 3 号位；1 号为电池与发动机冷却液储液罐等），打开发动机盖后可见。", "layer": "supplementary", "pages": "p.18-21", "source_chunk": "r5e-2025-topic-breakdown-recovery-overview-0001"},
+    {"fact": "电动车有两类电池：400 V 牵引电池（驱动电机）与 12 V 蓄电池（为车辆设备供电）——两者互不替代，12 V 亏电不影响牵引电池储能，但会影响车辆设备工作。", "layer": "supplementary", "pages": "p.26-27", "source_chunk": "r5e-2025-topic-electric-vehicle-0002"}
+   ]
+  }
+ ]
+}

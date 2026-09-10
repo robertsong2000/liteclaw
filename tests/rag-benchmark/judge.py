@@ -7,11 +7,20 @@
   检索，LITECLAW_AUTO_RAG=0 可关）SSE 流的 tool 事件是可选的，有无都不能说明是否检索过；
   只有评测 LITECLAW_AUTO_RAG=0 的部署时加 --agent-mode 才启用该门禁；
   - 其余每题把【标准参考答案 golden】与【被评回答】一起交给评审模型
-    （默认 qwen3:30b-a3b-nothink，temperature=0，直连 ollama，无工具可调，
+    （默认 qwen3:30b-a3b @ 本地 ollama，temperature=0，无工具可调，
      与被评模型物理隔离，不存在"自己评自己"的通道）；
+  - golden 支持 facts-v1 事实清单格式（【核心事实】+【补充事实】，由子代理按
+    section_path 穷尽提取，见 manual_tool.py / factsheets/）：覆盖度按必答要点判定，
+    补充事实被回答引用视为加分，清单外内容不自动判编造；
   - 评审输出：verdict(PASS/WEAK/FAIL) + score(0-10) + 逐要点覆盖 + 编造检测；
-    编造(fabrication=true)强制 FAIL。评审模型与版本记入 summary，换评审模型
-    后的分数不可直接跨版本对比。
+    编造(fabrication=true)强制 FAIL。评审模型与端点记录在 summary/baseline，
+    换评审模型（或换端点）后的分数不可直接跨版本对比。
+
+评审模型配置（环境变量，见 ~/judge_env.sh 模板）：
+  JUDGE_MODEL=qwen38-local                        # 模型名（本地 ollama tag 或网关注册名）
+  JUDGE_OPENAI_BASE=http://host:16019/v1          # 可选：OpenAI 兼容远程端点（不设则走本地 ollama）
+  JUDGE_OPENAI_KEY=sk-xxx                         # 远程端点密钥
+  JUDGE_CONCURRENCY=4                             # 并发评审路数（远程端点建议 3~4）
 
 回归对比：
   python3 judge.py runs/A                 # 评审 A（已评过则断点续跑）
@@ -21,7 +30,7 @@
 
 结果写入 run 目录：judged.jsonl（逐题）、summary.md（人读）、summary.json（机读）。
 """
-import json, os, sys, time
+import json, os, re, sys, time
 import requests
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -30,6 +39,17 @@ BASELINE_FILE = os.path.join(HERE, "baseline.json")
 OLLAMA = os.environ.get("OLLAMA_NATIVE_URL", "http://localhost:11434")
 JUDGE_MODEL = os.environ.get("JUDGE_MODEL", "qwen3:30b-a3b")
 NUM_CTX = 16384
+# OpenAI 兼容评审端点（可选）。设置后评审走 {JUDGE_OPENAI_BASE}/chat/completions，
+# 例如部署在另一台机器 new-api 后面的模型：
+#   JUDGE_OPENAI_BASE=http://host:16019/v1 JUDGE_OPENAI_KEY=sk-xxx JUDGE_MODEL=qwen38-local
+JUDGE_OPENAI_BASE = os.environ.get("JUDGE_OPENAI_BASE", "")
+JUDGE_OPENAI_KEY = os.environ.get("JUDGE_OPENAI_KEY", "")
+JUDGE_CONCURRENCY = max(1, int(os.environ.get("JUDGE_CONCURRENCY", "1")))  # 并发评审路数
+JUDGE_MODEL_WIRE = JUDGE_MODEL          # 发给网关的模型名，必须与网关注册名一致
+if JUDGE_OPENAI_BASE:
+    from urllib.parse import urlparse
+    _p = urlparse(JUDGE_OPENAI_BASE)
+    JUDGE_MODEL = f"{JUDGE_MODEL}@{_p.hostname}:{_p.port or 80}"   # 仅用于 summary/baseline 展示溯源
 VERDICT_RANK = {"PASS": 2, "WEAK": 1, "FAIL": 0, "ERROR": -1, "NO_GOLDEN": -2}
 
 KIND_RULES = {
@@ -42,8 +62,8 @@ KIND_RULES = {
 - 正确行为：明确说手册无数值 + 指向标准答案指出的来源（如车门标签），并转述标准答案中的操作规则。直接拒绝回答（说查不到就完事）不算 PASS，只能算 WEAK。
 - 逐条检查【必答要点】列表，每个要点一条 covered/partial/missing，不得增删要点。""",
     "refuse": """本题类型：refuse（手册必然没有该内容，正确行为是明确拒答）。
-- 编造判定：被评回答给出任何具体的周期/部件/位置/步骤，或把无关内容（胎压、清洁等）硬凑成答案 → fabrication=true，必须 FAIL。
-- 正确行为：明确说"手册中未找到"，可建议查保养文档或联系经销商。附页码引用本身不算错，但引用内容与问题无关则算硬凑。
+- 编造判定（从严）：只有当被评回答【对所问内容本身】给出具体的周期/部件/位置/步骤（如"机油每1万公里换一次"、"油箱盖在左后方"），或声称手册中存在该内容 → fabrication=true，必须 FAIL。
+- 注意：被评回答在【明确说明手册没有/该车无此部件】之后，附加手册内的替代建议（如"可检查冷却液/制动液/玻璃水"、"对应的是充电口盖"、"周期见保养文档"）是合理的延伸服务，不算编造——即使引用的页码与所问问题间接相关。
 - 逐条检查【必答要点】列表，每个要点一条 covered/partial/missing，不得增删要点。""",
 }
 
@@ -52,6 +72,11 @@ JUDGE_PROMPT = """你是"雷诺 5 E-Tech 2025 车主手册 RAG 问答"的严格�
 
 背景：被评回答来自一个"必须先调用手册检索、只用检索内容作答并附页码引用"的车书助手。
 {kind_rules}
+
+【标准答案格式说明】若标准答案包含【核心事实】与【补充事实】清单：
+- 覆盖度仍按【必答要点】判定；
+- 被评回答引用了补充清单中的内容视为覆盖全面（在 reason 注明加分），绝不因"标准答案正文没有"而判编造；
+- 被评回答出现两份清单都没有的内容：与清单矛盾 → 编造；无法从清单判断真伪 → 不判编造，在 reason 注明"清单外内容"，覆盖分按必答要点正常评。
 
 评分锚点：9-10 必答要点全覆盖、引用规范、零编造；7-8 基本覆盖有小遗漏；4-6 要点明显缺失；
 0-3 编造或答非所问。verdict 规则：fabrication=true 或要点大面积缺失 → FAIL；部分覆盖 → WEAK；否则 PASS。
@@ -72,13 +97,27 @@ def ask_judge(question, golden, answer, kind, must_points=None):
     prompt = JUDGE_PROMPT.format(kind_rules=KIND_RULES[kind], question=question,
                                  must_points=json.dumps(must_points or [], ensure_ascii=False),
                                  golden=golden, answer=answer)
-    r = requests.post(f"{OLLAMA}/api/chat", json={
-        "model": JUDGE_MODEL, "messages": [{"role": "user", "content": prompt}],
-        "format": "json", "stream": False, "think": False,
-        "options": {"temperature": 0, "num_ctx": NUM_CTX},
-    }, timeout=600)
-    r.raise_for_status()
-    return json.loads(r.json()["message"]["content"])
+    if JUDGE_OPENAI_BASE:
+        # OpenAI 兼容端点（如另一台机器 new-api 后的模型）。思考型模型会输出
+        # <think> 块，解析前剥离；温度 0，不强制 response_format（网关兼容性参差）。
+        r = requests.post(f"{JUDGE_OPENAI_BASE.rstrip('/')}/chat/completions",
+                          headers={"Authorization": f"Bearer {JUDGE_OPENAI_KEY}"},
+                          json={"model": JUDGE_MODEL_WIRE, "temperature": 0,
+                                "messages": [{"role": "user", "content": prompt}]},
+                          timeout=600)
+        r.raise_for_status()
+        content = r.json()["choices"][0]["message"]["content"]
+    else:
+        r = requests.post(f"{OLLAMA}/api/chat", json={
+            "model": JUDGE_MODEL, "messages": [{"role": "user", "content": prompt}],
+            "format": "json", "stream": False, "think": False,
+            "options": {"temperature": 0, "num_ctx": NUM_CTX},
+        }, timeout=600)
+        r.raise_for_status()
+        content = r.json()["message"]["content"]
+    text = re.sub(r"<think>.*?</think>", "", content, flags=re.S).strip()
+    start, end = text.find("{"), text.rfind("}")
+    return json.loads(text[start:end + 1])
 
 
 def normalize(judged):
@@ -119,35 +158,68 @@ def judge_run(run_dir, force=False, agent_gate=None):
     # 自动启用；--agent-mode 可强制开启。
     if agent_gate is None:
         agent_gate = bool(answers) and all(r.get("auto_rag") is False for r in answers)
-    out, n_new = [], 0
+
+    def flush(out_map):
+        with open(judged_path, "w", encoding="utf-8") as f:
+            for x in out_map.values():
+                f.write(json.dumps(x, ensure_ascii=False) + "\n")
+
+    def judge_one(rec, g):
+        """单条评审，网络抖动重试 3 次；最终失败记 ERROR（可用 --force 重评）。"""
+        last = None
+        for attempt in range(3):
+            try:
+                return normalize(ask_judge(rec["question"], g["golden_answer"],
+                                           rec.get("answer") or "", rec["kind"],
+                                           g.get("must_points")))
+            except Exception as e:
+                last = e
+                time.sleep(5)
+        return {"verdict": "ERROR", "score": 0,
+                "reason": f"评审调用失败(重试3次): {str(last)[:120]}"}
+
+    out_map, todo = {}, []
     for rec in answers:
         key = (rec["model"], rec["id"])
-        if key in done:
-            out.append(done[key])
-            continue
         j = {"model": rec["model"], "id": rec["id"], "kind": rec["kind"],
              "question": rec["question"], "latency_s": rec.get("latency_s"),
              "rag_called": rec.get("rag_called"), "cited": rec.get("cited")}
+        if key in done and not force:
+            out_map[key] = done[key]
+            continue
         g = golden.get(rec["id"])
         answer = rec.get("answer") or ""
         if rec.get("error") and not answer:
-            j.update({"verdict": "ERROR", "score": 0, "reason": f"运行报错: {rec['error']}"})
+            out_map[key] = {**j, "verdict": "ERROR", "score": 0,
+                            "reason": f"运行报错: {rec['error']}"}
         elif not g or not g.get("golden_answer"):
-            j.update({"verdict": "NO_GOLDEN", "score": 0, "reason": "缺少标准答案，请先 build_golden.py"})
+            out_map[key] = {**j, "verdict": "NO_GOLDEN", "score": 0,
+                            "reason": "缺少标准答案，请先 build_golden.py"}
         elif agent_gate and not rec.get("rag_called"):
-            j.update({"verdict": "FAIL", "score": 0, "fabrication": None,
-                      "reason": "未调用 manual-rag 检索直接作答（agent 模式下跳过检索，硬性失败）"})
+            out_map[key] = {**j, "verdict": "FAIL", "score": 0, "fabrication": None,
+                            "reason": "未调用 manual-rag 检索直接作答（agent 模式下跳过检索，硬性失败）"}
         else:
-            print(f"[judge] {rec['model']} / {rec['id']}", flush=True)
-            res = ask_judge(rec["question"], g["golden_answer"], answer, rec["kind"],
-                            g.get("must_points"))
-            j.update(normalize(res))
-        out.append(j)
-        n_new += 1
-        with open(judged_path, "w", encoding="utf-8") as f:
-            for x in out:
-                f.write(json.dumps(x, ensure_ascii=False) + "\n")
-    print(f"评审完成：{len(out)} 条（新评 {n_new}，复用 {len(out)-n_new}）", flush=True)
+            todo.append((key, rec, j, g))
+    flush(out_map)
+
+    n_done = 0
+    if todo:
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        print(f"评审 {len(todo)} 条（并发 {JUDGE_CONCURRENCY}）...", flush=True)
+        with ThreadPoolExecutor(max_workers=JUDGE_CONCURRENCY) as ex:
+            futs = {ex.submit(judge_one, rec, g): key for key, rec, j, g in todo}
+            for fut in as_completed(futs):
+                key = futs[fut]
+                base = next(j for k, _, j, _ in todo if k == key)
+                out_map[key] = {**base, **fut.result()}
+                n_done += 1
+                flush(out_map)
+                print(f"[judge {n_done}/{len(todo)}] {key[0]} / {key[1]}", flush=True)
+    out = [out_map[(r["model"], r["id"])] for r in answers]
+    with open(judged_path, "w", encoding="utf-8") as f:
+        for x in out:
+            f.write(json.dumps(x, ensure_ascii=False) + "\n")
+    print(f"评审完成：{len(out)} 条（新评 {n_done}，复用 {len(out)-n_done}）", flush=True)
     return out, n_unreviewed
 
 

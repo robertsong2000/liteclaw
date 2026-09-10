@@ -23,3 +23,7 @@ bubble.c
 manual/
 
 __pycache__/
+
+# Benchmark intermediates
+tests/rag-benchmark/agent_judge_tasks/
+tests/rag-benchmark/golden_prose_v1.backup.jsonl

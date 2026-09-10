@@ -1,22 +1,22 @@
 {
  "judge_model": "qwen3:30b-a3b",
- "generated_at": "2026-09-09 14:40",
- "golden_unreviewed": 32,
+ "generated_at": "2026-09-10 10:16",
+ "golden_unreviewed": 0,
  "models": {
   "openbmb/minicpm5-2b:latest": {
    "n": 29,
-   "score_sum": 64,
+   "score_sum": 90,
    "latency_sum": 589.0000000000001,
    "verdicts": {
-    "WEAK": 8,
-    "FAIL": 9,
+    "FAIL": 5,
+    "WEAK": 11,
     "ERROR": 11,
-    "PASS": 1
+    "PASS": 2
    },
    "by_kind": {
     "hit": {
      "n": 20,
-     "score_sum": 48
+     "score_sum": 75
     },
     "paraphrase": {
      "n": 4,
@@ -24,14 +24,14 @@
     },
     "refuse": {
      "n": 5,
-     "score_sum": 10
+     "score_sum": 9
     }
    },
    "fails": [
     {
-     "id": "hit-tyre-warning",
+     "id": "hit-child-seat",
      "verdict": "FAIL",
-     "reason": "被评回答中引用了 p.332 而非标准答案中的 p.180-183，且包含标准答案中未提及的数值（如 0.2–0.3 bar）和非原厂设备的建议，属于编造。"
+     "reason": "被评回答未引用手册页码，且包含与标准答案冲突的编造内容（如‘必须使用 ISOFIX’、‘不要让它紧贴仪表板’等）"
     },
     {
      "id": "para-charge-time",
@@ -44,19 +44,9 @@
      "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
     },
     {
-     "id": "hit-fog-lights",
-     "verdict": "FAIL",
-     "reason": "被评回答中包含与标准答案冲突的步骤（如‘旋转开关4’、‘A（AUTO）’等），且未引用任何页码，存在编造。"
-    },
-    {
-     "id": "hit-jack",
-     "verdict": "FAIL",
-     "reason": "被评回答编造了手册中未提及的‘四个专用备胎固定点’和‘具体方位’等信息，与标准答案冲突。虽然引用了页码，但内容存在编造，且未明确说明手册中未给出具体支撑点位置，导致安全警告部分也未完全覆盖。"
-    },
-    {
      "id": "hit-key-battery",
      "verdict": "FAIL",
-     "reason": "被评回答中提到‘蓝色染料渗出’和‘不要碰到内部的电路或触点’等标准答案中未提及的内容，属于编造；电池型号未在标准答案中出现，且被评回答未明确提及；页码引用部分与标准答案不完全一致，但未明显冲突。"
+     "reason": "被评回答中提到的'蓝色染料渗出'和'用钥匙的内部机械钥匙'等内容未在标准答案中出现，属于编造；且未提及电池型号，属于要点缺失。"
     },
     {
      "id": "hit-12v-battery",
@@ -69,24 +59,14 @@
      "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
     },
     {
-     "id": "hit-cruise-control",
-     "verdict": "FAIL",
-     "reason": "被评回答中包含标准答案未提及的细节（如 `SET ↑` / `SET ↓`、`Switch 1`、`Switch 0`、`ECO模式`、`再生制动不兼容` 等），构成编造。"
-    },
-    {
-     "id": "hit-fuse-box",
-     "verdict": "FAIL",
-     "reason": "被评回答中包含与标准答案冲突的信息（如‘两个保险丝盒’、‘副驾驶舱行李箱’等），且未引用任何页码，存在编造。"
-    },
-    {
      "id": "hit-gear-p",
      "verdict": "ERROR",
      "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
     },
     {
-     "id": "hit-brake-fluid",
+     "id": "hit-demist",
      "verdict": "FAIL",
-     "reason": "被评回答中出现了标准答案中未提及的具体步骤（如‘Cap 2’、‘MINI’标记）和操作细节，构成编造；且未引用页码。"
+     "reason": "被评回答中提到按钮 9，但标准答案中未提及该按钮，且未明确说明按钮 13 的具体功能（如 p.297-300 中的 Clear View 功能）。此外，未提及手动空调与自动空调的区别，也未引用 p.299-300 中关于手动调风向除雾的说明"
     },
     {
      "id": "hit-key-dead-start",
@@ -121,15 +101,15 @@
     {
      "id": "chain-charge#2",
      "verdict": "FAIL",
-     "reason": "被评回答编造了直流快充的具体功率数值（如 60kW、80kW），违反了标准答案中‘手册未给出直流快充具体功率数值’的明确要求。"
+     "reason": "被评回答编造了直流快充的具体功率数值（如 60kW、80kW），而标准答案明确指出手册未给出直流快充的具体功率数值，不得编造。"
     },
     {
      "id": "chain-charge#3",
      "verdict": "FAIL",
-     "reason": "被评回答中存在与标准答案冲突的具体内容（如按钮编号为9、V2L连接器自动锁定等），且未完全遵循标准答案中的操作步骤。"
+     "reason": "被评回答中出现与标准答案冲突的步骤（如按压按钮9、自动锁定等），且未正确引用页码。"
     }
    ],
-   "avg_score": 2.2,
+   "avg_score": 3.1,
    "avg_latency_s": 20.3
   }
  },
@@ -142,8 +122,8 @@
    "latency_s": 10.4,
    "rag_called": true,
    "cited": false,
-   "verdict": "WEAK",
-   "score": 6,
+   "verdict": "FAIL",
+   "score": 0,
    "points": [
     {
      "point": "ISOFIX 锚点位置（座椅背与坐垫间环形标记，p.91-98）",
@@ -151,7 +131,7 @@
     },
     {
      "point": "后排安装优先/前排限制条件",
-     "status": "partial"
+     "status": "missing"
     },
     {
      "point": "安装步骤要点",
@@ -162,9 +142,9 @@
      "status": "missing"
     }
    ],
-   "fabrication": false,
+   "fabrication": true,
    "citation_ok": false,
-   "reason": "被评回答未引用标准答案中提到的页码（如p.101-103, p.107-108），且未提及ISOFIX锚点位置的具体描述。"
+   "reason": "被评回答未引用手册页码，且包含与标准答案冲突的编造内容（如‘必须使用 ISOFIX’、‘不要让它紧贴仪表板’等）"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -174,25 +154,25 @@
    "latency_s": 15.6,
    "rag_called": true,
    "cited": false,
-   "verdict": "FAIL",
-   "score": 3,
+   "verdict": "WEAK",
+   "score": 6,
    "points": [
     {
      "point": "立即停车检查冷态胎压",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "按胎压标签复位流程",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码 p.180-183",
-     "status": "missing"
+     "status": "partial"
     }
    ],
-   "fabrication": true,
+   "fabrication": false,
    "citation_ok": false,
-   "reason": "被评回答中引用了 p.332 而非标准答案中的 p.180-183，且包含标准答案中未提及的数值（如 0.2–0.3 bar）和非原厂设备的建议，属于编造。"
+   "reason": "被评回答引用了332页，与标准答案中的p.180-183不一致，且未明确引用标准答案中提到的p.180-183。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -227,12 +207,12 @@
     },
     {
      "point": "附页码",
-     "status": "partial"
+     "status": "covered"
     }
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "被评回答部分覆盖了标准答案要点，但未完全引用标准答案中提到的 p.176-178 和 p.179-179 页码，且部分内容与标准答案不一致，如提到 p.42-43、p.26、p.306-307 等，未完全符合标准答案内容。"
+   "reason": "被评回答部分覆盖了标准答案要点，但未准确引用标准答案中明确提到的页码（如 p.131-132、p.175-176、p.178-179 等），且部分内容与标准答案不一致（如提到 p.26 和 p.306-307，但这些页码未在标准答案中出现）。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -254,25 +234,29 @@
    "latency_s": 46.2,
    "rag_called": true,
    "cited": false,
-   "verdict": "FAIL",
-   "score": 0,
+   "verdict": "WEAK",
+   "score": 6,
    "points": [
     {
-     "point": "操作方式",
+     "point": "后雾灯开启操作（环 4 转至 AUTO，再转开关标记 6 对符号 2）",
      "status": "partial"
     },
     {
-     "point": "前提条件（如先开近光）",
-     "status": "missing"
+     "point": "工作前提（取决于外部灯光选择）与仪表指示",
+     "status": "covered"
     },
     {
-     "point": "附页码",
+     "point": "关闭方式",
+     "status": "covered"
+    },
+    {
+     "point": "附页码引用 p.147-148",
      "status": "missing"
     }
    ],
-   "fabrication": true,
+   "fabrication": false,
    "citation_ok": false,
-   "reason": "被评回答中包含与标准答案冲突的步骤（如‘旋转开关4’、‘A（AUTO）’等），且未引用任何页码，存在编造。"
+   "reason": "未引用 p.147-148，且部分操作描述与标准答案不一致（如标记3与符号2对齐，而非标记3与符号3对齐）"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -282,25 +266,29 @@
    "latency_s": 22.1,
    "rag_called": true,
    "cited": true,
-   "verdict": "FAIL",
-   "score": 0,
+   "verdict": "WEAK",
+   "score": 6,
    "points": [
     {
      "point": "手册指定的支撑点位置",
-     "status": "missing"
+     "status": "partial"
     },
     {
      "point": "仅在指定点举升的安全警告",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码",
-     "status": "partial"
+     "status": "covered"
+    },
+    {
+     "point": "举升点适配平板直径 80–140 mm 的千斤顶",
+     "status": "missing"
     }
    ],
-   "fabrication": true,
+   "fabrication": false,
    "citation_ok": true,
-   "reason": "被评回答编造了手册中未提及的‘四个专用备胎固定点’和‘具体方位’等信息，与标准答案冲突。虽然引用了页码，但内容存在编造，且未明确说明手册中未给出具体支撑点位置，导致安全警告部分也未完全覆盖。"
+   "reason": "被评回答未提及举升点适配平板直径 80–140 mm 的千斤顶，且对支撑点位置的描述与标准答案不一致，手册未说明‘四个专用备胎固定点’的具体方位，但被评回答未准确引用手册原文。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -311,7 +299,7 @@
    "rag_called": true,
    "cited": true,
    "verdict": "FAIL",
-   "score": 0,
+   "score": 3,
    "points": [
     {
      "point": "更换步骤",
@@ -323,12 +311,12 @@
     },
     {
      "point": "附页码",
-     "status": "partial"
+     "status": "covered"
     }
    ],
    "fabrication": true,
    "citation_ok": true,
-   "reason": "被评回答中提到‘蓝色染料渗出’和‘不要碰到内部的电路或触点’等标准答案中未提及的内容，属于编造；电池型号未在标准答案中出现，且被评回答未明确提及；页码引用部分与标准答案不完全一致，但未明显冲突。"
+   "reason": "被评回答中提到的'蓝色染料渗出'和'用钥匙的内部机械钥匙'等内容未在标准答案中出现，属于编造；且未提及电池型号，属于要点缺失。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -362,8 +350,8 @@
    "latency_s": 28.7,
    "rag_called": true,
    "cited": true,
-   "verdict": "FAIL",
-   "score": 3,
+   "verdict": "WEAK",
+   "score": 6,
    "points": [
     {
      "point": "设置/调整巡航车速的操作步骤",
@@ -375,12 +363,12 @@
     },
     {
      "point": "附页码",
-     "status": "covered"
+     "status": "missing"
     }
    ],
-   "fabrication": true,
-   "citation_ok": true,
-   "reason": "被评回答中包含标准答案未提及的细节（如 `SET ↑` / `SET ↓`、`Switch 1`、`Switch 0`、`ECO模式`、`再生制动不兼容` 等），构成编造。"
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "被评回答未正确引用页码，且部分要点覆盖不完整，如未明确说明激活条件和具体操作步骤。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -390,8 +378,8 @@
    "latency_s": 13.8,
    "rag_called": true,
    "cited": false,
-   "verdict": "FAIL",
-   "score": 0,
+   "verdict": "WEAK",
+   "score": 6,
    "points": [
     {
      "point": "保险丝盒位置",
@@ -406,9 +394,9 @@
      "status": "missing"
     }
    ],
-   "fabrication": true,
+   "fabrication": false,
    "citation_ok": false,
-   "reason": "被评回答中包含与标准答案冲突的信息（如‘两个保险丝盒’、‘副驾驶舱行李箱’等），且未引用任何页码，存在编造。"
+   "reason": "被评回答未引用任何页码，且部分信息与标准答案不一致（如‘副驾驶舱行李箱’表述不准确，应为‘手套箱’；未提及 Fuse box A 的位置；未提及保险丝额定值要求等）。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -436,7 +424,7 @@
    ],
    "fabrication": false,
    "citation_ok": false,
-   "reason": "被评回答未引用页码，且部分信息与标准答案不一致（如触发方式中提到的‘按住 SOS 按钮两秒以上或连续按五次’与标准答案中的‘长按按钮2至少3秒或在10秒内按压按钮2五次’存在差异）。"
+   "reason": "被评回答未引用任何页码，且部分要点未完全覆盖，如触发方式中未提及‘自动模式触发条件’和‘误触取消’的具体操作，呼叫流程中未提及‘发送事故相关数据’等核心内容。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -476,7 +464,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "被评回答部分覆盖了标准答案中的要点，但存在与标准答案不一致的内容（如‘不要在未预湿的情况下刮除泥浆或污垢’未被明确提及，‘使用车主技术部门推荐的专用清洁产品’与标准答案中‘使用技术部门批准的产品’表述不一致，且未明确引用p.328-329, p.329-330）。"
+   "reason": "被评回答未完全覆盖标准答案中的核心要点，如高压水枪冲洗发动机舱、充电口、电池的明确警告，以及自动洗车机的详细操作要求等。部分信息与标准答案不一致，但未出现明显编造内容。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -486,8 +474,8 @@
    "latency_s": 20.1,
    "rag_called": true,
    "cited": true,
-   "verdict": "WEAK",
-   "score": 6,
+   "verdict": "FAIL",
+   "score": 3,
    "points": [
     {
      "point": "除雾功能操作方式",
@@ -502,9 +490,9 @@
      "status": "covered"
     }
    ],
-   "fabrication": false,
+   "fabrication": true,
    "citation_ok": true,
-   "reason": "被评回答部分覆盖了标准答案中的要点，但存在与标准答案不一致的细节（如按钮9的描述），且未完全匹配标准答案中的操作方式和注意事项。"
+   "reason": "被评回答中提到按钮 9，但标准答案中未提及该按钮，且未明确说明按钮 13 的具体功能（如 p.297-300 中的 Clear View 功能）。此外，未提及手动空调与自动空调的区别，也未引用 p.299-300 中关于手动调风向除雾的说明，属于部分遗漏。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -514,16 +502,16 @@
    "latency_s": 13.6,
    "rag_called": true,
    "cited": false,
-   "verdict": "WEAK",
-   "score": 6,
+   "verdict": "PASS",
+   "score": 9,
    "points": [
     {
      "point": "ECO 模式/经济驾驶要点",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "影响能耗的因素",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码",
@@ -532,7 +520,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "被评回答未完全覆盖标准答案中的所有要点，部分信息与标准答案不一致，但未出现编造内容。"
+   "reason": "被评回答完整覆盖了所有必答要点，引用了手册第176-178页，内容与标准答案一致，无编造。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -542,8 +530,8 @@
    "latency_s": 10.2,
    "rag_called": true,
    "cited": true,
-   "verdict": "FAIL",
-   "score": 0,
+   "verdict": "WEAK",
+   "score": 6,
    "points": [
     {
      "point": "制动液检查位置/方法",
@@ -551,16 +539,16 @@
     },
     {
      "point": "液位要求或警告",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码",
      "status": "missing"
     }
    ],
-   "fabrication": true,
+   "fabrication": false,
    "citation_ok": false,
-   "reason": "被评回答中出现了标准答案中未提及的具体步骤（如‘Cap 2’、‘MINI’标记）和操作细节，构成编造；且未引用页码。"
+   "reason": "未引用任何页码，且检查方法未完全符合标准答案中关于机盖开启方式和储液罐位置的详细描述。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -608,7 +596,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "被评回答未明确说明手册中无具体标准数值，且未提及冷态测量规则中的加压建议和热胎禁止放气的要点。"
+   "reason": "被评回答未明确说明手册中无具体标准数值，而是建议用户查看车门标签，但未明确指出手册本身不提供数值。同时未提及冷态检查规则和热胎禁止放气的要点。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -667,11 +655,16 @@
    "rag_called": true,
    "cited": true,
    "verdict": "PASS",
-   "score": 10,
-   "points": [],
+   "score": 9,
+   "points": [
+    {
+     "point": "手册中未包含正时皮带更换周期的具体信息",
+     "status": "covered"
+    }
+   ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "被评回答正确指出手册中未包含正时皮带更换周期信息，符合标准参考答案要求，未出现编造或硬凑内容。"
+   "reason": "被评回答明确指出手册中未包含正时皮带更换周期的具体信息，符合标准参考答案的要求，未编造内容，引用规范。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -711,7 +704,7 @@
    ],
    "fabrication": false,
    "citation_ok": false,
-   "reason": "被评回答未按标准答案要求的页码引用，且部分信息与标准答案不一致，如提到p.53-54、p.356-357等标准答案未提及的页码，属于引用不规范。"
+   "reason": "未正确引用标准答案中明确提到的页码，引用了未在标准答案中出现的页码（如 p.53-54、p.356-356），属于引用不规范。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -743,7 +736,7 @@
    ],
    "fabrication": true,
    "citation_ok": false,
-   "reason": "被评回答编造了直流快充的具体功率数值（如 60kW、80kW），违反了标准答案中‘手册未给出直流快充具体功率数值’的明确要求。"
+   "reason": "被评回答编造了直流快充的具体功率数值（如 60kW、80kW），而标准答案明确指出手册未给出直流快充的具体功率数值，不得编造。"
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
@@ -762,12 +755,12 @@
     },
     {
      "point": "附页码",
-     "status": "covered"
+     "status": "missing"
     }
    ],
    "fabrication": true,
-   "citation_ok": true,
-   "reason": "被评回答中存在与标准答案冲突的具体内容（如按钮编号为9、V2L连接器自动锁定等），且未完全遵循标准答案中的操作步骤。"
+   "citation_ok": false,
+   "reason": "被评回答中出现与标准答案冲突的步骤（如按压按钮9、自动锁定等），且未正确引用页码。"
   }
  ]
 }

@@ -1,29 +1,29 @@
-{"id":"hit-child-seat","kind":"hit","topic":"儿童安全","question":"儿童安全座椅怎么安装？","must_points":["ISOFIX 锚点位置（座椅背与坐垫间环形标记，p.91-98）","后排安装优先/前排限制条件","安装步骤要点","附页码引用"]}
-{"id":"hit-tyre-warning","kind":"hit","topic":"轮胎","question":"胎压警告灯亮了怎么办？","must_points":["立即停车检查冷态胎压","按胎压标签复位流程","附页码 p.180-183"]}
-{"id":"para-charge-time","kind":"paraphrase","topic":"充电","question":"充电需要多长时间？","must_points":["如实转述手册：充电时间取决于剩余电量与充电桩功率（p.45-46）","说明仪表盘会显示剩余充电时间估计（p.44-45）","不给拍脑袋的固定小时数","附页码"],"bad_signals":["编造固定充电小时数表"]}
-{"id":"hit-winter-range","kind":"hit","topic":"续航","question":"冬天续航里程为什么会下降？","must_points":["按手册解释低温对续航的影响","给出手册中的建议","附页码"]}
-{"id":"hit-service-interval","kind":"hit","topic":"保养","question":"保养周期是多久？","must_points":["如实转述手册不含具体周期表、指向保养日程/保养文档（maintenance schedule）","仪表盘 Service in / Service due 显示与保养后重置的规则（p.122-124）","不编造具体公里数/月数","附页码"]}
-{"id":"hit-fog-lights","kind":"hit","topic":"灯光","question":"雾灯怎么开？","must_points":["操作方式","前提条件（如先开近光）","附页码"]}
-{"id":"hit-jack","kind":"hit","topic":"轮胎","question":"千斤顶应该支撑在车底什么位置？","must_points":["手册指定的支撑点位置","仅在指定点举升的安全警告","附页码"]}
-{"id":"hit-key-battery","kind":"hit","topic":"钥匙","question":"车钥匙电池没电了怎么更换？","must_points":["更换步骤","电池型号","附页码"]}
-{"id":"hit-12v-battery","kind":"hit","topic":"电气","question":"12伏蓄电池亏电了怎么办？","must_points":["应急启动/充电说明","电动车专属注意事项","附页码"]}
-{"id":"hit-pretrip","kind":"hit","topic":"出行","question":"长途出行前应该检查哪些项目？","must_points":["综合多章节的检查清单","引用多条页码（≤4 条）"]}
-{"id":"hit-cruise-control","kind":"hit","topic":"驾驶辅助","question":"定速巡航怎么设置巡航车速？","must_points":["设置/调整巡航车速的操作步骤","激活/暂停条件","附页码"]}
-{"id":"hit-fuse-box","kind":"hit","topic":"电气","question":"保险丝盒在哪里？保险丝坏了怎么检查更换？","must_points":["保险丝盒位置","检查/更换要点","附页码"]}
-{"id":"hit-emergency-call","kind":"hit","topic":"安全","question":"紧急呼叫（SOS）功能是怎么工作的？","must_points":["触发方式","呼叫流程/工作方式","附页码"]}
-{"id":"hit-gear-p","kind":"hit","topic":"行驶","question":"挡位怎么挂入P挡？","must_points":["挂入 P 挡的操作方式","相关注意事项","附页码"]}
-{"id":"hit-car-wash","kind":"hit","topic":"保养","question":"洗车有什么注意事项？","must_points":["手工洗车建议","高压/自动洗车注意事项","附页码"]}
-{"id":"hit-demist","kind":"hit","topic":"空调","question":"前挡风玻璃起雾怎么除雾？","must_points":["除雾功能操作方式","相关注意事项","附页码"]}
-{"id":"hit-eco-driving","kind":"hit","topic":"能耗","question":"有哪些经济驾驶省电的技巧？","must_points":["ECO 模式/经济驾驶要点","影响能耗的因素","附页码"]}
-{"id":"hit-brake-fluid","kind":"hit","topic":"保养","question":"制动液需要检查吗？在哪里检查？","must_points":["制动液检查位置/方法","液位要求或警告","附页码"]}
-{"id":"hit-key-dead-start","kind":"hit","topic":"钥匙","question":"车钥匙卡片没电了怎么启动车辆？","must_points":["钥匙没电时的应急启动方式","附页码"]}
-{"id":"para-tyre-pressure","kind":"paraphrase","topic":"轮胎","question":"轮胎的标准胎压是多少？","must_points":["明确说手册无具体标准数值","指向驾驶员侧车门标签（Label A）","转述冷态检查规则：无法冷测加 0.2–0.3 bar (3 PSI)","热胎禁止放气","附页码"],"bad_signals":["编造具体 bar/PSI 标准值"]}
-{"id":"para-max-range","kind":"paraphrase","topic":"续航","question":"这车的最大续航里程是多少公里？","must_points":["不给拍脑袋的具体续航数字","说明实际续航随工况/条件变化","指向行程电脑或官方规格表获取数值","附页码"],"bad_signals":["编造 WLTP 或官方续航数字"]}
-{"id":"refuse-engine-oil","kind":"refuse","topic":"保养","question":"发动机机油多久换一次？","reason":"纯电车型无发动机及机油系统，手册必无此内容"}
-{"id":"refuse-fuel-filter","kind":"refuse","topic":"保养","question":"汽油滤芯多久换一次？","reason":"纯电车型无汽油系统，手册必无此内容"}
-{"id":"refuse-fuel-cap","kind":"refuse","topic":"车身","question":"油箱盖开关在哪里？","reason":"纯电车型无油箱，手册必无此内容"}
-{"id":"refuse-timing-belt","kind":"refuse","topic":"保养","question":"正时皮带多久需要更换一次？","reason":"纯电车型无发动机正时皮带，手册必无此内容"}
-{"id":"refuse-spark-plug","kind":"refuse","topic":"保养","question":"火花塞什么时候需要更换？","reason":"纯电车型无火花塞，手册必无此内容"}
-{"id":"chain-charge","kind":"chain","topic":"充电","turns":[{"kind":"hit","question":"在家里用家用插座充电，有什么需要注意的？","must_points":["家用充电方式说明","安全注意事项","附页码"]},{"kind":"paraphrase","question":"那用快充呢？直流快充的功率是多少？","must_points":["E 口交流充电最高 11 kW（p.40-43）","F 口为快充接口（视车型）","手册未给出直流快充具体功率数值，不得编造","附页码"]},{"kind":"hit","question":"充电口盖是怎么打开的？","must_points":["充电口盖操作步骤","附页码"]}]}
-{"id":"chain-tyre","kind":"chain","topic":"轮胎","turns":[{"kind":"hit","question":"胎压警告灯亮了怎么办？","must_points":["停车检查冷态胎压","复位流程","附页码"]},{"kind":"paraphrase","question":"那标准胎压到底是多少？","must_points":["明确说手册无具体数值","指向车门标签","不编造数值"]},{"kind":"hit","question":"胎压不足时应该怎么调整？","must_points":["冷态调整规则","无法冷测时 +0.2–0.3 bar (3 PSI)","热胎禁止放气","附页码"]}]}
-{"id":"chain-key","kind":"chain","topic":"钥匙","turns":[{"kind":"hit","question":"车钥匙电池没电了怎么更换？","must_points":["更换步骤","电池型号","附页码"]},{"kind":"hit","question":"钥匙没电的情况下怎么启动车辆？","must_points":["应急启动方式","附页码"]},{"kind":"hit","question":"数字钥匙是什么？怎么用？","must_points":["数字钥匙功能说明","开通/使用方式","附页码"]}]}
+{"id": "hit-child-seat", "kind": "hit", "topic": "儿童安全", "question": "儿童安全座椅怎么安装？", "must_points": ["ISOFIX 锚点位置（座椅背与坐垫间环形标记，p.91-98）", "后排安装优先/前排限制条件", "安装步骤要点", "附页码引用"]}
+{"id": "hit-tyre-warning", "kind": "hit", "topic": "轮胎", "question": "胎压警告灯亮了怎么办？", "must_points": ["立即停车检查冷态胎压", "按胎压标签复位流程", "附页码 p.180-183"]}
+{"id": "para-charge-time", "kind": "paraphrase", "topic": "充电", "question": "充电需要多长时间？", "must_points": ["如实转述手册：充电时间取决于剩余电量与充电桩功率（p.45-46）", "说明仪表盘会显示剩余充电时间估计（p.44-45）", "不给拍脑袋的固定小时数", "附页码"], "bad_signals": ["编造固定充电小时数表"]}
+{"id": "hit-winter-range", "kind": "hit", "topic": "续航", "question": "冬天续航里程为什么会下降？", "must_points": ["按手册解释低温对续航的影响", "给出手册中的建议", "附页码"]}
+{"id": "hit-service-interval", "kind": "hit", "topic": "保养", "question": "保养周期是多久？", "must_points": ["如实转述手册不含具体周期表、指向保养日程/保养文档（maintenance schedule）", "仪表盘 Service in / Service due 显示与保养后重置的规则（p.122-124）", "不编造具体公里数/月数", "附页码"]}
+{"id": "hit-fog-lights", "kind": "hit", "topic": "灯光", "question": "雾灯怎么开？", "must_points": ["操作方式", "前提条件（如先开近光）", "附页码"]}
+{"id": "hit-jack", "kind": "hit", "topic": "轮胎", "question": "千斤顶应该支撑在车底什么位置？", "must_points": ["手册指定的支撑点位置", "仅在指定点举升的安全警告", "附页码"]}
+{"id": "hit-key-battery", "kind": "hit", "topic": "钥匙", "question": "车钥匙电池没电了怎么更换？", "must_points": ["更换步骤", "电池型号", "附页码"]}
+{"id": "hit-12v-battery", "kind": "hit", "topic": "电气", "question": "12伏蓄电池亏电了怎么办？", "must_points": ["应急启动/充电说明", "电动车专属注意事项", "附页码"]}
+{"id": "hit-pretrip", "kind": "hit", "topic": "出行", "question": "长途出行前应该检查哪些项目？", "must_points": ["综合多章节的检查清单", "引用多条页码（≤4 条）"]}
+{"id": "hit-cruise-control", "kind": "hit", "topic": "驾驶辅助", "question": "定速巡航怎么设置巡航车速？", "must_points": ["设置/调整巡航车速的操作步骤", "激活/暂停条件", "附页码"]}
+{"id": "hit-fuse-box", "kind": "hit", "topic": "电气", "question": "保险丝盒在哪里？保险丝坏了怎么检查更换？", "must_points": ["保险丝盒位置", "检查/更换要点", "附页码"]}
+{"id": "hit-emergency-call", "kind": "hit", "topic": "安全", "question": "紧急呼叫（SOS）功能是怎么工作的？", "must_points": ["触发方式", "呼叫流程/工作方式", "附页码"]}
+{"id": "hit-gear-p", "kind": "hit", "topic": "行驶", "question": "挡位怎么挂入P挡？", "must_points": ["指出手册换挡杆没有 P 挡（只有 R/N/D/B）", "正确说明停车程序：施加电子驻车制动并经指示灯确认", "附页码引用 p.161-163"]}
+{"id": "hit-car-wash", "kind": "hit", "topic": "保养", "question": "洗车有什么注意事项？", "must_points": ["手工洗车建议", "高压/自动洗车注意事项", "附页码"]}
+{"id": "hit-demist", "kind": "hit", "topic": "空调", "question": "前挡风玻璃起雾怎么除雾？", "must_points": ["除雾功能操作方式", "相关注意事项", "附页码"]}
+{"id": "hit-eco-driving", "kind": "hit", "topic": "能耗", "question": "有哪些经济驾驶省电的技巧？", "must_points": ["ECO 模式/经济驾驶要点", "影响能耗的因素", "附页码"]}
+{"id": "hit-brake-fluid", "kind": "hit", "topic": "保养", "question": "制动液需要检查吗？在哪里检查？", "must_points": ["制动液检查位置/方法", "液位要求或警告", "附页码"]}
+{"id": "hit-key-dead-start", "kind": "hit", "topic": "钥匙", "question": "车钥匙卡片没电了怎么启动车辆？", "must_points": ["钥匙没电时的应急启动方式", "附页码"]}
+{"id": "para-tyre-pressure", "kind": "paraphrase", "topic": "轮胎", "question": "轮胎的标准胎压是多少？", "must_points": ["明确说手册无具体标准数值", "指向驾驶员侧车门标签（Label A）", "转述冷态检查规则：无法冷测加 0.2–0.3 bar (3 PSI)", "热胎禁止放气", "附页码"], "bad_signals": ["编造具体 bar/PSI 标准值"]}
+{"id": "para-max-range", "kind": "paraphrase", "topic": "续航", "question": "这车的最大续航里程是多少公里？", "must_points": ["不给拍脑袋的具体续航数字", "说明实际续航随工况/条件变化", "指向行程电脑或官方规格表获取数值", "附页码"], "bad_signals": ["编造 WLTP 或官方续航数字"]}
+{"id": "refuse-engine-oil", "kind": "refuse", "topic": "保养", "question": "发动机机油多久换一次？", "reason": "纯电车型无发动机及机油系统，手册必无此内容"}
+{"id": "refuse-fuel-filter", "kind": "refuse", "topic": "保养", "question": "汽油滤芯多久换一次？", "reason": "纯电车型无汽油系统，手册必无此内容"}
+{"id": "refuse-fuel-cap", "kind": "refuse", "topic": "车身", "question": "油箱盖开关在哪里？", "reason": "纯电车型无油箱，手册必无此内容"}
+{"id": "refuse-timing-belt", "kind": "refuse", "topic": "保养", "question": "正时皮带多久需要更换一次？", "reason": "纯电车型无发动机正时皮带，手册必无此内容"}
+{"id": "refuse-spark-plug", "kind": "refuse", "topic": "保养", "question": "火花塞什么时候需要更换？", "reason": "纯电车型无火花塞，手册必无此内容"}
+{"id": "chain-charge", "kind": "chain", "topic": "充电", "turns": [{"kind": "hit", "question": "在家里用家用插座充电，有什么需要注意的？", "must_points": ["家用充电方式说明", "安全注意事项", "附页码"]}, {"kind": "paraphrase", "question": "那用快充呢？直流快充的功率是多少？", "must_points": ["E 口交流充电最高 11 kW（p.40-43）", "F 口为快充接口（视车型）", "手册未给出直流快充具体功率数值，不得编造", "附页码"]}, {"kind": "hit", "question": "充电口盖是怎么打开的？", "must_points": ["充电口盖操作步骤", "附页码"]}]}
+{"id": "chain-tyre", "kind": "chain", "topic": "轮胎", "turns": [{"kind": "hit", "question": "胎压警告灯亮了怎么办？", "must_points": ["停车检查冷态胎压", "复位流程", "附页码"]}, {"kind": "paraphrase", "question": "那标准胎压到底是多少？", "must_points": ["明确说手册无具体数值", "指向车门标签", "不编造数值"]}, {"kind": "hit", "question": "胎压不足时应该怎么调整？", "must_points": ["冷态调整规则", "无法冷测时 +0.2–0.3 bar (3 PSI)", "热胎禁止放气", "附页码"]}]}
+{"id": "chain-key", "kind": "chain", "topic": "钥匙", "turns": [{"kind": "hit", "question": "车钥匙电池没电了怎么更换？", "must_points": ["更换步骤", "电池型号", "附页码"]}, {"kind": "hit", "question": "钥匙没电的情况下怎么启动车辆？", "must_points": ["应急启动方式", "附页码"]}, {"kind": "hit", "question": "数字钥匙是什么？怎么用？", "must_points": ["数字钥匙功能说明", "开通/使用方式", "附页码"]}]}

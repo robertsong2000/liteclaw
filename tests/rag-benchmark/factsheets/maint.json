@@ -1,0 +1,311 @@
+{
+ "cluster": "maint",
+ "questions": [
+  {
+   "id": "hit-service-interval",
+   "question": "保养周期是多久？",
+   "facts": [
+    {
+     "fact": "手册正文不含具体保养周期表（没有任何规定的保养公里数/月数数值）；关于更换周期（Replacement intervals），手册明确写 \"Refer to the maintenance document for your vehicle\"——请查阅随车的保养文档（maintenance document / maintenance schedule），冷却液与制动液章节均如此表述。",
+     "layer": "core",
+     "pages": "p.323-325",
+     "source_chunk": "r5e-2025-topic-levels-0003 / r5e-2025-topic-levels-0004"
+    },
+    {
+     "fact": "仪表行程电脑（trip computer）有 \"Service interval\"（保养间隔）显示项，显示距下次保养的剩余距离（英里或公里）和时间；屏幕示例为 \"Service in 1,203 miles (1,936 km) or three months\"（这只是屏幕显示示例，并非手册规定的保养周期数值）。",
+     "layer": "core",
+     "pages": "p.122-124",
+     "source_chunk": "r5e-2025-topic-trip-computer-0004"
+    },
+    {
+     "fact": "Service 临近/到期的显示规则：剩余间隔小于 932 英里（1,500 km）或 1 个月时显示 \"Service in\" 及剩余距离/时间；保养到期时显示 \"Service due\" 及先到达的限值（距离或时间）；剩余里程为 0（0 km）或保养日期已到时显示 \"Service required\" 并伴随警告灯，表示车辆须尽快保养。",
+     "layer": "core",
+     "pages": "p.122-124",
+     "source_chunk": "r5e-2025-topic-trip-computer-0004"
+    },
+    {
+     "fact": "保养后重置规则：保养间隔显示只能在完成了符合保养日程（maintenance schedule）建议的保养之后重置（\"must only be reset after a service which complies with the recommendations in the maintenance schedule\"）；重置方法：按住任一显示重置按钮约 10 秒，直到屏幕持续显示保养剩余里程（service range）。",
+     "layer": "core",
+     "pages": "p.122-124",
+     "source_chunk": "r5e-2025-topic-trip-computer-0004"
+    },
+    {
+     "fact": "12V 电池：必须遵守保养文档（maintenance document）中写明的更换周期且不得超期；电池为专用类型，更换须用同型号新电池并联系授权经销商（approved Dealer）。",
+     "layer": "supplementary",
+     "pages": "p.326-327",
+     "source_chunk": "r5e-2025-topic-battery-0001"
+    },
+    {
+     "fact": "空调系统的检查频率同样 \"Refer to the maintenance document for your vehicle for the inspection frequency\"；另建议即使冷天也每月至少运行空调一次、每次约 5 分钟。",
+     "layer": "supplementary",
+     "pages": "p.305-307",
+     "source_chunk": "r5e-2025-topic-climate-control-0012 / r5e-2025-topic-climate-control-0013"
+    },
+    {
+     "fact": "紧急呼叫（Emergency call）系统带专用电池，寿命约 4 年（到期时红色警告灯亮起提示，需咨询授权经销商）；其电池同样要求 \"respect the replacement intervals (without exceeding them) as stated in the maintenance document\"。",
+     "layer": "supplementary",
+     "pages": "p.290",
+     "source_chunk": "r5e-2025-topic-emergency-call-0003"
+    },
+    {
+     "fact": "车身防腐蚀保修：车辆出厂已做高效防腐处理，建议定期到车身维修车间（body shop）检查以维持 anti-corrosion 保修，具体参照保养文档（\"Refer to the maintenance document\"）；漆面损伤处应尽快修补以防腐蚀蔓延。",
+     "layer": "supplementary",
+     "pages": "p.328-329",
+     "source_chunk": "r5e-2025-topic-cleaning-0002 / r5e-2025-topic-cleaning-0003"
+    },
+    {
+     "fact": "手册附录提供保养记录表（Service sheets）与防腐检查表（anticorrosion check）空白模板，字段包括 VIN、日期（Date）、里程（Miles (km)）、操作类型（Type of operation: Service）、发票号（Invoice number）、经销商盖章（Stamp）、防腐检查结果（OK/Not OK），供每次保养/检查登记使用，模板本身不含周期数值。",
+     "layer": "supplementary",
+     "pages": "p.370-377",
+     "source_chunk": "r5e-2025-topic-service-sheets-0001~0003 / r5e-2025-table-service-forms-0001"
+    },
+    {
+     "fact": "手册第 1 章给出\"发动机舱例行保养\"部件位置总览图：1 电池与发动机冷却液（→p.321）、2 制动液（→p.322）、3 12V 电池（→p.324）、4 玻璃水（→p.323）、5 机盖开启（→p.319）、6 \"400 V\" 电路（→p.20）、7 乘员舱冷却液（→p.321）。",
+     "layer": "supplementary",
+     "pages": "p.16-21",
+     "source_chunk": "r5e-2025-topic-breakdown-recovery-overview-0001"
+    }
+   ]
+  },
+  {
+   "id": "hit-brake-fluid",
+   "question": "制动液需要检查吗？在哪里检查？",
+   "facts": [
+    {
+     "fact": "需要检查：制动液储液罐位于发动机舱内（第 1 章\"发动机舱（例行保养）\"总览图列出 \"Brake fluid\"，指向 p.322；机盖开启方式：拉动仪表板左侧拉手 1，再向左推锁止拨杆 2 并抬起机盖）。",
+     "layer": "core",
+     "pages": "p.16-21, p.319-322",
+     "source_chunk": "r5e-2025-topic-breakdown-recovery-overview-0001 / r5e-2025-topic-levels-0001"
+    },
+    {
+     "fact": "检查方法：应在熄火（engine switched off）、车辆停在水平地面（level ground）时读取液位；制动液应经常检查（checked frequently），一旦发现制动效率哪怕轻微下降（the slightest loss in braking efficiency）也要立即检查。",
+     "layer": "core",
+     "pages": "p.324-325",
+     "source_chunk": "r5e-2025-topic-levels-0004"
+    },
+    {
+     "fact": "液位要求：随制动蹄片（brake shoes）磨损液位正常下降属正常现象，但液位绝不允许降到 \"MINI\" 警戒线以下。",
+     "layer": "core",
+     "pages": "p.324-325",
+     "source_chunk": "r5e-2025-topic-levels-0004"
+    },
+    {
+     "fact": "警告：液位异常或反复下降时，必须咨询授权经销商（approved Dealer）。",
+     "layer": "core",
+     "pages": "p.324-325",
+     "source_chunk": "r5e-2025-topic-levels-0004"
+    },
+    {
+     "fact": "警告：液压回路的任何操作之后，必须由专业人员（specialist）更换制动液；只允许使用厂商技术部认可、取自密封容器的制动液。",
+     "layer": "core",
+     "pages": "p.324-325",
+     "source_chunk": "r5e-2025-topic-levels-0004"
+    },
+    {
+     "fact": "安全警告（发动机舱作业通用）：车辆充电中或点火开关接通（ignition switched on）时，不得在机盖下进行任何作业；在发动机舱作业时须确保雨刮拨杆处于 Park 位置，否则有受伤风险；作业后确认没有遗落抹布、工具等物，否则可能引发损坏或火灾。",
+     "layer": "core",
+     "pages": "p.321-325",
+     "source_chunk": "r5e-2025-topic-levels-0001~0004"
+    },
+    {
+     "fact": "制动液更换周期：手册未给数值，写明 \"Refer to the maintenance document for your vehicle\"（查阅随车保养文档）。",
+     "layer": "supplementary",
+     "pages": "p.324-325",
+     "source_chunk": "r5e-2025-topic-levels-0004"
+    },
+    {
+     "fact": "如想自行检查制动盘磨损，可从经销商网络（our Network）或制造商网站获取说明检查步骤的文件。",
+     "layer": "supplementary",
+     "pages": "p.324-325",
+     "source_chunk": "r5e-2025-topic-levels-0004"
+    },
+    {
+     "fact": "高压安全警告：电动车辆驱动系统使用约 400 V 直流电压，点火关闭期间及关闭后仍可能高温；严禁对 400 V 电气系统（部件、线缆、连接器、动力电池）做任何操作或改装，否则有严重烧伤或触电致死风险；发动机冷却风扇可能随时启动（机舱标签提示），有受伤风险。",
+     "layer": "supplementary",
+     "pages": "p.321-324",
+     "source_chunk": "r5e-2025-topic-levels-0001 / r5e-2025-topic-levels-0003"
+    },
+    {
+     "fact": "相关仪表信息：出现 \"WARNING: Check Braking System\" 等故障消息时伴随警告灯，应尽快谨慎驶往授权经销商（否则可能损坏车辆）；消息按一下显示选择键或数秒后消失，并存入电脑日志。",
+     "layer": "supplementary",
+     "pages": "p.124-125",
+     "source_chunk": "r5e-2025-topic-trip-computer-0005"
+    }
+   ]
+  },
+  {
+   "id": "hit-car-wash",
+   "question": "洗车有什么注意事项？",
+   "facts": [
+    {
+     "fact": "最高优先级警告：严禁用高压水枪冲洗发动机舱、充电接口（charging connection）或动力电池（traction battery）——有损坏电路的风险；严禁在车辆充电时洗车——有触电及生命危险（Risk of electric shock and a risk to life）。",
+     "layer": "core",
+     "pages": "p.329-330",
+     "source_chunk": "r5e-2025-topic-cleaning-0004 / r5e-2025-topic-cleaning-0005"
+    },
+    {
+     "fact": "手工洗车建议：应经常洗车，熄火（engine off）状态下使用厂商技术部推荐的清洁产品（禁用研磨性产品）；先用水流充分冲净再清洗；树胶、工业污染 spots、鸟粪（会与漆面发生化学反应迅速使其变色甚至脱皮）、撒盐路行驶后附着的盐分（尤其轮拱内和车身底部）须立即洗掉——这些痕迹抛光也无法去除。",
+     "layer": "core",
+     "pages": "p.328",
+     "source_chunk": "r5e-2025-topic-cleaning-0002"
+    },
+    {
+     "fact": "高压清洗设备注意事项：先确认车漆/待清洁部件适用高压清洗；设备压力必须低于 100 bar；喷嘴与车身距离至少 15 cm 且水流量低于 15 升/分钟（3.30 gal/min）；不要长时间持续冲洗同一区域、受撞击点或密封条（否则损伤车漆、密封条脱落）；机械部件、铰链等被清洗后须重新喷涂厂商认可产品加以防护。",
+     "layer": "core",
+     "pages": "p.328-329",
+     "source_chunk": "r5e-2025-topic-cleaning-0003"
+    },
+    {
+     "fact": "自动（滚刷式）洗车机注意事项：雨刮拨杆回 Park 位置（→p.150）；检查外部附件、附加灯和后视镜安装牢固，并用胶带固定雨刮片；如装有收音机天线杆须先取下，洗完后再装回拧紧。",
+     "layer": "core",
+     "pages": "p.329-330",
+     "source_chunk": "r5e-2025-topic-cleaning-0004"
+    },
+    {
+     "fact": "应遵守当地洗车法规（例如不得在公共道路上洗车）。",
+     "layer": "core",
+     "pages": "p.328-329",
+     "source_chunk": "r5e-2025-topic-cleaning-0003"
+    },
+    {
+     "fact": "禁止事项：不要在烈日下或冰冻温度下洗车；不要不预湿就刮除泥垢；不要让污垢在车外积累；不要使用技术部未认可的溶剂去渍（会损伤车漆）；雪天或泥地行驶后必须洗车（尤其轮拱下和车身底部）。",
+     "layer": "supplementary",
+     "pages": "p.328-329",
+     "source_chunk": "r5e-2025-topic-cleaning-0003"
+    },
+    {
+     "fact": "不要用未认可产品通过高压设备脱脂/清洗：机械部件（如发动机舱）、车轮（如制动卡钳等制动系统部件）、底盘（underbody）、带铰链的部位（如车门内侧）、涂漆塑料外饰件（如保险杠）——否则可能导致腐蚀或功能故障。",
+     "layer": "supplementary",
+     "pages": "p.329-330",
+     "source_chunk": "r5e-2025-topic-cleaning-0004"
+    },
+    {
+     "fact": "哑光漆（matte paint）车辆特别注意事项：只可手洗，用大量水配合软布或软海绵；禁止使用蜡类产品（抛光）、用力擦拭、进滚刷式洗车机、在漆面贴贴纸（会留痕）、用高压清洗设备洗车。",
+     "layer": "supplementary",
+     "pages": "p.329-330",
+     "source_chunk": "r5e-2025-topic-cleaning-0004"
+    },
+    {
+     "fact": "EV 章节重申洗车禁令：充电时不得对车辆做任何事（洗车、在发动机舱作业等）；充电中不得洗充电线，充电线未连接时也不要洗充电线和插头（防止触点/插头腐蚀）；不得用外部水源以外的任何方式——充电口旁标签 13 也提示 \"do not wash the charging flap using a high-pressure water jet\"（不得用高压水枪冲洗充电盖板）。",
+     "layer": "supplementary",
+     "pages": "p.29-34, p.46",
+     "source_chunk": "r5e-2025-topic-electric-vehicle-0006 / r5e-2025-topic-electric-vehicle-0007 / r5e-2025-topic-electric-vehicle-0016"
+    },
+    {
+     "fact": "滚刷洗车与自动雨刮：配备自动雨刮的车辆进滚刷式洗车机前，应把前雨刮拨杆回到关闭位 B 以解除自动雨刮；后雨刮同样把拨杆上的旋转环 3 回到关闭位。",
+     "layer": "supplementary",
+     "pages": "p.153, p.155-156",
+     "source_chunk": "r5e-2025-topic-wiper-0003 / r5e-2025-topic-wiper-0006"
+    },
+    {
+     "fact": "洗车/清洁风挡前雨刮安全警告：任何涉及风挡的操作（洗车、除冰、清洁等）之前把雨刮拨杆回 Park 位（位置 B），否则有受伤和/或设备损坏风险；点火接通前先把雨刮放回风挡，否则开雨刮时可能损坏机盖或雨刮。",
+     "layer": "supplementary",
+     "pages": "p.154-155",
+     "source_chunk": "r5e-2025-topic-wiper-0005"
+    },
+    {
+     "fact": "大灯、传感器和摄像头的清洁：用软布或棉球，必要时蘸肥皂水，之后始终用软布/棉球清水擦净，最后用软干布仔细擦干；禁用含酒精的清洁产品或器物（如刮刀）。贴纸、装饰膜同理。",
+     "layer": "supplementary",
+     "pages": "p.330",
+     "source_chunk": "r5e-2025-topic-cleaning-0005"
+    },
+    {
+     "fact": "内饰清洁：污渍应尽快处理，一般用冷（或温）肥皂水（天然皂）+软布，禁用洗涤剂（洗洁精、粉状产品、含酒精产品）；玻璃仪表板禁用含酒精产品和喷剂；座椅安全带须保持清洁（认可产品或温肥皂水+海绵），严禁使用洗涤剂或染料；严禁在乘员舱内使用高压清洗设备或喷雾（可能影响电气/电子元件正常工作）。",
+     "layer": "supplementary",
+     "pages": "p.330-332",
+     "source_chunk": "r5e-2025-topic-cleaning-0005~0007"
+    },
+    {
+     "fact": "清洁时取下的可拆卸设备（如脚垫）必须正确装回且方向正确（司机脚垫装司机侧，并使用随附的预装固定件固定）；车辆静止时确认没有任何东西妨碍驾驶（不能挡住踏板、脚跟不能被脚垫卡住）；不要在空调出风口附近放置香薰等物品（可能损伤仪表台饰板）。",
+     "layer": "supplementary",
+     "pages": "p.331-332",
+     "source_chunk": "r5e-2025-topic-cleaning-0007"
+    },
+    {
+     "fact": "V2L（Vehicle to Load）连接器维护：维护前确保连接器已断开；用微蘸清水的布清洁，注意抹布不得接触连接器端子（连接器、充电针脚），以免腐蚀。",
+     "layer": "supplementary",
+     "pages": "p.49-51",
+     "source_chunk": "r5e-2025-topic-electric-vehicle-0020"
+    }
+   ]
+  },
+  {
+   "id": "hit-pretrip",
+   "question": "长途出行前应该检查哪些项目？",
+   "facts": [
+    {
+     "fact": "轮胎气压：至少每月检查一次，并在任何长途出行（long journey）前额外检查；规定胎压见驾驶员车门边缘标签；须冷胎测量；无法冷测时将标称值提高 0.2~0.3 bar（3 PSI）；热胎严禁放气。胎压不正确会导致异常磨损和过热，影响操控并可能爆胎。",
+     "layer": "core",
+     "pages": "p.332, p.333-334, p.181-182",
+     "source_chunk": "r5e-2025-topic-cleaning-0008 / r5e-2025-topic-tyres-0002 / r5e-2025-topic-tyre-pressure-warning-0002"
+    },
+    {
+     "fact": "轮胎状况：轮胎必须状态良好、花纹深度足够；磨到磨损指示条（wear indicators）时花纹最多剩 1.6 mm，湿地抓地力差，须更换轮胎；撞到路缘等驾驶冲击可能损伤轮胎和轮辋并导致前/后轴定位失准，应到授权经销商检查。",
+     "layer": "core",
+     "pages": "p.331-332",
+     "source_chunk": "r5e-2025-topic-cleaning-0007 / r5e-2025-topic-cleaning-0008"
+    },
+    {
+     "fact": "冷却液液位：应定期检查（冷却液不足会对电机和电池造成严重损坏）；须在熄火、水平地面读数；两个储液罐——1 号冷却电机电路和电池、2 号冷却乘员舱回路——冷态液位都必须在 \"MINI\" 与 \"MAXI\" 之间，冷态下在降到 MINI 之前补足；只能补加技术部认可产品（防冻+冷却系统防腐）；液位异常或反复下降须咨询授权经销商；发动机（回路）热时严禁操作冷却回路（烫伤风险）；新车磨合期液位可能高于 MAXI 后回落，属正常。",
+     "layer": "core",
+     "pages": "p.322-324",
+     "source_chunk": "r5e-2025-topic-levels-0002 / r5e-2025-topic-levels-0003"
+    },
+    {
+     "fact": "制动液液位：熄火、水平地面检查，应经常检查，发现制动效率哪怕轻微下降立即检查；液位不得低于 \"MINI\" 警戒线（随制动蹄磨损下降属正常）。",
+     "layer": "core",
+     "pages": "p.324-325",
+     "source_chunk": "r5e-2025-topic-levels-0004"
+    },
+    {
+     "fact": "玻璃水（风挡洗涤液）：打开盖 2 加注至可见液面后盖回；只使用含防冻成分的洗涤液；不要用硬水（会损坏泵、在泵和水嘴上结水垢）。",
+     "layer": "core",
+     "pages": "p.324-325",
+     "source_chunk": "r5e-2025-topic-levels-0004"
+    },
+    {
+     "fact": "12V 电池：电量可能在低温环境或熄火状态下长时间使用大功率电器后下降；12V 电池的任何操作（拆卸、断开等）必须由专业人员进行（有严重烧伤或触电风险）；不得用外部充电器或别车的电池给本车 12V 电池充电；也不要用本电动车去帮别的车辆搭电（电力不足，会损坏车辆）。",
+     "layer": "core",
+     "pages": "p.326-327",
+     "source_chunk": "r5e-2025-topic-battery-0001 / r5e-2025-topic-battery-0002"
+    },
+    {
+     "fact": "出发前规划（EV 续航）：可用导航系统的交通信息和最近充电站等管理行程；实际续航受车速与驾驶风格、道路类型、加热使用、轮胎、电器使用、车辆负载影响；开启 ECO 模式可降低能耗增程（车速被限制在约 71 mph/115 km/h）；高速行驶显著缩短续航（例如 130→110 km/h 可省约 20%）；胎压不足会增加能耗，务必符合规定胎压。",
+     "layer": "supplementary",
+     "pages": "p.176-179",
+     "source_chunk": "r5e-2025-topic-eco-driving-0002~0005"
+    },
+    {
+     "fact": "电量余量表：动力电池电量到约 7%（视车型约 12%）时电量表和警告灯变黄并伴提示音（reserve threshold）；约 4%（或 6%）再次提示音并变红；3.5%（或约 5%）时不再显示续航值，动力性能逐渐下降——长途出发前应充满电。",
+     "layer": "supplementary",
+     "pages": "p.131-132",
+     "source_chunk": "r5e-2025-topic-trip-computer-0010"
+    },
+    {
+     "fact": "雨刮：雨刮片效率开始下降即应更换，约一年一次（→p.344）；冰冻或下雪条件下先清理风挡再开雨刮（电机过热风险）；洗涤液在零下温度有冻结风险（使用含防冻液玻璃水）。",
+     "layer": "supplementary",
+     "pages": "p.155-156, p.154-155",
+     "source_chunk": "r5e-2025-topic-wiper-0006 / r5e-2025-topic-wiper-0005"
+    },
+    {
+     "fact": "满载（最大许可总重）并拖挂挂车时：最高车速须限制在 62 mph（100 km/h）且胎压增加 0.2 bar（有爆胎风险）。",
+     "layer": "supplementary",
+     "pages": "p.334-336",
+     "source_chunk": "r5e-2025-topic-tyres-0003"
+    },
+    {
+     "fact": "随车应急装备：充气补胎套件（tyre inflation kit）位于行李舱地毯下（仅可修补直径小于 6 mm 的胎面穿孔、不可修胎侧切口），随车工具（轮毂罩工具、拖车环、V2L 转接头、补胎剂瓶）也在行李舱地毯下——出发前可确认在位并检查补胎剂瓶有效期。",
+     "layer": "supplementary",
+     "pages": "p.333-338",
+     "source_chunk": "r5e-2025-topic-tyres-0003~0007"
+    },
+    {
+     "fact": "灯光状态可通过仪表盘指示灯确认（近光、远光、自动远光、后雾灯、转向灯等 tell-tale）；出现红色停车警告灯须立即停车熄火并联系经销商，黄色警告灯须尽快前往经销商。",
+     "layer": "supplementary",
+     "pages": "p.135-137",
+     "source_chunk": "r5e-2025-topic-warning-lights-0003~0005"
+    }
+   ]
+  }
+ ]
+}

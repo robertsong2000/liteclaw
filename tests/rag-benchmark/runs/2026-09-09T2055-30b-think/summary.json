@@ -1,0 +1,1006 @@
+{
+ "judge_model": "qwen3:30b-a3b",
+ "generated_at": "2026-09-10 10:15",
+ "golden_unreviewed": 0,
+ "models": {
+  "qwen3:30b-a3b": {
+   "n": 35,
+   "score_sum": 196,
+   "latency_sum": 439.6,
+   "verdicts": {
+    "WEAK": 22,
+    "FAIL": 6,
+    "PASS": 7
+   },
+   "by_kind": {
+    "hit": {
+     "n": 25,
+     "score_sum": 123
+    },
+    "paraphrase": {
+     "n": 5,
+     "score_sum": 28
+    },
+    "refuse": {
+     "n": 5,
+     "score_sum": 45
+    }
+   },
+   "fails": [
+    {
+     "id": "hit-service-interval",
+     "verdict": "FAIL",
+     "reason": "被评回答编造了具体公里数/月数（1500公里或一个月），与标准答案中明确指出手册不含具体周期表、仅指向保养文档（maintenance schedule）相冲突。"
+    },
+    {
+     "id": "hit-pretrip",
+     "verdict": "FAIL",
+     "reason": "被评回答未引用任何手册页码，且内容与标准答案中的必答要点无覆盖，属于编造。"
+    },
+    {
+     "id": "hit-gear-p",
+     "verdict": "FAIL",
+     "reason": "被评回答编造了 P 挡的存在及操作方式，与标准答案矛盾，且未引用任何页码。"
+    },
+    {
+     "id": "chain-tyre#2",
+     "verdict": "FAIL",
+     "reason": "被评回答编造了具体数值（2.0-2.3bar或对应psi值），而标准答案明确指出手册中无具体数值，必须查看车门标签。"
+    },
+    {
+     "id": "chain-key#1",
+     "verdict": "FAIL",
+     "reason": "被评回答未正确引用页码，且包含与标准答案冲突的编造内容（如 'Renault 授权经销商提供的型号'）"
+    },
+    {
+     "id": "chain-key#2",
+     "verdict": "FAIL",
+     "reason": "被评回答中提到的'充电口位置的感应区'和'p.62 数字钥匙使用'未在标准答案中出现，属于编造；且未正确引用页码。"
+    }
+   ],
+   "avg_score": 5.6,
+   "avg_latency_s": 12.6
+  }
+ },
+ "records": [
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-child-seat",
+   "kind": "hit",
+   "question": "儿童安全座椅怎么安装？",
+   "latency_s": 15.8,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "ISOFIX 锚点位置（座椅背与坐垫间环形标记，p.91-98）",
+     "status": "partial"
+    },
+    {
+     "point": "后排安装优先/前排限制条件",
+     "status": "covered"
+    },
+    {
+     "point": "安装步骤要点",
+     "status": "partial"
+    },
+    {
+     "point": "附页码引用",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答未完整覆盖 ISOFIX 锚点位置和安装步骤要点，但引用了正确页码。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-tyre-warning",
+   "kind": "hit",
+   "question": "胎压警告灯亮了怎么办？",
+   "latency_s": 14.4,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "立即停车检查冷态胎压",
+     "status": "partial"
+    },
+    {
+     "point": "按胎压标签复位流程",
+     "status": "partial"
+    },
+    {
+     "point": "附页码 p.180-183",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答未明确提到'立即停车'，且未完整复述'冷态胎压'的详细要求，但引用了正确页码。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "para-charge-time",
+   "kind": "paraphrase",
+   "question": "充电需要多长时间？",
+   "latency_s": 13.9,
+   "rag_called": false,
+   "cited": false,
+   "verdict": "WEAK",
+   "score": 5,
+   "points": [
+    {
+     "point": "如实转述手册：充电时间取决于剩余电量与充电桩功率（p.45-46）",
+     "status": "covered"
+    },
+    {
+     "point": "说明仪表盘会显示剩余充电时间估计（p.44-45）",
+     "status": "covered"
+    },
+    {
+     "point": "不给拍脑袋的固定小时数",
+     "status": "missing"
+    },
+    {
+     "point": "附页码",
+     "status": "missing"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "未引用具体页码，且未明确说明手册中无固定小时数。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-winter-range",
+   "kind": "hit",
+   "question": "冬天续航里程为什么会下降？",
+   "latency_s": 10.8,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "按手册解释低温对续航的影响",
+     "status": "partial"
+    },
+    {
+     "point": "给出手册中的建议",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答部分覆盖了手册内容，但未准确引用标准答案中的具体页码和细节，且部分信息与标准答案不一致（如将80mph换算为130km/h，手册中未提及具体数值）。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-service-interval",
+   "kind": "hit",
+   "question": "保养周期是多久？",
+   "latency_s": 11.7,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "FAIL",
+   "score": 0,
+   "points": [
+    {
+     "point": "如实转述手册不含具体周期表、指向保养日程/保养文档（maintenance schedule）",
+     "status": "missing"
+    },
+    {
+     "point": "仪表盘 Service in / Service due 显示与保养后重置的规则（p.122-124）",
+     "status": "partial"
+    },
+    {
+     "point": "不编造具体公里数/月数",
+     "status": "missing"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": true,
+   "citation_ok": true,
+   "reason": "被评回答编造了具体公里数/月数（1500公里或一个月），与标准答案中明确指出手册不含具体周期表、仅指向保养文档（maintenance schedule）相冲突。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-fog-lights",
+   "kind": "hit",
+   "question": "雾灯怎么开？",
+   "latency_s": 10.2,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "后雾灯开启操作（环 4 转至 AUTO，再转开关标记 6 对符号 2）",
+     "status": "partial"
+    },
+    {
+     "point": "工作前提（取决于外部灯光选择）与仪表指示",
+     "status": "covered"
+    },
+    {
+     "point": "关闭方式",
+     "status": "covered"
+    },
+    {
+     "point": "附页码引用 p.147-148",
+     "status": "missing"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "未正确引用 p.147-148，且开启操作描述与标准答案不一致"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-jack",
+   "kind": "hit",
+   "question": "千斤顶应该支撑在车底什么位置？",
+   "latency_s": 10.6,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "手册指定的支撑点位置",
+     "status": "covered"
+    },
+    {
+     "point": "仅在指定点举升的安全警告",
+     "status": "missing"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    },
+    {
+     "point": "举升点适配平板直径 80–140 mm 的千斤顶",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "未提及安全警告内容，但其他要点覆盖，引用页码正确。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-key-battery",
+   "kind": "hit",
+   "question": "车钥匙电池没电了怎么更换？",
+   "latency_s": 15.2,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 4,
+   "points": [
+    {
+     "point": "更换步骤",
+     "status": "partial"
+    },
+    {
+     "point": "电池型号",
+     "status": "missing"
+    },
+    {
+     "point": "附页码",
+     "status": "missing"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "未按要求附页码引用，且未覆盖电池型号和完整更换步骤。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-12v-battery",
+   "kind": "hit",
+   "question": "12伏蓄电池亏电了怎么办？",
+   "latency_s": 13.1,
+   "rag_called": false,
+   "cited": false,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "应急启动/充电说明",
+     "status": "partial"
+    },
+    {
+     "point": "电动车专属注意事项",
+     "status": "missing"
+    },
+    {
+     "point": "附页码",
+     "status": "missing"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "未引用页码，且未提及电动车专属注意事项。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-pretrip",
+   "kind": "hit",
+   "question": "长途出行前应该检查哪些项目？",
+   "latency_s": 18.7,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "FAIL",
+   "score": 0,
+   "points": [
+    {
+     "point": "综合多章节的检查清单",
+     "status": "missing"
+    },
+    {
+     "point": "引用多条页码（≤4 条）",
+     "status": "missing"
+    }
+   ],
+   "fabrication": true,
+   "citation_ok": false,
+   "reason": "被评回答未引用任何手册页码，且内容与标准答案中的必答要点无覆盖，属于编造。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-cruise-control",
+   "kind": "hit",
+   "question": "定速巡航怎么设置巡航车速？",
+   "latency_s": 12.0,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "设置/调整巡航车速的操作步骤",
+     "status": "partial"
+    },
+    {
+     "point": "激活/暂停条件",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答未完整覆盖所有必答要点，如未提及开关1、开关2、开关3等具体控件操作，也未说明恢复巡航的条件。但未出现与标准答案冲突的编造内容，且引用了正确页码。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-fuse-box",
+   "kind": "hit",
+   "question": "保险丝盒在哪里？保险丝坏了怎么检查更换？",
+   "latency_s": 13.3,
+   "rag_called": false,
+   "cited": false,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "保险丝盒位置",
+     "status": "partial"
+    },
+    {
+     "point": "检查/更换要点",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "missing"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "未引用页码，且未完整覆盖标准答案中的保险丝盒位置和更换步骤。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-emergency-call",
+   "kind": "hit",
+   "question": "紧急呼叫（SOS）功能是怎么工作的？",
+   "latency_s": 11.2,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "触发方式",
+     "status": "partial"
+    },
+    {
+     "point": "呼叫流程/工作方式",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答未完整覆盖必答要点，缺少对呼叫流程的详细说明，且未提及系统组件和使用限制等核心事实。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-gear-p",
+   "kind": "hit",
+   "question": "挡位怎么挂入P挡？",
+   "latency_s": 9.4,
+   "rag_called": false,
+   "cited": false,
+   "verdict": "FAIL",
+   "score": 0,
+   "points": [
+    {
+     "point": "指出手册换挡杆没有 P 挡（只有 R/N/D/B）",
+     "status": "missing"
+    },
+    {
+     "point": "正确说明停车程序：施加电子驻车制动并经指示灯确认",
+     "status": "missing"
+    },
+    {
+     "point": "附页码引用 p.161-163",
+     "status": "missing"
+    }
+   ],
+   "fabrication": true,
+   "citation_ok": false,
+   "reason": "被评回答编造了 P 挡的存在及操作方式，与标准答案矛盾，且未引用任何页码。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-car-wash",
+   "kind": "hit",
+   "question": "洗车有什么注意事项？",
+   "latency_s": 15.5,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 5,
+   "points": [
+    {
+     "point": "手工洗车建议",
+     "status": "partial"
+    },
+    {
+     "point": "高压/自动洗车注意事项",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答未完整覆盖必答要点，部分信息与标准答案不一致，但未出现编造内容。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-demist",
+   "kind": "hit",
+   "question": "前挡风玻璃起雾怎么除雾？",
+   "latency_s": 15.1,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "除雾功能操作方式",
+     "status": "covered"
+    },
+    {
+     "point": "相关注意事项",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答覆盖了除雾功能操作方式和页码引用，但未完整涵盖相关注意事项，如空调与内循环的关系、除雾优先级等。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-eco-driving",
+   "kind": "hit",
+   "question": "有哪些经济驾驶省电的技巧？",
+   "latency_s": 17.3,
+   "rag_called": false,
+   "cited": false,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "ECO 模式/经济驾驶要点",
+     "status": "partial"
+    },
+    {
+     "point": "影响能耗的因素",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "missing"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "未引用任何页码，且部分要点未完整覆盖。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-brake-fluid",
+   "kind": "hit",
+   "question": "制动液需要检查吗？在哪里检查？",
+   "latency_s": 16.6,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "制动液检查位置/方法",
+     "status": "partial"
+    },
+    {
+     "point": "液位要求或警告",
+     "status": "covered"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答未完整说明检查位置（如未提及发动机舱、机盖开启方式等），但覆盖了液位要求和引用了正确页码。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "hit-key-dead-start",
+   "kind": "hit",
+   "question": "车钥匙卡片没电了怎么启动车辆？",
+   "latency_s": 12.3,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 4,
+   "points": [
+    {
+     "point": "钥匙没电时的应急启动方式",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "missing"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "未引用标准答案中提到的页码，且未完整覆盖必答要点。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "para-tyre-pressure",
+   "kind": "paraphrase",
+   "question": "轮胎的标准胎压是多少？",
+   "latency_s": 8.1,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "明确说手册无具体标准数值",
+     "status": "covered"
+    },
+    {
+     "point": "指向驾驶员侧车门标签（Label A）",
+     "status": "covered"
+    },
+    {
+     "point": "转述冷态检查规则：无法冷测加 0.2–0.3 bar (3 PSI)",
+     "status": "missing"
+    },
+    {
+     "point": "热胎禁止放气",
+     "status": "missing"
+    },
+    {
+     "point": "附页码",
+     "status": "missing"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答未提及冷态检查规则和热胎禁止放气，也未引用具体页码，属于部分覆盖。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "para-max-range",
+   "kind": "paraphrase",
+   "question": "这车的最大续航里程是多少公里？",
+   "latency_s": 9.2,
+   "rag_called": false,
+   "cited": false,
+   "verdict": "PASS",
+   "score": 9,
+   "points": [
+    {
+     "point": "不给拍脑袋的具体续航数字",
+     "status": "covered"
+    },
+    {
+     "point": "说明实际续航随工况/条件变化",
+     "status": "covered"
+    },
+    {
+     "point": "指向行程电脑或官方规格表获取数值",
+     "status": "covered"
+    },
+    {
+     "point": "附页码",
+     "status": "missing"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答未编造具体数值，正确指出手册无具体续航数字，并说明实际续航受工况影响，建议参考官方参数或车载显示屏。但未附页码，故页码要点缺失。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "refuse-engine-oil",
+   "kind": "refuse",
+   "question": "发动机机油多久换一次？",
+   "latency_s": 6.3,
+   "rag_called": false,
+   "cited": false,
+   "verdict": "PASS",
+   "score": 9,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答正确指出手册中无相关内容，并建议查阅维护文档或联系经销商，未编造任何信息，符合标准参考答案要求。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "refuse-fuel-filter",
+   "kind": "refuse",
+   "question": "汽油滤芯多久换一次？",
+   "latency_s": 6.3,
+   "rag_called": false,
+   "cited": false,
+   "verdict": "PASS",
+   "score": 9,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答准确指出手册中未提及汽油滤芯的更换周期，符合标准参考答案要求，无编造内容。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "refuse-fuel-cap",
+   "kind": "refuse",
+   "question": "油箱盖开关在哪里？",
+   "latency_s": 8.8,
+   "rag_called": false,
+   "cited": false,
+   "verdict": "PASS",
+   "score": 9,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答正确指出手册中无相关内容，并明确说明该车为纯电车型无油箱盖，同时提供合理替代建议，未编造任何信息。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "refuse-timing-belt",
+   "kind": "refuse",
+   "question": "正时皮带多久需要更换一次？",
+   "latency_s": 7.2,
+   "rag_called": false,
+   "cited": false,
+   "verdict": "PASS",
+   "score": 9,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答正确指出手册中无相关内容，未编造信息，符合标准参考答案要求。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "refuse-spark-plug",
+   "kind": "refuse",
+   "question": "火花塞什么时候需要更换？",
+   "latency_s": 5.5,
+   "rag_called": false,
+   "cited": false,
+   "verdict": "PASS",
+   "score": 9,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答准确指出手册中无相关内容，符合标准参考答案，未编造任何信息。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "chain-charge#1",
+   "kind": "hit",
+   "question": "在家里用家用插座充电，有什么需要注意的？",
+   "latency_s": 16.6,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "家用充电方式说明",
+     "status": "partial"
+    },
+    {
+     "point": "安全注意事项",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答未完全覆盖必答要点，部分要点仅部分覆盖，且未引用标准答案中明确提到的页码内容。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "chain-charge#2",
+   "kind": "paraphrase",
+   "question": "那用快充呢？直流快充的功率是多少？",
+   "latency_s": 13.6,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "E 口交流充电最高 11 kW（p.40-43）",
+     "status": "covered"
+    },
+    {
+     "point": "F 口为快充接口（视车型）",
+     "status": "covered"
+    },
+    {
+     "point": "手册未给出直流快充具体功率数值，不得编造",
+     "status": "covered"
+    },
+    {
+     "point": "附页码",
+     "status": "partial"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "被评回答引用了手册中未提及的页码（p.34-34），且未完整引用标准答案中明确提到的页码（如 p.40-43、p.42-43 等）。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "chain-charge#3",
+   "kind": "hit",
+   "question": "充电口盖是怎么打开的？",
+   "latency_s": 17.0,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 5,
+   "points": [
+    {
+     "point": "充电口盖操作步骤",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答仅部分覆盖了必答要点，未完整描述充电口盖的操作步骤，且引用的页码与标准答案不完全一致。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "chain-tyre#1",
+   "kind": "hit",
+   "question": "胎压警告灯亮了怎么办？",
+   "latency_s": 17.0,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "PASS",
+   "score": 9,
+   "points": [
+    {
+     "point": "停车检查冷态胎压",
+     "status": "covered"
+    },
+    {
+     "point": "复位流程",
+     "status": "covered"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答覆盖了所有必答要点，引用了手册页码，未出现与标准答案冲突或未提及的内容。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "chain-tyre#2",
+   "kind": "paraphrase",
+   "question": "那标准胎压到底是多少？",
+   "latency_s": 15.2,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "FAIL",
+   "score": 2,
+   "points": [
+    {
+     "point": "明确说手册无具体数值",
+     "status": "missing"
+    },
+    {
+     "point": "指向车门标签",
+     "status": "covered"
+    },
+    {
+     "point": "不编造数值",
+     "status": "missing"
+    }
+   ],
+   "fabrication": true,
+   "citation_ok": false,
+   "reason": "被评回答编造了具体数值（2.0-2.3bar或对应psi值），而标准答案明确指出手册中无具体数值，必须查看车门标签。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "chain-tyre#3",
+   "kind": "hit",
+   "question": "胎压不足时应该怎么调整？",
+   "latency_s": 15.4,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "冷态调整规则",
+     "status": "covered"
+    },
+    {
+     "point": "无法冷测时 +0.2–0.3 bar (3 PSI)",
+     "status": "covered"
+    },
+    {
+     "point": "热胎禁止放气",
+     "status": "covered"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "被评回答覆盖了所有必答要点，但未引用标准答案中提到的 p.181-183 和 p.332-334 的内容，且未提及胎压复位操作的具体页码（p.182）以及补充事实中的部分信息。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "chain-key#1",
+   "kind": "hit",
+   "question": "车钥匙电池没电了怎么更换？",
+   "latency_s": 10.4,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "FAIL",
+   "score": 3,
+   "points": [
+    {
+     "point": "更换步骤",
+     "status": "partial"
+    },
+    {
+     "point": "电池型号",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "missing"
+    }
+   ],
+   "fabrication": true,
+   "citation_ok": false,
+   "reason": "被评回答未正确引用页码，且包含与标准答案冲突的编造内容（如 'Renault 授权经销商提供的型号'）"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "chain-key#2",
+   "kind": "hit",
+   "question": "钥匙没电的情况下怎么启动车辆？",
+   "latency_s": 12.9,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "FAIL",
+   "score": 3,
+   "points": [
+    {
+     "point": "应急启动方式",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "missing"
+    }
+   ],
+   "fabrication": true,
+   "citation_ok": false,
+   "reason": "被评回答中提到的'充电口位置的感应区'和'p.62 数字钥匙使用'未在标准答案中出现，属于编造；且未正确引用页码。"
+  },
+  {
+   "model": "qwen3:30b-a3b",
+   "id": "chain-key#3",
+   "kind": "hit",
+   "question": "数字钥匙是什么？怎么用？",
+   "latency_s": 13.0,
+   "rag_called": false,
+   "cited": true,
+   "verdict": "WEAK",
+   "score": 6,
+   "points": [
+    {
+     "point": "数字钥匙功能说明",
+     "status": "partial"
+    },
+    {
+     "point": "开通/使用方式",
+     "status": "partial"
+    },
+    {
+     "point": "附页码",
+     "status": "missing"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "未完整引用标准答案中提到的页码，且部分信息未覆盖核心事实。"
+  }
+ ]
+}

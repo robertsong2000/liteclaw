@@ -20,6 +20,12 @@ cases.jsonl ──build_golden.py──> golden.jsonl ────────�
 | `golden.jsonl` | 标准参考答案。`reviewed:false` 表示尚未人工复核——judge 汇总会统计未复核比例 |
 | `compare_models.py` | 阶段2：登录 → 携带前端同款 SYSTEM_PROMPT → `/api/chat` SSE 解析；单轮与链式都在此跑；回答**全文**写入 `runs/<时间戳>/answers.jsonl`（永不覆盖历史） |
 | `judge.py` | 阶段3/4：LLM-as-judge 评审 + 跨次回归对比 |
+| `baseline.json` | 当前回归基线（含评审模型溯源标签） |
+| `manual_tool.py` | 手册 JSONL 挖掘工具（sections / grep / show），事实提取专用 |
+| `verify_golden.py` → `apply_golden_fixes.py` | golden 质检流水线：云端模型逐条核对 golden 与手册原文 → 自动融合漏点/改正矛盾 |
+| `factsheets/` | 事实清单原始成果（27 题 454 条事实，每条带页码与 chunk 溯源） |
+| `prep_agent_judge.py` / `agent_judge_tasks/RUBRIC.md` / `merge_agent_judge.py` | 发布级评审三件套：把评审分片派给对话模型（GLM-5.3）子代理，噪声远小于本地 30b |
+| `golden_review.md` | 2026-09-09 全量质检报告（31 条逐条核对，pass 5 / warn 19 / fail 7） |
 
 ## 快速上手
 
@@ -38,8 +44,13 @@ python3 compare_models.py --no-auto-rag            # 关自动检索：模型自
 python3 compare_models.py --smoke                  # 单模型单题冒烟
 
 # 3. LLM 评审打分（未调检索的题直接判 0，不耗评审调用）
-python3 judge.py runs/2026-09-08T2315
+python3 judge.py runs/2026-09-09T2315
 #    -> runs/<ts>/summary.md（人读榜单）+ summary.json（机读）+ judged.jsonl（逐题）
+
+# 3b. golden 质检流水线（手册或 golden 大改后建议跑一遍）
+python3 verify_golden.py            # 云端模型逐条核对 golden 与手册原文（宽检索 top12）
+python3 apply_golden_fixes.py      # 按质检结果自动融合漏点、改正矛盾、标 reviewed
+#    明细见 golden_review.jsonl / golden_review.md
 
 # 4. 回归对比：改动前后各跑一次，然后
 python3 judge.py runs/<新> --vs runs/<旧>          # 有回归则退出码 1（可当门禁）
@@ -64,7 +75,14 @@ python3 judge.py runs/<再新> --vs baseline         # 日常：只跟基线比
   引用页码与 golden 不同但内容一致不算编造（检索召回相邻页是正常的）。
 - 分数锚点：9-10 全覆盖零编造 / 7-8 小遗漏 / 4-6 明显缺失 / 0-3 编造或答非所问。
 - 回归判定：verdict 下滑（PASS→WEAK/FAIL）即回归；单题分数掉 ≥2 记警告。
-- **换评审模型后分数不可直接跨版本对比**（评审模型记录在 summary.json）。
+- **评审模型可远程、可并发**：四个环境变量切换（模板 `~/judge_env.sh`，source 后再跑，
+  **不要**用后台 `export`——会被运行环境吞掉）：
+  `JUDGE_MODEL`（模型名）、`JUDGE_OPENAI_BASE` + `JUDGE_OPENAI_KEY`（OpenAI 兼容端点，
+  不设则走本地 ollama）、`JUDGE_CONCURRENCY`（并发路数，远程建议 3~4）。
+  当前基线评审 = `qwen38-local@121.40.234.38:16019`（4090 机器 new-api）。
+- **facts-v1 事实清单格式**：golden 由【核心事实】+【补充事实】组成——覆盖度按必答要点判定，
+  补充事实被回答引用算加分，清单外内容不自动判编造（测量天花板已移除）。
+- **换评审模型/端点后分数不可直接跨版本对比**（summary 与 baseline 均记录评审模型溯源标签）。
 - golden 是唯一事实依据：评审不以评审模型自己的知识纠错；golden 基于**手册文件 sha256**，
   重新 ingest 手册后必须 `--force` 重建 golden 再评测，否则结论无效。
 

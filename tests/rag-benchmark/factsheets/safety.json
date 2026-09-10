@@ -1,0 +1,73 @@
+{
+ "cluster": "safety",
+ "questions": [
+  {
+   "id": "hit-fuse-box",
+   "question": "保险丝盒在哪里？保险丝坏了怎么检查更换？",
+   "facts": [
+    {"fact": "检查触发条件：如果某个电气部件（electrical component）不工作，应检查相关保险丝的状态（check the condition of the fuses）。", "layer": "core", "pages": "p.347-348", "source_chunk": "r5e-2025-topic-wiper-blades-0001"},
+    {"fact": "Fuse box B（视车型配置，depending on the vehicle）位于乘客舱手套箱（glovebox）后方：用开启按钮打开手套箱，即可直接接触保险丝盒 2。", "layer": "core", "pages": "p.348", "source_chunk": "r5e-2025-topic-wiper-blades-0002"},
+    {"fact": "Fuse box A 位于乘客舱仪表台区域：解开盖板（flap）1 即可接触保险丝；保险丝面板上配有取保险丝用的镊子（tweezers）3。", "layer": "core", "pages": "p.347-348", "source_chunk": "r5e-2025-topic-wiper-blades-0001"},
+    {"fact": "驾驶位置图也将 Fuse box 列为驾驶位部件之一（左舵图编号 25，紧随手套箱 Glovebox 之后；右舵图编号 26），印证保险丝盒位于仪表台/手套箱附近区域。", "layer": "supplementary", "pages": "p.117", "source_chunk": "r5e-2025-topic-driving-position-0002"},
+    {"fact": "右舵驾驶位置图同样标注 Fuse box 为编号 26（紧随编号 25 的 Glovebox 之后）。", "layer": "supplementary", "pages": "p.120-121", "source_chunk": "r5e-2025-topic-trip-computer-0002"},
+    {"fact": "更换操作：用位于保险丝面板上的镊子 3 取下保险丝；要把保险丝从镊子上取下时，将保险丝向侧面滑动即可。不建议使用空置的保险丝插位（It is not advisable to use the free fuse locations）。", "layer": "core", "pages": "p.348", "source_chunk": "r5e-2025-topic-wiper-blades-0002"},
+    {"fact": "额定值安全警告：更换保险丝必须使用与原保险丝相同额定值（same rating）的保险丝；如果装上额定值过高的保险丝，当设备用电过大时可能导致电路过热（起火风险 risk of fire）。", "layer": "core", "pages": "p.349-352", "source_chunk": "r5e-2025-topic-fuses-0001"},
+    {"fact": "保险丝分配表：车辆未贴保险丝分配标签（fuse allocation label）时查手册表格——1 后雨刮/后雾灯；2 转向指示灯；3 制动灯；4 行李厢附件插座；5 右后车窗电机；6 驾驶侧车窗电机；7 左后车窗电机；8 副驾侧车窗电机；9 后视镜 ECU-车门多路矩阵控制；10 拖车钩插座通信模块；11 第一排附件插座；12 仪表板。注意：某些保险丝是否存在取决于车辆配置等级。", "layer": "core", "pages": "p.349-352", "source_chunk": "r5e-2025-topic-fuses-0001"},
+    {"fact": "保险丝编号-用途对照表（1 后雨刮/后雾灯、2 转向灯、3 制动灯、4 行李厢附件插座、5-8 四门车窗电机、9 后视镜 ECU/车门多路控制、10 拖车钩插座通信模块、11 第一排附件插座、12 仪表板），该表为 PDF 页图辅助转录，用于核对各保险丝保护的电路。", "layer": "supplementary", "pages": "p.351", "source_chunk": "r5e-2025-table-fuses-allocation-0001"},
+    {"fact": "建议：为符合当地法规或以防万一，可从授权经销商（approved Dealer）处购买一套含备用灯泡和备用保险丝的应急工具包（emergency kit）。", "layer": "supplementary", "pages": "p.349-352", "source_chunk": "r5e-2025-topic-fuses-0001"},
+    {"fact": "故障排查表（电气设备）：雨刮不工作——雨刮保险丝烧断、后雨刮保险丝烧断（间歇或永久停转）→ 更换保险丝或送修（→p.346）；两侧转向灯均不工作——保险丝烧断 → 更换保险丝或送修（→p.346）；大灯不工作——保险丝损坏 → 更换（→p.346）；两颗保险丝损坏 → 更换两颗保险丝（→p.346）；电路或控制故障、电机故障等则联系授权经销商。", "layer": "supplementary", "pages": "p.357-360", "source_chunk": "r5e-2025-table-operating-faults-0002"},
+    {"fact": "故障排查正文同样列出：两侧转向灯不工作的可能原因是保险丝烧断，处理为更换保险丝或送修（→346）；大灯双侧不工作的可能原因是两颗保险丝损坏，处理为更换保险丝（→346）。", "layer": "supplementary", "pages": "p.358-360", "source_chunk": "r5e-2025-topic-operating-faults-0003"},
+    {"fact": "空调系统的保险丝关联：空调不出冷气时，先检查控制设置是否正确、保险丝是否完好（fuses are sound），否则关闭系统。", "layer": "supplementary", "pages": "p.306-307", "source_chunk": "r5e-2025-topic-climate-control-0013"},
+    {"fact": "加装电气设备注意事项：若日后加装电气设备，务必获知对应保险丝的额定值（rating）和位置（position）。", "layer": "supplementary", "pages": "p.354-355", "source_chunk": "r5e-2025-topic-accessories-0002"},
+    {"fact": "Breakdown recovery（抛锚救援）章节把 Fuses 列为随车应急项目之一，指向手册 p.346（目录亦标注 Fuses 章节起始页为 346，本章实际内容覆盖 p.346-352）。", "layer": "supplementary", "pages": "p.18-21", "source_chunk": "r5e-2025-topic-breakdown-recovery-overview-0001"},
+    {"fact": "手册目录确认 Fuses 章节位于 practical advice 部分、起始页 346（Wiper blades: replacement 344 → Fuses 346 → Installation and use of accessories 350）。", "layer": "supplementary", "pages": "p.5", "source_chunk": "r5e-2025-topic-exterior-0006"}
+   ]
+  },
+  {
+   "id": "hit-emergency-call",
+   "question": "紧急呼叫（SOS）功能是怎么工作的？",
+   "facts": [
+    {"fact": "功能概述：若车辆配备（If the vehicle is equipped），紧急呼叫功能可在事故或突发疾病时自动或手动呼叫紧急服务，且免费（without charge），可缩短紧急服务到达时间。", "layer": "core", "pages": "p.288-289", "source_chunk": "r5e-2025-topic-emergency-call-0001"},
+    {"fact": "使用限制警告：仅在自身遭遇紧急情况、目击事故或感到不适时才可使用紧急呼叫（Use the emergency call only in the event of an emergency you are involved in, if you witness an accident or if you feel ill）。", "layer": "core", "pages": "p.288-289", "source_chunk": "r5e-2025-topic-emergency-call-0001"},
+    {"fact": "系统组件：1 系统运行警示灯（绿色=可用（网络可用）；熄灭=不可用（网络不可用）；红色=运行故障；绿色闪烁=呼叫进行中）；2 \"SOS\" 按钮；3 麦克风；4 扬声器（视车型配置）。", "layer": "core", "pages": "p.288-289", "source_chunk": "r5e-2025-topic-emergency-call-0001"},
+    {"fact": "呼叫流程（固定顺序）：呼叫总是按以下步骤进行——先接通紧急服务（call is initiated with the emergency services）；发送事故相关数据（制造铭牌、呼叫时间、最后位置、车辆行驶方向等）；与紧急服务进行语音通话；必要时呼叫紧急救援（emergency assistance）。", "layer": "core", "pages": "p.288-290", "source_chunk": "r5e-2025-topic-emergency-call-0001"},
+    {"fact": "两种触发模式：自动模式（automatic mode）和手动模式（manual mode）。", "layer": "core", "pages": "p.288-289", "source_chunk": "r5e-2025-topic-emergency-call-0001"},
+    {"fact": "自动模式触发：当事故已触发保护装置（安全带预紧器 seat belt pretensioners、安全气囊 airbag 等）时，紧急呼叫自动发起；自动模式警示灯 1 显示绿色即表示自动系统已激活。", "layer": "core", "pages": "p.289-290", "source_chunk": "r5e-2025-topic-emergency-call-0002"},
+    {"fact": "手动模式触发：按住 \"SOS\" 按钮 2 至少 3 秒；或在 10 秒内按按钮 2 五次。", "layer": "core", "pages": "p.289-290", "source_chunk": "r5e-2025-topic-emergency-call-0002"},
+    {"fact": "误触取消：在呼叫接通呼叫中心之前，长按按钮 2 约 2 秒可取消呼叫。", "layer": "core", "pages": "p.289-290", "source_chunk": "r5e-2025-topic-emergency-call-0002"},
+    {"fact": "通话控制：呼叫一旦建立，只有呼叫中心（call centre）能结束通话。", "layer": "core", "pages": "p.289-290", "source_chunk": "r5e-2025-topic-emergency-call-0002"},
+    {"fact": "功能可用条件：仅在覆盖该远程信息服务（telematics services）及相配套兼容基础设施的国家可用，并取决于车辆行驶地区的网络覆盖情况。", "layer": "supplementary", "pages": "p.288-289", "source_chunk": "r5e-2025-topic-emergency-call-0001"},
+    {"fact": "目击事故报警：若用紧急呼叫报告目击的事故，应在交通条件允许处停车，以便紧急服务定位你的车辆进而定位事故地点；任何情况下须遵守当地法规。", "layer": "supplementary", "pages": "p.288-289", "source_chunk": "r5e-2025-topic-emergency-call-0001"},
+    {"fact": "事故后注意事项：事故后如地点和交通条件允许，应留在车辆附近，以便必要时快速接听呼叫中心的来电。", "layer": "supplementary", "pages": "p.289-290", "source_chunk": "r5e-2025-topic-emergency-call-0002"},
+    {"fact": "故障情形：某些情况下紧急呼叫可能不工作（例如电量低 low battery 等）；系统检测到运行故障时，警示灯 1 显示红色超过 30 分钟，应尽快联系授权经销商（approved dealer）。", "layer": "supplementary", "pages": "p.289-290", "source_chunk": "r5e-2025-topic-emergency-call-0002"},
+    {"fact": "专用电池：系统由专用电池（dedicated battery）供电，电池寿命约 4 年，届时警示灯 1 变红提醒；必须遵守保养文件中规定的更换周期（不得超期），且必须更换同类型电池；联系授权经销商处理。", "layer": "supplementary", "pages": "p.290", "source_chunk": "r5e-2025-topic-emergency-call-0003"},
+    {"fact": "数据隐私：没有紧急呼叫功能时系统不可被追踪、也不受持续监控；数据会自动且持续清除，系统仅存储车辆最后 3 个位置；依所在国法规，仅在紧急呼叫时才发送数据；发送给呼叫中心的数据按所在国个人数据保护法处理；系统仅存储 13 小时的活动历史数据；车主有权访问其数据，可要求更正、删除或锁定。", "layer": "supplementary", "pages": "p.290", "source_chunk": "r5e-2025-topic-emergency-call-0003"},
+    {"fact": "电池作业安全警告：为保证安全和系统正常运行，对该系统电池的任何操作（拆卸、断开等）必须由具备资质的专业人员进行，存在严重烧伤或电击风险。", "layer": "supplementary", "pages": "p.290", "source_chunk": "r5e-2025-topic-emergency-call-0003"},
+    {"fact": "章节位置：手册目录显示 Emergency call 属于 Driving（驾驶）部分，起始页 286；字母索引亦标注 \"Emergency: emergency call, 286\"。", "layer": "supplementary", "pages": "p.4-5", "source_chunk": "r5e-2025-topic-exterior-0005"}
+   ]
+  },
+  {
+   "id": "hit-demist",
+   "question": "前挡风玻璃起雾怎么除雾？",
+   "facts": [
+    {"fact": "主要操作（手动空调）——\"Clear View\" 快速除雾除冰功能（按钮 13）：按下按钮 13，内置指示灯亮起；该系统快速为前挡风玻璃和前侧窗除雾除冰，会自动启用空调或暖风；要退出该功能，再次按按钮 13 或直接选择所需设置（风向分配、通风速度、内循环）。", "layer": "core", "pages": "p.297-300", "source_chunk": "r5e-2025-topic-climate-control-0004"},
+    {"fact": "手动空调控制面板定义：按钮 13 为 \"Clear View\" 功能，按钮 12 为后挡风玻璃及（视车型配置）后视镜的除冰/除雾（De-icing/demisting of the rear screen and, depending on the vehicle, the rear view mirrors）。", "layer": "core", "pages": "p.297-298", "source_chunk": "r5e-2025-topic-climate-control-0002"},
+    {"fact": "自动空调——\"Clear View\" 功能（按钮 15）：按下按钮 15，指示灯亮起；该功能快速为前挡风玻璃、后挡风玻璃、前侧窗和车门后视镜（视配置）除雾，并自动激活空调（air conditioning）和后挡除冰功能；要退出按按钮 13 或 15。", "layer": "core", "pages": "p.302-303", "source_chunk": "r5e-2025-topic-climate-control-0008"},
+    {"fact": "自动空调控制面板布局：控件 7 为前挡除冰/除雾（De-icing/de-misting the windscreen），控件 14 为后挡及后视镜除冰/除雾，控件 15 为 \"Clear View\"，控件 16 调节通风速度，控件 17 调节温度。", "layer": "core", "pages": "p.301", "source_chunk": "r5e-2025-topic-climate-control-0006"},
+    {"fact": "后挡除雾/除冰功能：按下按钮（手动空调为 12，自动空调为 14）后指示灯亮起，可快速为后挡风玻璃及后视镜（视配置）除雾/除冰；再次按下退出；除雾会自动停止（Demisting automatically stops）。", "layer": "core", "pages": "p.299-300", "source_chunk": "r5e-2025-topic-climate-control-0004"},
+    {"fact": "手动调风向除雾：通过空气分配（distribution）可将气流分配给前侧窗除雾口、前挡除雾口和脚部出风口（组合之一即只对除雾口送风），需要除雾时可把分配调到对应档位。", "layer": "core", "pages": "p.299-300", "source_chunk": "r5e-2025-topic-climate-control-0004"},
+    {"fact": "出风口布局：前挡风玻璃设有专用除雾出风口（windscreen demisting vent，编号 2），侧窗设有除雾口（side window demister outlet，编号 3），位于仪表台两端。", "layer": "core", "pages": "p.293-297", "source_chunk": "r5e-2025-topic-climate-control-0001"},
+    {"fact": "起雾/结露处理建议：某些情况下（空调关闭、内循环开启、通风速度为零或很低等），车窗和前挡会出现冷凝（condensation）；若有冷凝，使用 \"Clear View\" 功能去除，之后让空调以自动模式运行以防再次形成。", "layer": "core", "pages": "p.305-306", "source_chunk": "r5e-2025-topic-climate-control-0012"},
+    {"fact": "空调有助除雾：空调系统的作用之一是更快消除冷凝（eliminating condensation more quickly）；但通风风量为零时空调无法开启；为优化续航，外界温度舒适时建议关闭空调。", "layer": "supplementary", "pages": "p.298-299", "source_chunk": "r5e-2025-topic-climate-control-0003"},
+    {"fact": "内循环与除雾的关系：除雾/除冰优先级高于内循环（Demisting/de-icing will still take priority over the air recirculation）；长时间使用内循环会导致侧窗和前挡形成冷凝、车内空气不新鲜，建议不再需要时尽快切回正常（外循环）模式。", "layer": "supplementary", "pages": "p.300-301", "source_chunk": "r5e-2025-topic-climate-control-0005"},
+    {"fact": "自动空调下内循环同样适用上述规则：手动开启内循环时间过长可能导致异味及车窗冷凝；除雾/除冰仍优先于内循环。", "layer": "supplementary", "pages": "p.303-304", "source_chunk": "r5e-2025-topic-climate-control-0009"},
+    {"fact": "结冰天气节能建议：结冰时建议用刮冰器（scraper）手动除前挡冰，而不是使用除雾/除冰功能，以降低能耗。", "layer": "supplementary", "pages": "p.300-301", "source_chunk": "r5e-2025-topic-climate-control-0005"},
+    {"fact": "除雾性能下降的故障排查：除冰、除雾或空调性能下降可能是空调滤芯（cabin filter cartridge）堵塞所致；一般故障请联络授权经销商；空调完全不出冷气时检查控制设置和保险丝，否则关闭系统。", "layer": "supplementary", "pages": "p.306-307", "source_chunk": "r5e-2025-topic-climate-control-0013"},
+    {"fact": "自动空调模式说明：自动模式（AUTO）下系统自动管理风速、空气分配、内循环以及空调的启停，从而自动维持车窗不起雾的舒适环境；但按 AUTO 以外的任何按钮都会退出自动模式。", "layer": "supplementary", "pages": "p.301-302", "source_chunk": "r5e-2025-topic-climate-control-0007"},
+    {"fact": "面板按钮多数带工作指示灯，显示该功能（含除雾相关功能）是否处于工作状态。", "layer": "supplementary", "pages": "p.297-298", "source_chunk": "r5e-2025-topic-climate-control-0002"},
+    {"fact": "使用空调可经常化：建议即使冬天也定期使用空调，每月至少运行约 5 分钟（有助于保持除雾/制冷性能）。", "layer": "supplementary", "pages": "p.306-307", "source_chunk": "r5e-2025-topic-climate-control-0013"},
+    {"fact": "章节位置：手册目录显示 Air vents, heating and air conditioning 属于 Your comfort（舒适）部分，起始页 291，本章内容覆盖 p.291-307。", "layer": "supplementary", "pages": "p.4-5", "source_chunk": "r5e-2025-topic-exterior-0005"}
+   ]
+  }
+ ]
+}

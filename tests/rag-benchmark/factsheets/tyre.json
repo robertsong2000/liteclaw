@@ -1,0 +1,335 @@
+{
+ "cluster": "tyre",
+ "questions": [
+  {
+   "id": "hit-tyre-warning",
+   "question": "胎压警告灯亮了怎么办？",
+   "facts": [
+    {
+     "fact": "胎压损失警告系统（Tyre pressure loss warning, TPW）通过行驶中测量车轮转速来检测某条轮胎失压；警告灯常亮表示检测到胎压不足（亏气、被扎等）。",
+     "layer": "core",
+     "pages": "p.180-181",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0001"
+    },
+    {
+     "fact": "警告灯亮起（'Inflate tyres and init.'，指示灯先闪烁后常亮）表示检测到轮胎亏气或被扎：应在冷态下检查并调整全部四个轮胎的胎压，然后复位系统。",
+     "layer": "core",
+     "pages": "p.182-183",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0003"
+    },
+    {
+     "fact": "复位标准胎压参考值的流程：先在冷态下检查全部四个轮胎的胎压并按胎压标签（驾驶员侧车门边缘的 Label A）调整到规定压力，然后通过多媒体屏幕启动复位；复位必须在车辆静止、点火接通（ignition switched on）的状态下进行，具体操作见多媒体系统说明书。",
+     "layer": "core",
+     "pages": "p.181-182",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0002"
+    },
+    {
+     "fact": "系统必须以胎压标签上标明的压力值进行复位，否则在明显失压时可能无法给出可靠警告；复位前必须先检查胎压，若实际压力与推荐压力不符，系统将不会发出警告。",
+     "layer": "core",
+     "pages": "p.180-182",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0001"
+    },
+    {
+     "fact": "每次充气/调整胎压之后、更换车轮之后、四轮换位之后，都必须重新执行胎压参考值复位。",
+     "layer": "core",
+     "pages": "p.181-183",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0002"
+    },
+    {
+     "fact": "冷态检查规则：四个轮胎的胎压必须在冷态时设定（参照驾驶员侧车门边缘标签）；如无法在冷态测量胎压，应将推荐压力提高 0.2 至 0.3 bar（3 PSI）；严禁给热胎放气。每次充气或调整后须重新复位参考值。",
+     "layer": "core",
+     "pages": "p.181-182",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0002"
+    },
+    {
+     "fact": "故障信息表：'Check tyre press and init.'（指示灯闪烁后常亮）表示复位未成功，应检查并重新调整胎压后再次启动复位。",
+     "layer": "core",
+     "pages": "p.182-183",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0003"
+    },
+    {
+     "fact": "故障信息表：'Check TPW' 表示系统故障，应咨询授权经销商（approved Dealer）。",
+     "layer": "supplementary",
+     "pages": "p.182-183",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0003"
+    },
+    {
+     "fact": "故障信息表：'TPW not available' 表示车辆装上了与其余四个车轮尺寸不同的应急备胎（emergency spare wheel）；装回与其它车轮尺寸相同的车轮并执行复位后，系统才恢复可用。",
+     "layer": "supplementary",
+     "pages": "p.183-183",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0004"
+    },
+    {
+     "fact": "TPW 只是附加驾驶辅助功能，不能替代驾驶员，任何情况下都不能取代驾驶员的警觉与责任；应每月检查一次胎压（包括应急备胎），并在长途出行前检查。",
+     "layer": "supplementary",
+     "pages": "p.180-182",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0001"
+    },
+    {
+     "fact": "系统可能延迟动作或工作不正常的情形：充气或车轮作业后未复位、复位不正确（胎压与推荐值不符）、载荷或单侧载荷分布显著变化、大加速度的激烈驾驶、雪地或湿滑路面行驶、装防滑链行驶、只换装一条新胎、使用非品牌网络认证的轮胎。",
+     "layer": "supplementary",
+     "pages": "p.180-181",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0001"
+    },
+    {
+     "fact": "轮胎突然失压（爆胎 burst tyre 等）无法被系统立即检测到。",
+     "layer": "supplementary",
+     "pages": "p.181-182",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0002"
+    },
+    {
+     "fact": "更换车轮/轮胎以及使用补胎充气套装（tyre repair product and inflation kit）时，只可使用品牌网络认证的设备，否则系统可能延迟激活或工作不正常；每次换轮/换胎或使用充气套装后，都要重新调整胎压并复位参考值。",
+     "layer": "supplementary",
+     "pages": "p.182-183",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0003"
+    },
+    {
+     "fact": "仪表盘出现'至少一条轮胎被扎或严重亏气'的警告信息时：若车辆停在路肩（hard shoulder），必须按所在国现行法规用三角警示牌或其他装置警示其他道路使用者。",
+     "layer": "supplementary",
+     "pages": "p.126-128",
+     "source_chunk": "r5e-2025-topic-trip-computer-0007"
+    },
+    {
+     "fact": "胎压不足警告灯（Tyre under-inflation warning light）在点火接通或发动机启动时亮起，数秒后熄灭（自检），详见手册 p.178 的 TPW 章节。",
+     "layer": "supplementary",
+     "pages": "p.138-139",
+     "source_chunk": "r5e-2025-topic-steering-0001"
+    },
+    {
+     "fact": "装备 TPW 的车辆发生亏气（如被扎）时，仪表盘上会出现警告灯（指向 p.178）；补胎充气套装位于行李厢地毯下方，可临时处理被扎轮胎。",
+     "layer": "supplementary",
+     "pages": "p.333-337",
+     "source_chunk": "r5e-2025-topic-tyres-0004"
+    },
+    {
+     "fact": "行驶中方向盘振动（Vibrations）的可能原因之一是轮胎胎压不正确、动平衡不良或轮胎受损；应先检查胎压，若无效则到授权经销商检查。",
+     "layer": "supplementary",
+     "pages": "p.357-360",
+     "source_chunk": "r5e-2025-table-operating-faults-0001"
+    }
+   ]
+  },
+  {
+   "id": "para-tyre-pressure",
+   "question": "轮胎的标准胎压是多少？",
+   "facts": [
+    {
+     "fact": "手册正文没有给出具体的标准胎压数值：实际胎压值以驾驶员侧车门边缘的胎压标签 Label A 为准，打开驾驶员侧车门即可读取。",
+     "layer": "core",
+     "pages": "p.333-334",
+     "source_chunk": "r5e-2025-topic-tyres-0002"
+    },
+    {
+     "fact": "手册中的胎压标签页只是图例和位置示意，不含本车的具体轮胎规格或胎压数值；实际压力值必须从车辆上的 Label A 读取，不得从该页或其他车辆的配置推断。",
+     "layer": "core",
+     "pages": "p.334-334",
+     "source_chunk": "r5e-2025-table-tyre-pressure-label-0001"
+    },
+    {
+     "fact": "Label A 标签图例：B = 车辆装配轮胎的规格（dimension of the tyres fitted），C = 前轮胎压，D = 后轮胎压。",
+     "layer": "core",
+     "pages": "p.333-334",
+     "source_chunk": "r5e-2025-topic-tyres-0002"
+    },
+    {
+     "fact": "冷态检查规则：胎压应在轮胎冷态时检查；如无法在冷态下检查胎压，则标签标示值必须增加 0.2 至 0.3 bar（或 3 PSI）；严禁给热胎放气。",
+     "layer": "core",
+     "pages": "p.333-334",
+     "source_chunk": "r5e-2025-topic-tyres-0002"
+    },
+    {
+     "fact": "胎压取决于载荷和行驶速度，应按使用条件（空载、载重、高速公路行驶等）参照驾驶员侧车门边缘的标签调整胎压。",
+     "layer": "supplementary",
+     "pages": "p.332-332",
+     "source_chunk": "r5e-2025-topic-cleaning-0009"
+    },
+    {
+     "fact": "冷态检查时应忽略热态下偏高的压力读数：炎热天气或高速行驶后压力升高属正常现象。",
+     "layer": "supplementary",
+     "pages": "p.332-332",
+     "source_chunk": "r5e-2025-topic-cleaning-0009"
+    },
+    {
+     "fact": "至少每月检查一次胎压，并在每次长途出行前加检（参照驾驶员侧车门边缘的标签）。",
+     "layer": "supplementary",
+     "pages": "p.332-332",
+     "source_chunk": "r5e-2025-topic-cleaning-0008"
+    },
+    {
+     "fact": "车辆满载（达到最大总重量 MMAC）并拖挂挂车时：最高车速必须限制在 62 mph (100 km/h)，且胎压增加 0.2 bar（有轮胎爆裂风险）。",
+     "layer": "supplementary",
+     "pages": "p.334-336",
+     "source_chunk": "r5e-2025-topic-tyres-0003"
+    },
+    {
+     "fact": "气门帽（valve cap）未拧紧或缺失会导致轮胎气密性下降而漏气；必须使用与原装相同的气门帽并完全拧紧。",
+     "layer": "supplementary",
+     "pages": "p.333-338",
+     "source_chunk": "r5e-2025-topic-tyres-0001"
+    },
+    {
+     "fact": "胎压不足会增加能耗（影响续航），应遵守车辆标定胎压；不正确的胎压还会导致轮胎异常磨损和异常发热，增加爆胎或胎面甩脱的风险。",
+     "layer": "supplementary",
+     "pages": "p.179-179",
+     "source_chunk": "r5e-2025-topic-eco-driving-0005"
+    }
+   ]
+  },
+  {
+   "id": "hit-jack",
+   "question": "千斤顶应该支撑在车底什么位置？",
+   "facts": [
+    {
+     "fact": "车辆底部设有四个专用举升点（dedicated lifting points，图中标记 1）；举升车辆前，千斤顶托板（plate）必须正确定位并贴靠在举升点上。",
+     "layer": "core",
+     "pages": "p.365-367",
+     "source_chunk": "r5e-2025-topic-vehicle-information-0002"
+    },
+    {
+     "fact": "安全警告：出于安全原因，车辆举升点只能用于更换车轮，绝不可用于其他用途——不得用于进行维修作业，也不得用于进入车底；违反有人员受伤和车辆损坏的风险。",
+     "layer": "core",
+     "pages": "p.365-367",
+     "source_chunk": "r5e-2025-topic-vehicle-information-0002"
+    },
+    {
+     "fact": "为防止受伤或损坏车辆，千斤顶只能摇到被更换车轮离地最多三厘米（3 cm）的高度，不得顶得更高。",
+     "layer": "core",
+     "pages": "p.365-367",
+     "source_chunk": "r5e-2025-topic-vehicle-information-0002"
+    },
+    {
+     "fact": "千斤顶仅可用于更换车轮时的举升，且必须满足条件：拉紧驻车制动（parking brake）、车辆空载（unladen）、停放在平坦、不滑且坚实的地面上。",
+     "layer": "core",
+     "pages": "p.365-367",
+     "source_chunk": "r5e-2025-topic-vehicle-information-0002"
+    },
+    {
+     "fact": "举升点与托板直径 80 mm 至 140 mm 的平面式千斤顶兼容；所用千斤顶必须符合车辆所在国现行标准法规，其举升能力必须大于相关车轴的最大允许重量（见制造商牌照 →359）。",
+     "layer": "supplementary",
+     "pages": "p.365-367",
+     "source_chunk": "r5e-2025-topic-vehicle-information-0002"
+    },
+    {
+     "fact": "出于安全考虑，手册建议联系授权经销商（approved dealer）更换车轮；举升设备定位不当有损坏车辆（尤其是电动 traction battery 电驱电池）的风险。",
+     "layer": "supplementary",
+     "pages": "p.361-367",
+     "source_chunk": "r5e-2025-topic-vehicle-information-0001"
+    },
+    {
+     "fact": "前牵引点（front towing point）只能用于牵引拉拽，绝不可用于直接或间接举升车辆。",
+     "layer": "supplementary",
+     "pages": "p.341-341",
+     "source_chunk": "r5e-2025-topic-tyres-0010"
+    }
+   ]
+  },
+  {
+   "id": "chain-tyre#2",
+   "question": "那标准胎压到底是多少？",
+   "facts": [
+    {
+     "fact": "手册没有提供具体的标准胎压数值：实际数值必须查看驾驶员侧车门边缘的胎压标签 Label A（打开驾驶侧车门读取），不得编造或从手册页面推断。",
+     "layer": "core",
+     "pages": "p.334-334",
+     "source_chunk": "r5e-2025-table-tyre-pressure-label-0001"
+    },
+    {
+     "fact": "手册该页只是标签位置和图例说明，不是数值胎压表；车辆的胎压及轮胎规格数值只能以车辆上的 Label A 为准（Label A 图例：B = 轮胎规格，C = 前轮胎压，D = 后轮胎压）。",
+     "layer": "core",
+     "pages": "p.333-334",
+     "source_chunk": "r5e-2025-topic-tyres-0002"
+    },
+    {
+     "fact": "胎压按车辆当前使用状态（空载、载重、高速公路行驶等）而不同，须参照车门标签并确保与当前用途相符。",
+     "layer": "supplementary",
+     "pages": "p.181-182",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0002"
+    },
+    {
+     "fact": "读取数值后的检查规则：冷态检查；无法冷测时在标示值上加 0.2–0.3 bar（3 PSI）；严禁给热胎放气。",
+     "layer": "supplementary",
+     "pages": "p.334-334",
+     "source_chunk": "r5e-2025-table-tyre-pressure-label-0001"
+    },
+    {
+     "fact": "满载（MMAC）并拖挂时胎压需增加 0.2 bar 且限速 100 km/h——这是特殊工况下的加压规则，标签上另有对应数值，不是常规标准值。",
+     "layer": "supplementary",
+     "pages": "p.334-336",
+     "source_chunk": "r5e-2025-topic-tyres-0003"
+    }
+   ]
+  },
+  {
+   "id": "chain-tyre#3",
+   "question": "胎压不足时应该怎么调整？",
+   "facts": [
+    {
+     "fact": "冷态调整规则：四个轮胎的胎压必须在冷态时设定，以驾驶员侧车门边缘标签（Label A）的数值为准；如无法在冷态下检查胎压，则标示压力值应增加 0.2 至 0.3 bar（3 PSI）；严禁给热胎放气（Never deflate a hot tyre）。",
+     "layer": "core",
+     "pages": "p.181-182",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0002"
+    },
+    {
+     "fact": "同样的冷态调整规则也写在 Tyres 章节：胎压应在冷态时按标签检查，无法冷测时指示值增加 0.2–0.3 bar（或 3 PSI），热胎严禁放气。",
+     "layer": "core",
+     "pages": "p.333-334",
+     "source_chunk": "r5e-2025-topic-tyres-0002"
+    },
+    {
+     "fact": "每次充气或调整胎压后，必须重新启动胎压参考值复位（复位在车辆静止、点火接通时通过多媒体屏幕进行）。",
+     "layer": "core",
+     "pages": "p.181-183",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0002"
+    },
+    {
+     "fact": "胎压取决于载荷和车速，应按使用条件（冷态检查时忽略热天或高速行驶后出现的偏高压力）参照驾驶员侧车门边缘的标签进行调整。",
+     "layer": "core",
+     "pages": "p.332-332",
+     "source_chunk": "r5e-2025-topic-cleaning-0009"
+    },
+    {
+     "fact": "调整时胎压应与车辆当前使用状态（空载、载重、高速公路行驶等）相符；至少每月检查一次（包括应急备胎），长途出行前加检。",
+     "layer": "supplementary",
+     "pages": "p.180-182",
+     "source_chunk": "r5e-2025-topic-tyre-pressure-warning-0002"
+    },
+    {
+     "fact": "车辆满载（MMAC）并拖挂挂车时：最高车速限制为 62 mph (100 km/h)，胎压增加 0.2 bar（有轮胎爆裂风险）。",
+     "layer": "supplementary",
+     "pages": "p.334-336",
+     "source_chunk": "r5e-2025-topic-tyres-0003"
+    },
+    {
+     "fact": "胎压不足的危害：导致轮胎异常磨损和异常发热（有爆胎、胎面甩脱风险），并增加能耗、降低续航。",
+     "layer": "supplementary",
+     "pages": "p.332-332",
+     "source_chunk": "r5e-2025-topic-cleaning-0008"
+    },
+    {
+     "fact": "气门帽未拧紧或缺失会造成慢漏气；调整后应使用与原装相同的气门帽并完全拧紧。",
+     "layer": "supplementary",
+     "pages": "p.333-338",
+     "source_chunk": "r5e-2025-topic-tyres-0001"
+    },
+    {
+     "fact": "若被扎亏气需应急处理：使用行李厢地毯下方的补胎充气套装（充气至推荐压力，15 分钟后读压；15 分钟内达不到 1.8 bar 则无法修复，勿继续行驶，联系授权经销商）。",
+     "layer": "supplementary",
+     "pages": "p.336-338",
+     "source_chunk": "r5e-2025-topic-tyres-0005"
+    },
+    {
+     "fact": "行驶中振动可能是胎压不正确、动平衡不良或轮胎受损所致：应先检查并调整胎压，若非胎压问题则到授权经销商检查。",
+     "layer": "supplementary",
+     "pages": "p.357-360",
+     "source_chunk": "r5e-2025-table-operating-faults-0001"
+    },
+    {
+     "fact": "车门标签图例（p.334）：A=驾驶员车门开启处的胎压标签，B=轮胎尺寸，C=前轮胎压，D=后轮胎压；标签图例仅说明各标识含义，实际数值以车门 Label A 为准",
+     "layer": "core",
+     "pages": "p.334",
+     "source_chunk": "r5e-2025-table-tyre-pressure-label-0001"
+    }
+   ]
+  }
+ ]
+}

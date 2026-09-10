@@ -1,0 +1,119 @@
+{
+ "cluster": "range",
+ "questions": [
+  {
+   "id": "para-max-range",
+   "question": "这车的最大续航里程是多少公里？",
+   "facts": [
+    {
+     "fact": "手册全书不含任何官方\u201c最大续航里程\u201d数值：没有 WLTP 或其他认证续航的公里数（全文检索 WLTP 无匹配）；技术规格章（p.361-368）只给出尺寸、重量、拖挂、发动机标识等信息，不含续航或电池容量数据，因此无法从本手册直接回答\u201c最大续航多少公里\u201d。",
+     "layer": "core",
+     "pages": "p.361-368（全书检索确认）",
+     "source_chunk": "r5e-2025-topic-vehicle-information-0001 / r5e-2025-topic-vehicle-information-0002 / r5e-2025-topic-vehicle-information-0003"
+    },
+    {
+     "fact": "手册明确说明续航\u201c按统一法规方法认证\u201d（Range is accredited in according to a standard regulatory method，对所有制造商一致，用于车辆间相互比较），但手册未给出该认证数值；官方/最大续航数值应查官方规格表或认证数据，而非本手册。",
+     "layer": "core",
+     "pages": "p.175-176",
+     "source_chunk": "r5e-2025-topic-eco-driving-0001"
+    },
+    {
+     "fact": "实际（实时）续航取决于车辆使用条件、所装备设备和用户驾驶风格（原文：Range in real time depends on vehicle usage conditions, equipment fitted and the user's driving style），即实际续航会随工况变化，不存在固定数值。",
+     "layer": "core",
+     "pages": "p.175-176",
+     "source_chunk": "r5e-2025-topic-eco-driving-0001"
+    },
+    {
+     "fact": "续航数值的官方来源是行车电脑估算：组合仪表上显示\u201c估算续航\u201d（Estimated range，仪表 B 标号 28）和动力电池充电率（Battery information 标号 5：traction battery charging rate, estimated range），可通过多功能开关切换浏览。",
+     "layer": "core",
+     "pages": "p.128-129, p.131-132",
+     "source_chunk": "r5e-2025-topic-trip-computer-0008 / r5e-2025-topic-trip-computer-0010"
+    },
+    {
+     "fact": "估算续航的计算与重置规则：动力电池充满后可选手动重置（选中行程项后长按开关 1）或自动重置；自动重置时按\u201c平均使用\u201d计算并考虑车外温度（exterior temperature）；若系统识别出特别经济的驾驶风格，会对计算进行修正并增大续航读数。",
+     "layer": "core",
+     "pages": "p.121-122",
+     "source_chunk": "r5e-2025-topic-trip-computer-0003"
+    },
+    {
+     "fact": "估算续航读数的解读规则：重置后行驶得越远，平均能耗和续航显示越稳定可靠；按 Reset 后最初几英里续航读数会随行驶增大（因计入上次重置以来的平均能耗）；另外部分车载设备本身耗电，车辆能耗可能不同于电表计量的能耗；部分行车电脑信息也会显示在导航系统屏幕上。",
+     "layer": "core",
+     "pages": "p.121-122",
+     "source_chunk": "r5e-2025-topic-trip-computer-0003"
+    },
+    {
+     "fact": "仪表对估算续航提供高/低两种显示（Estimated range 28）：High（标号 32）= 理想条件下的续航（例如在 A 级公路或双车道行驶、很少使用热舒适系统）；Low（标号 33）= 不利条件下的续航（例如冬季跑高速公路、或拥堵路况下大量使用热舒适系统）。即手册中\u201c最乐观\u201d的续航也只是理想工况下的估算值，且无具体公里数。",
+     "layer": "core",
+     "pages": "p.131-132",
+     "source_chunk": "r5e-2025-topic-trip-computer-0010"
+    },
+    {
+     "fact": "低电量例外：当电量降到约 3.5%（视车型约 5%）时，续航数值不再显示（the range value is no longer displayed），此后电机性能逐渐下降直至车辆停止；即接近没电时连估算续航也不再给出。",
+     "layer": "core",
+     "pages": "p.129-132",
+     "source_chunk": "r5e-2025-topic-trip-computer-0009 / r5e-2025-topic-trip-computer-0010 / r5e-2025-topic-trip-computer-0011"
+    },
+    {
+     "fact": "续航与电量的关系：车辆续航取决于动力电池电量（your vehicle range will vary according to the charge level），也取决于驾驶风格（Your vehicle range will depend on the traction battery charge level and also on your driving style）；且能耗可用水平取决于电池温度，电池冷/热状态不同，可用能量在停车与重启间可能变化。",
+     "layer": "core",
+     "pages": "p.26-27, p.42-43, p.44-45",
+     "source_chunk": "r5e-2025-topic-electric-vehicle-0002 / r5e-2025-topic-electric-vehicle-0012 / r5e-2025-topic-electric-vehicle-0014"
+    },
+    {
+     "fact": "获取续航数值的另一个官方渠道：车辆互联服务（手机、平板等外部设备或车载多媒体屏）可提供\u201c剩余续航\u201d（remaining vehicle range）、充电状态及低电量提醒等信息。",
+     "layer": "core",
+     "pages": "p.22-26",
+     "source_chunk": "r5e-2025-topic-electric-vehicle-0001"
+    },
+    {
+     "fact": "影响实际续航的因素清单（车主可部分控制、可能造成\u201c相当大\u201d差异）：车速与驾驶风格、道路类型、暖风（heating level）、轮胎、电气附件的使用、车辆负载；激活 ECO 模式可自动接管各耗能单元（发动机功率等）以最大限度降低能耗。",
+     "layer": "supplementary",
+     "pages": "p.176-178",
+     "source_chunk": "r5e-2025-topic-eco-driving-0003"
+    },
+    {
+     "fact": "车速影响的量化示例：高速行驶会显著降低续航——匀速下从约 130 km/h 降到 110 km/h 最多可省约 20%；从约 90 km/h 降到 80 km/h 最多可省约 10%；\u201c运动式\u201d驾驶降低续航，建议恒速行驶、平顺驾驶、多利用滑行能量回收（松开加速踏板或缓刹）。",
+     "layer": "supplementary",
+     "pages": "p.178",
+     "source_chunk": "r5e-2025-topic-eco-driving-0004"
+    },
+    {
+     "fact": "温度与热舒适的影响：使用暖风或空调会降低续航；建议出发前使用\u201c编程\u201d（programming）模式（充电时预热/预冷座舱）以保持续航；外界温度舒适时关闭空调可优化续航。",
+     "layer": "supplementary",
+     "pages": "p.179, p.298-299",
+     "source_chunk": "r5e-2025-topic-eco-driving-0005 / r5e-2025-topic-climate-control-0003"
+    },
+    {
+     "fact": "ECO 模式与空调 Eco 设置：ECO 模式通过降低加速性能和最高车速（启用时限速约 71 mph / 115 km/h，可短暂深踩油门临时退出）来减少能耗、增大续航，视车型还会影响空调性能；MULTI-SENSE 中每 种模式可开启空调\u201cEco\u201d设置（如延迟达到设定温度）以优化续航。",
+     "layer": "supplementary",
+     "pages": "p.176-178, p.292",
+     "source_chunk": "r5e-2025-topic-eco-driving-0003 / r5e-2025-topic-multi-sense-0002"
+    },
+    {
+     "fact": "轮胎对续航的影响：胎压不足会增加能耗，应按规定的胎压执行；使用非原厂推荐的轮胎（尺寸/类型/结构不同）会影响续航；使用雪地胎/冬季胎/防滑钉胎会\u201c显著降低\u201d车辆续航。",
+     "layer": "supplementary",
+     "pages": "p.179, p.333-334",
+     "source_chunk": "r5e-2025-topic-eco-driving-0005 / r5e-2025-topic-tyres-0002"
+    },
+    {
+     "fact": "低电量提醒门槛：电量约 7%（视车型约 12%）时电量条与指示灯变黄并伴蜂鸣，提示需优化续航；约 4%（视车型约 6%）时再次蜂鸣且电量条变红（或变红 30 秒后），接近\u201c即将无法行驶\u201d阈值。",
+     "layer": "supplementary",
+     "pages": "p.129-132",
+     "source_chunk": "r5e-2025-topic-trip-computer-0009 / r5e-2025-topic-trip-computer-0010"
+    },
+    {
+     "fact": "充电时也可看到续航：仪表\u201c充电视图\u201d（charging view）仅在充电中显示续航、电池百分比和剩余充电时间；充电开始时仪表还会提示\u201c车辆续航将随充电量（charge level）变化\u201d。",
+     "layer": "supplementary",
+     "pages": "p.44-45, p.126-128",
+     "source_chunk": "r5e-2025-topic-electric-vehicle-0014 / r5e-2025-topic-trip-computer-0007"
+    },
+    {
+     "fact": "其他与续航相关的能量管理行为：编程空调/立即启动空调要求动力电池电量高于 7.5%，电量低于约 7% 时编程空调自动停止；点火关闭后空调与风机默认自动关闭，属于正常现象，目的是保护电池续航（preserve battery autonomy）或优化充电。",
+     "layer": "supplementary",
+     "pages": "p.305, p.357-360",
+     "source_chunk": "r5e-2025-topic-climate-control-0011 / r5e-2025-table-operating-faults-0003 / r5e-2025-topic-operating-faults-0004"
+    }
+   ]
+  }
+ ]
+}

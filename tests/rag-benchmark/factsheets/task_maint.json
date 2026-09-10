@@ -1,0 +1,41 @@
+{
+ "cluster": "maint",
+ "questions": [
+  {
+   "id": "hit-service-interval",
+   "question": "保养周期是多久？",
+   "must_points": [
+    "如实转述手册不含具体周期表、指向保养日程/保养文档（maintenance schedule）",
+    "仪表盘 Service in / Service due 显示与保养后重置的规则（p.122-124）",
+    "不编造具体公里数/月数",
+    "附页码"
+   ]
+  },
+  {
+   "id": "hit-brake-fluid",
+   "question": "制动液需要检查吗？在哪里检查？",
+   "must_points": [
+    "制动液检查位置/方法",
+    "液位要求或警告",
+    "附页码"
+   ]
+  },
+  {
+   "id": "hit-car-wash",
+   "question": "洗车有什么注意事项？",
+   "must_points": [
+    "手工洗车建议",
+    "高压/自动洗车注意事项",
+    "附页码"
+   ]
+  },
+  {
+   "id": "hit-pretrip",
+   "question": "长途出行前应该检查哪些项目？",
+   "must_points": [
+    "综合多章节的检查清单",
+    "引用多条页码（≤4 条）"
+   ]
+  }
+ ]
+}

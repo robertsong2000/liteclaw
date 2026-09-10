@@ -1,0 +1,425 @@
+{
+  "cluster": "key",
+  "questions": [
+    {
+      "id": "hit-key-battery",
+      "question": "车钥匙电池没电了怎么更换？",
+      "facts": [
+        {
+          "fact": "钥匙卡（hands-free card）电池寿命约两年；当仪表盘出现 \"Keycard Battery Low\" 消息时应更换电池。更换时须确认使用了正确的电池类型、电池状态良好且安装方向正确。",
+          "layer": "core",
+          "pages": "p.54-55",
+          "source_chunk": "r5e-2025-topic-card-0002"
+        },
+        {
+          "fact": "更换电池步骤：按住卡上 A 区的同时向下滑动后盖 1 → 取下电池盖 2 → 按住电池一侧、翘起另一侧取出电池 → 按电池盖内侧标示的方向和模板（direction and template）装入新电池。",
+          "layer": "core",
+          "pages": "p.61",
+          "source_chunk": "r5e-2025-topic-card-0009"
+        },
+        {
+          "fact": "装回按与拆卸相反的顺序进行；装好后站在车辆附近按卡上任意一个按钮 4 次，下次启动车辆时 \"Keycard Battery Low\" 消息即会消失；并须确认电池盖已卡扣扣合（clipped shut）。",
+          "layer": "core",
+          "pages": "p.62-64",
+          "source_chunk": "r5e-2025-topic-digital-key-0001"
+        },
+        {
+          "fact": "更换电池时不要触碰卡片上的电子电路或触点（electronic circuit or contacts）。",
+          "layer": "core",
+          "pages": "p.62-64",
+          "source_chunk": "r5e-2025-topic-digital-key-0001"
+        },
+        {
+          "fact": "电池型号：手册未给出具体型号（如 CR2032），只要求必须使用同型号或等效类型（same or equivalent type）的电池，并建议咨询认证经销商（Approved Dealer）；电池可在认证经销商处购买。",
+          "layer": "core",
+          "pages": "p.62-64",
+          "source_chunk": "r5e-2025-topic-digital-key-0001"
+        },
+        {
+          "fact": "安全警告：更换电池时要确保电池正确插入到位，存在爆炸风险（Risk of explosion）；如果电池盖不能正确闭合，请勿继续使用该卡，并将其放在儿童接触不到的地方。",
+          "layer": "core",
+          "pages": "p.62-64",
+          "source_chunk": "r5e-2025-topic-digital-key-0001"
+        },
+        {
+          "fact": "安全警告：新电池和旧电池都要放在儿童接触不到的地方；切勿吞食电池，有化学灼伤（chemical burns）风险、可能导致死亡；若被吞入或插入身体任何部位，应尽快就医。",
+          "layer": "core",
+          "pages": "p.62-64",
+          "source_chunk": "r5e-2025-topic-digital-key-0001"
+        },
+        {
+          "fact": "废旧电池不得作为垃圾丢弃，应送到认证经销商处，或咨询当地政府机构（local authority）了解合适的回收设施。",
+          "layer": "supplementary",
+          "pages": "p.62-64",
+          "source_chunk": "r5e-2025-topic-digital-key-0001"
+        },
+        {
+          "fact": "安装前检查电池上没有染色/污渍（dye），否则可能造成电气接触不良。",
+          "layer": "supplementary",
+          "pages": "p.62-64",
+          "source_chunk": "r5e-2025-topic-digital-key-0001"
+        },
+        {
+          "fact": "电池电量过弱无法保证正常工作时，仍然可以启动车辆并锁止/解锁车辆（应急启动见 \"Starting, stopping the engine\" 章节）。",
+          "layer": "supplementary",
+          "pages": "p.62-64",
+          "source_chunk": "r5e-2025-topic-digital-key-0001"
+        },
+        {
+          "fact": "卡片日常保养：避免将卡放在过热、过冷或潮湿的地方；不要放在可能被意外弯折或损坏的位置（如衣服后袋被坐到）。",
+          "layer": "supplementary",
+          "pages": "p.55-56",
+          "source_chunk": "r5e-2025-topic-card-0003"
+        },
+        {
+          "fact": "不要把卡存放在可能接触其他电子设备（电脑、手机等）的地方，否则可能妨碍其正常工作；附近的外部设施或使用相同频率的设备产生的干扰也可能影响遥控操作。",
+          "layer": "supplementary",
+          "pages": "p.55-57",
+          "source_chunk": "r5e-2025-topic-card-0003"
+        },
+        {
+          "fact": "卡片丢失或需要额外卡片时可向认证经销商购买；换卡后须带车辆及其全部卡片到认证经销商处对系统重新初始化；每辆车最多可使用 4 张卡。",
+          "layer": "supplementary",
+          "pages": "p.55-56",
+          "source_chunk": "r5e-2025-topic-card-0003"
+        },
+        {
+          "fact": "故障排除表：卡片无法锁止/解锁车门的可能原因是卡电池没电，处理方式为更换电池（或请人更换），且期间仍可锁止、解锁并启动车辆。",
+          "layer": "supplementary",
+          "pages": "p.356",
+          "source_chunk": "r5e-2025-table-operating-faults-charging-card-0001"
+        },
+        {
+          "fact": "故障排除表：若卡片失步（desynchronisation），用卡内内置钥匙插入驾驶员车门锁解锁，然后把卡放在放置区（placement area）并按 \"START\" 按钮重新同步；若出现 \"Place the card near the START button\" 消息，检查卡电池状态或将卡放到专用放置区。",
+          "layer": "supplementary",
+          "pages": "p.357-358",
+          "source_chunk": "r5e-2025-topic-operating-faults-0002"
+        }
+      ]
+    },
+    {
+      "id": "hit-key-dead-start",
+      "question": "车钥匙卡片没电了怎么启动车辆？",
+      "facts": [
+        {
+          "fact": "应急启动方式：仪表盘出现 \"Place card on zone + START\" 消息时，踩下制动踏板，将卡 4（按钮面朝下）平放在中央控制台上部的杯架 3（放置区，区域 A）内，然后按下启动按钮 2 启动车辆，启动后该消息熄灭（该说明在手册中的交叉引用印刷页码为 p.156）。",
+          "layer": "core",
+          "pages": "p.159-160",
+          "source_chunk": "r5e-2025-topic-start-stop-0002"
+        },
+        {
+          "fact": "手册明确：卡电池没电（flat）时，仍然可以锁止/解锁并启动车辆。",
+          "layer": "core",
+          "pages": "p.55-56",
+          "source_chunk": "r5e-2025-topic-card-0003"
+        },
+        {
+          "fact": "若卡电池没电导致车门无法免提打开，可用卡内内置机械钥匙（built-in key）解锁驾驶员侧（左前）车门：按住 A 区向下滑动后盖 1 抽出钥匙 2 → 将钥匙末端插入驾驶员车门盖 B 底部的缺口 3、向上撬开盖子 → 将钥匙插入锁芯锁止/解锁车门；进入车内后把钥匙放回卡的壳体内。",
+          "layer": "core",
+          "pages": "p.69-70",
+          "source_chunk": "r5e-2025-topic-doors-0006"
+        },
+        {
+          "fact": "正常启动方式（对照）：卡必须在探测区 1 内，踩下制动踏板并按下启动按钮 2，仪表盘显示 \"READY\" 并伴随提示音；车速超过约 3 mph (5 km/h) 时 \"READY\" 消息消失。",
+          "layer": "core",
+          "pages": "p.158-159",
+          "source_chunk": "r5e-2025-topic-start-stop-0001"
+        },
+        {
+          "fact": "免提卡在以下情况可能失效：卡电池没电或 12 V 电池亏电；卡靠近工作在同频率的设备（显示器、手机、游戏机等）；车辆处于强电磁辐射区域。",
+          "layer": "supplementary",
+          "pages": "p.159-160",
+          "source_chunk": "r5e-2025-topic-start-stop-0002"
+        },
+        {
+          "fact": "卡可能不工作的其他情况（车门开关失效时）：卡电池老化/没电、附近使用电子设备（如手机）、车辆处于强电磁辐射区、车辆已用数字钥匙锁止；此时可改用卡内内置钥匙、手动逐门锁止、车内中控锁开关或数字钥匙（视车型）。",
+          "layer": "supplementary",
+          "pages": "p.69-70",
+          "source_chunk": "r5e-2025-topic-doors-0006"
+        },
+        {
+          "fact": "故障排除表：出现 \"Place the card near the START button\" 消息的可能原因是卡电池没电或卡失步，应检查卡电池状态或将卡放到专用放置区。",
+          "layer": "core",
+          "pages": "p.357-358",
+          "source_chunk": "r5e-2025-topic-operating-faults-0002"
+        },
+        {
+          "fact": "故障排除表：卡片失步时，用内置钥匙解锁驾驶员车门，再将卡放在放置区并按 \"START\" 按钮同步卡片。",
+          "layer": "supplementary",
+          "pages": "p.357-358",
+          "source_chunk": "r5e-2025-topic-operating-faults-0002"
+        },
+        {
+          "fact": "故障排除表：卡不能锁止/解锁车门且原因为卡电池没电时，更换电池即可；更换前仍可锁止、解锁并启动车辆。",
+          "layer": "supplementary",
+          "pages": "p.356",
+          "source_chunk": "r5e-2025-table-operating-faults-charging-card-0001"
+        },
+        {
+          "fact": "启动前提条件：充电线必须已从车上拔下才能启动；多媒体系统更新期间无法启动车辆，须等更新完成。",
+          "layer": "supplementary",
+          "pages": "p.158-159",
+          "source_chunk": "r5e-2025-topic-start-stop-0001"
+        },
+        {
+          "fact": "行李厢开着时的免提启动特例：此时卡不要放在行李厢内，以防卡片丢失。",
+          "layer": "supplementary",
+          "pages": "p.159-160",
+          "source_chunk": "r5e-2025-topic-start-stop-0002"
+        },
+        {
+          "fact": "卡电池电量低的征兆与处理：仪表盘出现 \"Keycard Battery Low\" 消息时应尽快按说明更换卡电池（更换步骤见 Card 章节电池更换部分）。",
+          "layer": "supplementary",
+          "pages": "p.61",
+          "source_chunk": "r5e-2025-topic-card-0009"
+        },
+        {
+          "fact": "熄火时若卡不在车内，仪表盘出现 \"Keycard absent: press/hold START\" 消息，此时按住启动按钮 2 超过两秒即可熄火。",
+          "layer": "supplementary",
+          "pages": "p.160",
+          "source_chunk": "r5e-2025-topic-start-stop-0003"
+        },
+        {
+          "fact": "无卡/卡临时失效时锁车：点火关闭且某扇门或行李厢门打开的状态下，按住门锁开关 5 超过 5 秒，关门后全部车门和行李厢门即被锁止；此后从车外解锁只能靠卡进入车辆访问区或使用卡内内置钥匙。",
+          "layer": "supplementary",
+          "pages": "p.70-71",
+          "source_chunk": "r5e-2025-topic-doors-0007"
+        },
+        {
+          "fact": "备选方案：若车辆配备数字钥匙（digital key），手机可替代卡片完成锁止/解锁和启动车辆。",
+          "layer": "supplementary",
+          "pages": "p.64",
+          "source_chunk": "r5e-2025-topic-digital-key-0002"
+        },
+        {
+          "fact": "部分车型配有 \"Hands-free\" 卡槽（card holder，驾驶位中控上，编号 12），启动按钮位于电子挡杆旁。",
+          "layer": "supplementary",
+          "pages": "p.117",
+          "source_chunk": "r5e-2025-topic-driving-position-0002"
+        }
+      ]
+    },
+    {
+      "id": "chain-key#2",
+      "question": "钥匙没电的情况下怎么启动车辆？",
+      "facts": [
+        {
+          "fact": "应急启动方式：仪表盘出现 \"Place card on zone + START\" 消息时，踩下制动踏板，将卡 4（按钮面朝下）平放在中央控制台上部的杯架 3（放置区，区域 A）内，然后按下启动按钮 2 启动车辆，启动后该消息熄灭（该说明在手册中的交叉引用印刷页码为 p.156）。",
+          "layer": "core",
+          "pages": "p.159-160",
+          "source_chunk": "r5e-2025-topic-start-stop-0002"
+        },
+        {
+          "fact": "手册明确：卡电池没电（flat）时，仍然可以锁止/解锁并启动车辆。",
+          "layer": "core",
+          "pages": "p.55-56",
+          "source_chunk": "r5e-2025-topic-card-0003"
+        },
+        {
+          "fact": "若卡电池没电导致车门无法免提打开，可用卡内内置机械钥匙（built-in key）解锁驾驶员侧（左前）车门：按住 A 区向下滑动后盖 1 抽出钥匙 2 → 将钥匙末端插入驾驶员车门盖 B 底部的缺口 3、向上撬开盖子 → 将钥匙插入锁芯锁止/解锁车门；进入车内后把钥匙放回卡的壳体内。",
+          "layer": "core",
+          "pages": "p.69-70",
+          "source_chunk": "r5e-2025-topic-doors-0006"
+        },
+        {
+          "fact": "正常启动方式（对照）：卡必须在探测区 1 内，踩下制动踏板并按下启动按钮 2，仪表盘显示 \"READY\"；若启动条件不满足，仪表盘显示 \"Press Brake + START\"；必要时需在按启动按钮的同时转动方向盘以解锁转向柱，此时显示 \"Turn Steering Wheel + START\"。",
+          "layer": "core",
+          "pages": "p.158-159",
+          "source_chunk": "r5e-2025-topic-start-stop-0001"
+        },
+        {
+          "fact": "免提卡在以下情况可能失效（需改用放置区启动）：卡电池没电或 12 V 电池亏电；卡靠近工作在同频率的设备（显示器、手机、游戏机等）；车辆处于强电磁辐射区域。",
+          "layer": "core",
+          "pages": "p.159-160",
+          "source_chunk": "r5e-2025-topic-start-stop-0002"
+        },
+        {
+          "fact": "故障排除表：出现 \"Place the card near the START button\" 消息的可能原因是卡电池没电或卡失步，应检查卡电池状态或将卡放到专用放置区。",
+          "layer": "core",
+          "pages": "p.357-358",
+          "source_chunk": "r5e-2025-topic-operating-faults-0002"
+        },
+        {
+          "fact": "故障排除表：卡片失步（desynchronisation）时，用内置钥匙解锁驾驶员车门，再将卡放在放置区并按 \"START\" 按钮同步卡片。",
+          "layer": "supplementary",
+          "pages": "p.357-358",
+          "source_chunk": "r5e-2025-topic-operating-faults-0002"
+        },
+        {
+          "fact": "故障排除表：卡不能锁止/解锁车门且原因为卡电池没电时，更换电池即可；更换前仍可锁止、解锁并启动车辆。",
+          "layer": "supplementary",
+          "pages": "p.356",
+          "source_chunk": "r5e-2025-table-operating-faults-charging-card-0001"
+        },
+        {
+          "fact": "启动前提条件：充电线必须已从车上拔下才能启动；多媒体系统更新期间无法启动车辆；使用其他附件功能时，卡在乘员舱内、不踩踏板直接按启动按钮 2 即可接通附件电源（收音机、导航、雨刮等）。",
+          "layer": "supplementary",
+          "pages": "p.158-159",
+          "source_chunk": "r5e-2025-topic-start-stop-0001"
+        },
+        {
+          "fact": "卡电池电量低时应更换：仪表盘出现 \"Keycard Battery Low\" 消息即提示更换卡电池；电池寿命约两年。",
+          "layer": "supplementary",
+          "pages": "p.61",
+          "source_chunk": "r5e-2025-topic-card-0009"
+        },
+        {
+          "fact": "熄火时若卡不在车内，仪表盘出现 \"Keycard absent: press/hold START\" 消息，按住启动按钮 2 超过两秒即可熄火；发动机熄火后附件（收音机等）还会继续工作约 45 分钟。",
+          "layer": "supplementary",
+          "pages": "p.160",
+          "source_chunk": "r5e-2025-topic-start-stop-0003"
+        },
+        {
+          "fact": "无卡/卡临时失效时锁车：点火关闭且车门或行李厢门打开的状态下，按住门锁开关 5 超过 5 秒，关门后所有车门和行李厢门锁止；从车外解锁只能靠卡进入访问区或使用内置钥匙。",
+          "layer": "supplementary",
+          "pages": "p.70-71",
+          "source_chunk": "r5e-2025-topic-doors-0007"
+        },
+        {
+          "fact": "备选方案：若车辆配备数字钥匙（digital key），手机可替代卡片完成锁止/解锁和启动车辆。",
+          "layer": "supplementary",
+          "pages": "p.64",
+          "source_chunk": "r5e-2025-topic-digital-key-0002"
+        },
+        {
+          "fact": "发动机运转期间卡片按钮全部失效（deactivated）；免提模式下卡在探测区约 15 分钟后远程锁止功能会被停用，需按卡上按钮锁车。",
+          "layer": "supplementary",
+          "pages": "p.57-59",
+          "source_chunk": "r5e-2025-topic-card-0005"
+        }
+      ]
+    },
+    {
+      "id": "chain-key#3",
+      "question": "数字钥匙是什么？怎么用？",
+      "facts": [
+        {
+          "fact": "定义：视国家和订阅（subscription）情况，可在智能手机上为车辆安装数字钥匙（digital key）；数字钥匙包含锁止/解锁和启动车辆所需的全部权限，手机即替代了卡片。",
+          "layer": "core",
+          "pages": "p.64",
+          "source_chunk": "r5e-2025-topic-digital-key-0002"
+        },
+        {
+          "fact": "开通方式：数字钥匙的安装、管理和传输均通过制造商 App（manufacturer's app）完成；在手机上安装制造商应用并激活订阅后，还必须在应用内激活数字钥匙方可使用。",
+          "layer": "core",
+          "pages": "p.64",
+          "source_chunk": "r5e-2025-topic-digital-key-0002"
+        },
+        {
+          "fact": "使用条件：在手机上激活 Bluetooth® 并打开制造商 App 即可使用各数字钥匙功能；手机必须有足够电量，电量低时仪表盘出现 \"Low phone battery\" 消息；数字钥匙的有效作用距离取决于手机的 Bluetooth® 连接。",
+          "layer": "core",
+          "pages": "p.64",
+          "source_chunk": "r5e-2025-topic-digital-key-0002"
+        },
+        {
+          "fact": "功能范围：数字钥匙的功能与卡片完全相同，包括锁止/解锁所有开启件、行李厢锁止/解锁（视车型）、死锁 deadlocking（视车型）、远程照明（remote lighting）、远程鸣笛（便于远距离或大型停车场找车）、启动/停止发动机。",
+          "layer": "core",
+          "pages": "p.65-66",
+          "source_chunk": "r5e-2025-topic-doors-0002"
+        },
+        {
+          "fact": "校准：首次使用及每次更换新手机时，必须将数字钥匙与车辆校准——激活手机 Bluetooth® 后按制造商 App 中的流程操作；校准时手机必须放在放置区 1 内。",
+          "layer": "core",
+          "pages": "p.66",
+          "source_chunk": "r5e-2025-topic-doors-0003"
+        },
+        {
+          "fact": "启动/熄火要求：启动前系统会检查手机是否在放置区 1 内；整个行程中手机必须留在车内；校准、启动和熄火都必须把手机放在放置区。",
+          "layer": "core",
+          "pages": "p.66",
+          "source_chunk": "r5e-2025-topic-doors-0003"
+        },
+        {
+          "fact": "放置区的位置：视国家和订阅情况，车内的感应充电区（induction charging zone，中央扶手/中控处）即为数字钥匙手机的放置区（placement zone）。",
+          "layer": "core",
+          "pages": "p.314-315",
+          "source_chunk": "r5e-2025-topic-storage-0001"
+        },
+        {
+          "fact": "熄火时若手机不在乘员舱内，仪表盘会显示提示信息，此时须按住发动机启动/停止按钮 2 超过两秒；按住前先确保能取回手机——没有手机也没有卡的话将无法再次启动车辆。",
+          "layer": "core",
+          "pages": "p.66",
+          "source_chunk": "r5e-2025-topic-doors-0003"
+        },
+        {
+          "fact": "数字钥匙保持有效的条件：手机必须至少每 48 小时连接一次互联网（WIFI 或移动网络），否则数字钥匙失效；重新联网几分钟即可重新激活。",
+          "layer": "core",
+          "pages": "p.66-68",
+          "source_chunk": "r5e-2025-topic-doors-0004"
+        },
+        {
+          "fact": "卡片与数字钥匙的互斥逻辑：若卡片留在车内且车门是用数字钥匙锁止的，则该卡的所有功能被抑制（inhibited），直到发动机再次启动；此时只能用数字钥匙或另一张卡（非车内那张）启动发动机。",
+          "layer": "core",
+          "pages": "p.66-68",
+          "source_chunk": "r5e-2025-topic-doors-0004"
+        },
+        {
+          "fact": "外借数字钥匙：在制造商 App 中进入 \"Share Virtual Key\" 菜单，填写临时使用者（occasional user）信息，验证通过后系统会向该用户发送确认电子邮件；车辆外借时，数字钥匙所有者有责任指定一名可信人员作为车辆使用者。",
+          "layer": "core",
+          "pages": "p.64",
+          "source_chunk": "r5e-2025-topic-digital-key-0003"
+        },
+        {
+          "fact": "外借前的准备（避免传输失败，如无 WIFI/移动网络）：应提前办理——临时使用者须已提前下载并安装制造商 App；双方手机在整个流程中均须联网（WIFI 或移动网络）；流程完成后临时使用者的数字钥匙即被激活。",
+          "layer": "supplementary",
+          "pages": "p.62-65",
+          "source_chunk": "r5e-2025-topic-digital-key-0003"
+        },
+        {
+          "fact": "撤销（revoking）：用户可单独撤销一个数字钥匙，撤销后该用户可激活新钥匙；删除被外借的数字钥匙时，须把手机放在放置区内执行撤销程序，否则删除请求被挂起，要等用另一个数字钥匙或卡片启动发动机后才确认删除。",
+          "layer": "core",
+          "pages": "p.65-66",
+          "source_chunk": "r5e-2025-topic-doors-0001"
+        },
+        {
+          "fact": "可通过多媒体屏幕停用/重新激活 \"Digital key\" 功能，使车辆不与任何数字钥匙通信；注意停用功能不会删除已有的数字钥匙，只是停用车辆的通信能力。",
+          "layer": "supplementary",
+          "pages": "p.65",
+          "source_chunk": "r5e-2025-topic-doors-0001"
+        },
+        {
+          "fact": "首次识别延迟：第一次用新数字钥匙或新手机解锁/启动车辆时，车辆识别手机上的数字钥匙需要几秒钟。",
+          "layer": "supplementary",
+          "pages": "p.65-66",
+          "source_chunk": "r5e-2025-topic-doors-0002"
+        },
+        {
+          "fact": "解锁特例：某些情况下（如车辆约 8 天未使用）可能无法用数字钥匙解锁车辆，此时先按行李厢开启按钮，再用数字钥匙解锁车辆。",
+          "layer": "supplementary",
+          "pages": "p.65-66",
+          "source_chunk": "r5e-2025-topic-doors-0002"
+        },
+        {
+          "fact": "安全责任：数字钥匙所有者和被指定的使用者有责任保护并确保手机上数字钥匙的访问安全，必须在手机上安装必要的安全防护工具（如带密码的屏幕锁）。",
+          "layer": "core",
+          "pages": "p.64",
+          "source_chunk": "r5e-2025-topic-digital-key-0002"
+        },
+        {
+          "fact": "需要把车辆交给他人（如车辆维修、到认证经销商或专业人员处预约服务等）时，务必随身携带车辆卡片以保证能用卡访问车辆。",
+          "layer": "supplementary",
+          "pages": "p.64",
+          "source_chunk": "r5e-2025-topic-digital-key-0002"
+        },
+        {
+          "fact": "启动或熄火发动机时，手机应始终保持足够电量才能使用数字钥匙。",
+          "layer": "supplementary",
+          "pages": "p.66-68",
+          "source_chunk": "r5e-2025-topic-doors-0004"
+        },
+        {
+          "fact": "感应充电区使用警告：充电时切勿在感应充电区放置任何物品（启动卡、U 盘、SD 卡、信用卡、首饰、钥匙、硬币等）；把手机放入感应充电区前，须先取出手机壳上的磁卡/信用卡。",
+          "layer": "supplementary",
+          "pages": "p.314-315",
+          "source_chunk": "r5e-2025-topic-storage-0001"
+        },
+        {
+          "fact": "数字钥匙章节位于手册 \"vehicle > Digital key\"（chunk 页码 p.62-64 起），手册索引列为 \"Digital key, 62\"；卡片章节中多次交叉引用该章节。",
+          "layer": "supplementary",
+          "pages": "p.62-64",
+          "source_chunk": "r5e-2025-topic-digital-key-0001"
+        }
+      ]
+    }
+  ]
+}

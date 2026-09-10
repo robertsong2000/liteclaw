@@ -1,0 +1,93 @@
+{
+ "cluster": "driving",
+ "questions": [
+  {
+   "id": "hit-gear-p",
+   "question": "挡位怎么挂入P挡？",
+   "facts": [
+    {"fact": "手册换挡杆（电子selector lever）没有 P 挡：只有 R（reverse 倒挡）、N（neutral 空挡）、D（forward gear 前进挡）和 B（视车型配置，带增强能量回收的前进挡）；挂入的挡位会显示在仪表盘上。", "layer": "core", "pages": "p.161-162", "source_chunk": "r5e-2025-topic-gear-control-0001"},
+    {"fact": "换挡为单触式（one-touch）：将换挡杆向前或向后拨一格或两格挂入所需位置（R/N/D 或视车型 B）后松开，杆自动回到稳定位置；若某些条件不满足换挡，当前挡位会在仪表盘上闪烁。挂 N 挡：车辆静止且发动机运转时，须先踩下制动踏板再上拨或下拨一格。", "layer": "core", "pages": "p.161-162", "source_chunk": "r5e-2025-topic-gear-control-0001"},
+    {"fact": "停车程序（相当于\"挂P\"的正确做法）：车辆停稳后踩下制动踏板，将换挡杆上拨或下拨一格挂入 N 挡；然后确认电子驻车制动已施加且车辆已固定不动（→165）。电子驻车制动可用于固定车辆。", "layer": "core", "pages": "p.162-163", "source_chunk": "r5e-2025-topic-gear-control-0003"},
+    {"fact": "离车前必须检查电子驻车制动已完全施加：施加由电子驻车制动开关上的指示灯和仪表盘上的驻车制动警示灯（车门锁止前保持点亮）确认；视车型在风挡上缘贴有提醒标签。", "layer": "core", "pages": "p.163", "source_chunk": "r5e-2025-topic-gear-control-0004"},
+    {"fact": "安全警告：挂入 N 挡并不会机械锁止驱动轮（drive wheels），离车前务必确保车辆已被固定（immobilised）。", "layer": "core", "pages": "p.163", "source_chunk": "r5e-2025-topic-gear-control-0004"},
+    {"fact": "安全警告：出于安全原因，车辆完全停止前不要关闭点火开关。", "layer": "core", "pages": "p.163", "source_chunk": "r5e-2025-topic-gear-control-0004"},
+    {"fact": "发生发动机故障或电气故障（如电池故障）时，务必确认车辆已被妥善固定；调车时撞击车底（撞到立柱、路缘等）可能损坏车辆（如车轴变形），应到授权经销商检查。", "layer": "supplementary", "pages": "p.163", "source_chunk": "r5e-2025-topic-gear-control-0004"},
+    {"fact": "电子驻车制动辅助施加：车辆静止时，以下情况自动施加驻车制动——按下发动机启动/停止按钮、或驾驶员座椅安全带解开、或驾驶员车门打开；其他所有情况不会自动施加，须使用手动模式。确认已施加：仪表盘驻车制动警示灯和开关上的指示灯 2 点亮；熄火后指示灯几分钟后熄灭，警示灯在车辆锁止后熄灭。", "layer": "core", "pages": "p.167-168", "source_chunk": "r5e-2025-topic-parking-brake-0001"},
+    {"fact": "电子驻车制动手动操作：施加=上拉开关3（开关指示灯与仪表盘警示灯点亮）；解除=不踩踏板按启动按钮接通点火，踩住制动踏板再按开关3，两个指示灯熄灭。", "layer": "core", "pages": "p.168", "source_chunk": "r5e-2025-topic-parking-brake-0002"},
+    {"fact": "驻车制动辅助释放：车辆起步加速时、或从 N 挂入 R/D/B 挡时，驻车制动自动解除。", "layer": "core", "pages": "p.168", "source_chunk": "r5e-2025-topic-parking-brake-0002"},
+    {"fact": "短暂停车（红灯、发动机运转中临时停车等）：拉后松开开关3即可手动施加驻车制动，车辆再次起步时自动释放。", "layer": "core", "pages": "p.168-169", "source_chunk": "r5e-2025-topic-parking-brake-0003"},
+    {"fact": "坡道停车（或拖挂车等）：长拉开关3数秒以启用最大制动力。", "layer": "core", "pages": "p.168-169", "source_chunk": "r5e-2025-topic-parking-brake-0003"},
+    {"fact": "在驻车制动释放状态下停车（特殊场景）：按启动按钮熄火→解开驾驶员安全带→打开驾驶员车门→必要时在车轮前后放置三角木→手动解除驻车制动（仪表显示 \"Parking brake loose\" 并蜂鸣，确认车辆稳定）→关闭驾驶员车门，必要时锁车。解除前须确认车辆稳定。", "layer": "core", "pages": "p.168-169", "source_chunk": "r5e-2025-topic-parking-brake-0003"},
+    {"fact": "安全警告：切勿在驻车制动未施加且发动机未熄火的情况下离开车辆——发动机运转且挡位接合时，踩加速踏板车辆可能移动，有事故风险。", "layer": "core", "pages": "p.169-172", "source_chunk": "r5e-2025-topic-parking-brake-0004"},
+    {"fact": "驻车制动故障处理：出现 \"Check Parking Brake\"（含制动/驻车故障灯）或 \"Parking brake failure\" 信息+蜂鸣时立即联系授权经销商；仪表盘熄灭且开关指示灯闪烁表示必须在交通允许时尽快停车；出现 \"Electric System Failure\"、\"Check battery\" 或 \"Parking brake failure\" 时，必须长拉开关3约10秒固定车辆（坡道等必要时塞住车轮），否则车辆可能失去固定，须呼叫授权经销商。", "layer": "core", "pages": "p.169-172", "source_chunk": "r5e-2025-topic-parking-brake-0004"},
+    {"fact": "\"Autohold\" 功能：车辆停止时（红灯、路口、拥堵等），即使驾驶员松开制动踏板也保持制动力；驾驶员挂挡并充分加速后制动力释放。按开关1激活（开关指示灯2点亮确认），再按关闭。每次启动恢复上次熄火时的设定。", "layer": "core", "pages": "p.172-173", "source_chunk": "r5e-2025-topic-parking-brake-0004"},
+    {"fact": "Autohold 保持制动力须同时满足：驾驶员车门关闭、安全带系好、电子驻车制动已释放、车辆不在很陡的坡道上（仪表显示相应指示灯）；中断条件：驾驶员充分加速（挂挡）或关闭该功能。若由制动力维持车辆，在车门打开、解开安全带或静止超过约3分钟时，会自动施加驻车制动。", "layer": "core", "pages": "p.172-173", "source_chunk": "r5e-2025-topic-parking-brake-0005"},
+    {"fact": "熄火与驻车联动：车辆必须处于静止，按启动/停止按钮后发动机熄火、\"READY\" 消失，同时电子驻车制动自动施加；熄火后正在使用的附件（收音机等）继续工作约45分钟。", "layer": "supplementary", "pages": "p.160", "source_chunk": "r5e-2025-topic-start-stop-0003"},
+    {"fact": "One Pedal 功能相关：车辆静止且 One Pedal 激活、挡位在 D 时，松开制动踏板车辆不会移动（不移溜）；驻车制动在车辆静止超过约3分钟后自动施加；One Pedal 在挂入 R 或 N 时转入待命。", "layer": "supplementary", "pages": "p.166", "source_chunk": "r5e-2025-topic-regenerative-braking-0003"}
+   ]
+  },
+  {
+   "id": "hit-cruise-control",
+   "question": "定速巡航怎么设置巡航车速？",
+   "facts": [
+    {"fact": "巡航控制（Cruise control）通过控制发动机和制动系统帮助车辆保持驾驶员选择的车速（cruising speed，巡航车速）；巡航车速可在 19 mph (30 km/h) 以上的任意车速设定。", "layer": "core", "pages": "p.234-235", "source_chunk": "r5e-2025-topic-cruise-control-0001"},
+    {"fact": "控件布局：开关1选择/取消驾驶辅助模式（Active Driver Assist、adaptive cruise control、cruise control、speed limiter、OFF）；开关2 (0) 使功能待命（保留存储车速）；开关3 (RES) 恢复存储的巡航车速；控制4 上推=SET/+（激活/增速/存储当前车速）、下推=SET/-（激活/减速/存储当前车速）；按钮5（视车型）按检测到的限速适配设定车速。", "layer": "core", "pages": "p.234-235", "source_chunk": "r5e-2025-topic-cruise-control-0001"},
+    {"fact": "开启功能：按开关1若干次选择 cruise control，仪表盘出现灰色警示灯6和 \"Cruise Control selected\" 信息并显示横线（破折号），表示巡航控制已运行、等待存储巡航车速。", "layer": "core", "pages": "p.235", "source_chunk": "r5e-2025-topic-cruise-control-0002"},
+    {"fact": "激活并设定巡航车速：在约 19 mph (30 km/h) 以上的稳定车速下，将控制4上推 (SET/+) 或下推 (SET/-)，功能激活并采用当前车速作为巡航车速，横线被巡航车速取代；存储车速和警示灯7显示为绿色表示激活成功。若在 19 mph (30 km/h) 以下尝试激活，显示 \"Invalid Speed\" 信息且功能保持未激活。", "layer": "core", "pages": "p.235", "source_chunk": "r5e-2025-topic-cruise-control-0002"},
+    {"fact": "巡航车速注册并激活后，可以松开加速踏板；但警告：脚必须靠近踏板，以便紧急情况下及时反应。", "layer": "core", "pages": "p.235", "source_chunk": "r5e-2025-topic-cruise-control-0002"},
+    {"fact": "调整巡航车速：上推控制4 (SET/+) 增速、下推 (SET/-) 减速；长按上或下可按连续步进方式调整车速。", "layer": "core", "pages": "p.235-236", "source_chunk": "r5e-2025-topic-cruise-control-0003"},
+    {"fact": "超越巡航车速：随时可踩下加速踏板超过设定车速，超速期间巡航车速在仪表盘红色闪烁；松开加速踏板几秒后车辆自动回到设定的巡航车速。", "layer": "core", "pages": "p.235-236", "source_chunk": "r5e-2025-topic-cruise-control-0003"},
+    {"fact": "无法维持巡航车速的情况：陡下坡时系统可能无法保持巡航车速，存储车速红色闪烁并周期性蜂鸣提示。若多次尝试后巡航控制仍无法激活，请联系授权经销商。", "layer": "core", "pages": "p.235-236", "source_chunk": "r5e-2025-topic-cruise-control-0003"},
+    {"fact": "暂停（待命 standby）条件：按开关2 (0)、踩下制动踏板、或挂入空挡（neutral）。待命后巡航车速被保留并在仪表盘以灰色显示。", "layer": "core", "pages": "p.235-236", "source_chunk": "r5e-2025-topic-cruise-control-0003"},
+    {"fact": "恢复巡航：确认路况（交通、路面、天气等）合适且车速高于 19 mph (30 km/h) 时按开关3 (RES) 召回存储车速；注意若存储车速远高于当前车速，车辆会较快加速达到该阈值。待命状态下也可直接上推/下推控制4 (SET/+ 或 SET/-) 以车辆当前车速（而非存储车速）重新激活巡航。", "layer": "core", "pages": "p.236-237", "source_chunk": "r5e-2025-topic-cruise-control-0004"},
+    {"fact": "关闭功能：按开关1取消巡航控制，存储的车速不再保留；若熄火前选择了 OFF，下次启动发动机时默认激活 \"Speed limiter\"（限速器）功能并等待存储限速值。", "layer": "core", "pages": "p.236-237", "source_chunk": "r5e-2025-topic-cruise-control-0004"},
+    {"fact": "警告：将巡航控制置于待命或关闭并不会使车速快速下降——必须自己踩制动踏板减速。", "layer": "core", "pages": "p.236-237", "source_chunk": "r5e-2025-topic-cruise-control-0004"},
+    {"fact": "安全警告：巡航控制只是辅助驾驶装置，绝不能替代驾驶员遵守限速和保持警惕的责任；不得在交通拥堵、弯道或湿滑路面（黑冰、水滑、砾石）以及恶劣天气（雾、雨、侧风等）下使用，有事故风险。", "layer": "core", "pages": "p.234-235", "source_chunk": "r5e-2025-topic-cruise-control-0001"},
+    {"fact": "补充条件与联动：ECO 模式激活时，巡航车速不能超过车辆当前车速（→173）；巡航控制或自适应巡航激活时，能量回收制动系统和换挡拨片不可用；视车型可按开关5将巡航控制与 \"Road sign detection\"（交通标志识别）联动以自动适配限速（→220）。", "layer": "supplementary", "pages": "p.234-235", "source_chunk": "r5e-2025-topic-cruise-control-0001"}
+   ]
+  },
+  {
+   "id": "hit-eco-driving",
+   "question": "有哪些经济驾驶省电的技巧？",
+   "facts": [
+    {"fact": "续航（range）按标准法规方法认证（各厂商一致，用于车与车比较）；实际续航取决于车辆使用条件、装备和用户驾驶风格。车辆提供降低能耗的功能：仪表盘上的功率表（power meter）和驾驶风格指示器；多媒体屏上的能耗数据、能耗图表、驾驶风格评分、Eco driving 建议、路线规划器和 ECO 驾驶模式。", "layer": "core", "pages": "p.175-176", "source_chunk": "r5e-2025-topic-eco-driving-0001"},
+    {"fact": "功率表（仪表盘）实时显示行驶中消耗或回收的能量，分三个区：\"Energy recovery\"（能量回收）区——松开加速踏板或踩制动踏板减速时电机发电，能量用于减速并给牵引电池充电（→162）；\"Optimal\" 区——回收与能耗平衡的经济驾驶；\"Energy consumption\"（能耗）区——牵引电池向电机供电驱动车辆。", "layer": "core", "pages": "p.175-176", "source_chunk": "r5e-2025-topic-eco-driving-0001"},
+    {"fact": "驾驶风格指示器（driving style indicator）：实时用指示灯1上的叶片大小反映驾驶风格——叶片越大，车速、加速和预判管理越经济；叶片越小（不经济，小橙叶）越差，并可能推送驾驶习惯建议。经常参照该指示器可增加电动车续航。", "layer": "core", "pages": "p.176", "source_chunk": "r5e-2025-topic-eco-driving-0002"},
+    {"fact": "行程记录（Journey log）：配备的车辆熄火后在多媒体屏3显示上次行程信息——平均能耗、行驶里程、综合评分（考虑加速、制动预判和车速管理）以及改进建议。", "layer": "supplementary", "pages": "p.176", "source_chunk": "r5e-2025-topic-eco-driving-0002"},
+    {"fact": "利用导航系统信息（路况、最近充电站等）有助于管理行程。", "layer": "supplementary", "pages": "p.176", "source_chunk": "r5e-2025-topic-eco-driving-0002"},
+    {"fact": "ECO 模式：通过作用于车辆性能（降低加速性能和最高车速等）帮助降低能耗、增加续航。激活方式：按开关3（配备车型）、或经 MULTI-SENSE 菜单、或反复按开关5选择 ECO 模式。激活后仪表显示 ECO 警示灯6，车速限制约 71 mph (115 km/h)；行驶中可将加速踏板用力踩到底暂时退出 ECO 模式以提升动力，松开踏板后 ECO 模式自动恢复。", "layer": "core", "pages": "p.176-178", "source_chunk": "r5e-2025-topic-eco-driving-0003"},
+    {"fact": "视车型，ECO 模式还作用于空调性能；激活 ECO 模式后车辆自动接管所有能耗设备（发动机功率等）以最大限度降低其能耗（→173）。", "layer": "core", "pages": "p.176-178", "source_chunk": "r5e-2025-topic-eco-driving-0003"},
+    {"fact": "实际使用中影响电动车续航的因素（可部分控制、可显著改变续航）：车速和驾驶风格、道路类型、加热程度（heating level）、轮胎、电气附件的使用、车辆载荷。", "layer": "core", "pages": "p.177-178", "source_chunk": "r5e-2025-topic-eco-driving-0003"},
+    {"fact": "车速与驾驶风格的具体数据（匀速下）：车速从约 80 mph (130 km/h) 降到 68 mph (110 km/h) 可节省最多约 20% 续航；从约 56 mph (90 km/h) 降到 50 mph (80 km/h) 可节省最多约 10% 续航。高速行驶显著降低续航；\"激烈（Sporty）\"驾驶降低续航，应选择更\"平顺\"的驾驶风格。", "layer": "core", "pages": "p.178-179", "source_chunk": "r5e-2025-topic-eco-driving-0004"},
+    {"fact": "驾驶建议：保持恒定车速行驶；留意可用工具查看行驶状况（电量表、当前能耗、行程记录等→173）；调整驾驶风格避免过度能耗；优先利用能量回收——通过提前松开加速踏板或平缓制动来预判交通变化。", "layer": "core", "pages": "p.178-179", "source_chunk": "r5e-2025-topic-eco-driving-0004"},
+    {"fact": "道路类型：上坡不要试图保持与平路相同的车速，加速不超过平路程度，加速踏板保持同一位置。", "layer": "core", "pages": "p.178-179", "source_chunk": "r5e-2025-topic-eco-driving-0004"},
+    {"fact": "加热程度：使用加热或空调会降低车辆续航；为保持续航，建议在用车前选择 \"programming\"（预约）模式（→302）。", "layer": "core", "pages": "p.178-179", "source_chunk": "r5e-2025-topic-eco-driving-0004"},
+    {"fact": "轮胎：充气不足的轮胎会增加能耗，应按车辆规定胎压充气；行驶时应使用与原胎相同厂家、尺寸、类型和结构的轮胎，使用非推荐轮胎会影响车辆续航（→330）。", "layer": "core", "pages": "p.179", "source_chunk": "r5e-2025-topic-eco-driving-0005"},
+    {"fact": "车辆载荷：避免无谓的超载。", "layer": "core", "pages": "p.179", "source_chunk": "r5e-2025-topic-eco-driving-0005"},
+    {"fact": "MULTI-SENSE：\"ECO\" 模式以节能为核心，发动机管理降低能耗（→173）；每个驾驶模式均可设置空调 \"Eco\" 选项，通过作用于空调性能（如延迟达到设定温度的时间等）优化续航，在多媒体屏 MULTI-SENSE 配置菜单中开关。", "layer": "supplementary", "pages": "p.291-292", "source_chunk": "r5e-2025-topic-multi-sense-0002"},
+    {"fact": "冬季/结冰场景节能建议：结冰时用刮板（scraper）手动为风挡除冰，而不要使用除雾/除冰功能，以降低能耗。", "layer": "supplementary", "pages": "p.300-301", "source_chunk": "r5e-2025-topic-climate-control-0005"},
+    {"fact": "续航估算与驾驶风格联动：牵引电池充满后续航自动重置，按平均使用并考虑车外温度计算；若系统识别到特别经济的驾驶模式，计算会被修正、显示续航增加。", "layer": "supplementary", "pages": "p.121-122", "source_chunk": "r5e-2025-topic-trip-computer-0003"},
+    {"fact": "空调能耗提示：空调运行时能耗增加属正常；建议行驶时开通风口、关车窗；车辆暴晒后先开门让热气排出再启动。", "layer": "supplementary", "pages": "p.305-306", "source_chunk": "r5e-2025-topic-climate-control-0012"}
+   ]
+  },
+  {
+   "id": "hit-winter-range",
+   "question": "冬天续航里程为什么会下降？",
+   "facts": [
+    {"fact": "手册对冬季续航下降的直接解释（仪表盘估算）：剩余续航提供两种显示——High（最优条件下的续航，如 A 级公路/双车道行驶且很少使用热舒适功能）和 Low（不利条件下的续航，如冬季在高速公路行驶或拥堵时大量使用热舒适功能）；说明低温环境+大量使用采暖/空调是续航明显下降的典型场景（优化续航→176）。", "layer": "core", "pages": "p.131-132", "source_chunk": "r5e-2025-topic-trip-computer-0010"},
+    {"fact": "续航非固定值：标称续航按标准法规方法认证，实际续航取决于车辆使用条件、装备和驾驶风格，这些因素可造成很大差别。", "layer": "core", "pages": "p.175-176", "source_chunk": "r5e-2025-topic-eco-driving-0001"},
+    {"fact": "低温对电池的机理：可用能量取决于电池温度——电池冷或热时，可用能量在停车与重新启动之间可能发生变化（低温下电池可输出能量减少，续航随之下降）。", "layer": "core", "pages": "p.42-43", "source_chunk": "r5e-2025-topic-electric-vehicle-0012"},
+    {"fact": "低温对充电的机理与建议：避免在极端温度（炎热或寒冷）下充电和停放车辆；极端条件下充电开始前可能需等待几分钟（牵引电池冷却/升温所需时间）；车辆在低于约 -25°C 温度下停放超过7天，牵引电池可能无法充电；电量低（<25%）且为负温时，最好在行驶后（电池温热）立即充电；负温还会使实际充电时间长于仪表显示值。", "layer": "core", "pages": "p.42-43", "source_chunk": "r5e-2025-topic-electric-vehicle-0012"},
+    {"fact": "冬季能耗因素与建议：使用加热或空调会降低续航，建议出发前用 \"programming\"（预约）模式预先调节座舱温度（→302）；车速与驾驶风格也是主要因素——高速显著降续航（130→110 km/h 省最多约20%，90→80 km/h 省最多约10%），应恒速、平顺驾驶并利用能量回收；激活 ECO 模式可让车辆自动管理所有能耗设备以最大幅度降耗。", "layer": "core", "pages": "p.178-179", "source_chunk": "r5e-2025-topic-eco-driving-0004"},
+    {"fact": "冬季除冰节能建议：结冰时建议用刮板手动为风挡除冰，而不要使用除雾/除冰（de-icing/demisting）功能，以降低能耗。", "layer": "core", "pages": "p.300-301", "source_chunk": "r5e-2025-topic-climate-control-0005"},
+    {"fact": "冬胎对续航的影响：使用雪地胎（snow tyres）、冬季胎（winter tyres）或防滑钉胎（studded tyres）会显著降低车辆续航；\"Snow/Winter\" 轮胎建议四轮同装以保证最大附着力。", "layer": "core", "pages": "p.333-334", "source_chunk": "r5e-2025-topic-tyres-0002"},
+    {"fact": "低温能量回收受限：B 模式下，电池温度低（或满电）时能量回收制动性能会降低；低附着路面（霜冻、积雪等）上强能量回收/One Pedal 可能造成明显减速，建议使用较低回收挡位并用制动踏板管理重减速和停车。", "layer": "core", "pages": "p.162", "source_chunk": "r5e-2025-topic-gear-control-0002"},
+    {"fact": "低电量阈值提示（冬季更需留意）：电量到约 7%（视车型约12%）时电量表和警示灯变黄并蜂鸣（优化续航→176）；到约 4%（视车型约6%）再次蜂鸣、电量表变红；到 3.5%（视车型约5%）时续航值不再显示，车辆性能逐渐下降直至停止。", "layer": "supplementary", "pages": "p.129-132", "source_chunk": "r5e-2025-topic-trip-computer-0010"},
+    {"fact": "结冰风险提示：车外温度在 -3°C 到 +3°C 之间时，温度数字闪烁，提示有结冰风险（但结冰还与湿度等有关，单凭外温不能完全判断）。", "layer": "supplementary", "pages": "p.134-135", "source_chunk": "r5e-2025-topic-warning-lights-0002"},
+    {"fact": "低温充电预约/预热座舱：空调 \"programming\" 预约在出发前使车内达到舒适温度，生效条件为引擎盖关闭、牵引电池电量高于 7.5%、发动机熄火、驾驶员不在车内；可用手机 App 预约；也可立即远程启动空调（自动开启方向盘/座椅加热，约10分钟后停止）。", "layer": "supplementary", "pages": "p.304-305", "source_chunk": "r5e-2025-topic-climate-control-0010"},
+    {"fact": "低温下的正常现象：外温很低时，空调压缩机和通风风扇会在熄火后或充电时运转以调节系统温度，并非故障；空调/加热在无人操作时自动关闭是为了保留电池电量或优化充电。", "layer": "supplementary", "pages": "p.357-360", "source_chunk": "r5e-2025-table-operating-faults-0003"},
+    {"fact": "低温停放建议：避免在极端温度下停放；高电量状态下长期（超过一个月）停放（尤其酷热天气）不利于电池寿命；停放环境极端时充电可能延迟数分钟才开始。", "layer": "supplementary", "pages": "p.42-43", "source_chunk": "r5e-2025-topic-electric-vehicle-0012"}
+   ]
+  }
+ ]
+}
