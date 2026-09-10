@@ -127,19 +127,20 @@ async fn inject_rag(messages: &mut Vec<Message>, skill_tool: &Tool, ctx: &Ctx) {
 /// `model_endpoints` map (gateway-hosted models), override the frontend-
 /// supplied base_url/api_key. Keys stay server-side and never reach the
 /// browser; models not listed keep whatever the frontend sent (local Ollama).
-fn resolve_model_endpoint(cfg: &mut ModelConfig) -> bool {
+fn resolve_model_endpoint(cfg: &mut ModelConfig) -> (bool, Option<Vec<String>>) {
     // Returns true when the endpoint sets "tools": false — small models emit
     // empty tool-call loops instead of answers when tools are offered, and
     // with auto-RAG injection they don't need tools anyway.
     let mut disable_tools = false;
+    let mut only_tools: Option<Vec<String>> = None;
     let Ok(text) = std::fs::read_to_string(config_path()) else {
-        return disable_tools;
+        return (disable_tools, only_tools);
     };
     let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) else {
-        return disable_tools;
+        return (disable_tools, only_tools);
     };
     let Some(ep) = v.get("model_endpoints").and_then(|m| m.get(&cfg.model)) else {
-        return disable_tools;
+        return (disable_tools, only_tools);
     };
     if let Some(u) = ep.get("base_url").and_then(|x| x.as_str()) {
         cfg.base_url = u.to_string();
@@ -150,7 +151,13 @@ fn resolve_model_endpoint(cfg: &mut ModelConfig) -> bool {
     if ep.get("tools").and_then(|x| x.as_bool()) == Some(false) {
         disable_tools = true;
     }
-    disable_tools
+    if let Some(arr) = ep.get("only_tools").and_then(|x| x.as_array()) {
+        let names: Vec<String> = arr.iter().filter_map(|x| x.as_str().map(String::from)).collect();
+        if !names.is_empty() {
+            only_tools = Some(names);
+        }
+    }
+    (disable_tools, only_tools)
 }
 
 /// POST /api/chat — start an agent turn and stream events back as SSE.
@@ -159,7 +166,7 @@ pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -
     // models resolve their base_url/api_key server-side from config.json's
     // model_endpoints map — credentials never live in the browser.
     let mut model_cfg = req.model;
-    let disable_tools = resolve_model_endpoint(&mut model_cfg);
+    let (disable_tools, only_tools) = resolve_model_endpoint(&mut model_cfg);
     let model = match liteclaw_model::OpenAiClient::new(model_cfg) {
         Ok(m) => m,
         Err(e) => {
@@ -199,7 +206,10 @@ pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -
         }
     }
 
-    if disable_tools {
+    // 工具白名单/禁用在自动注入之后应用(注入本身需要 skill_run 工具执行)
+    if let Some(names) = &only_tools {
+        tools.retain(|t| names.iter().any(|n| *n == t.name));
+    } else if disable_tools {
         tools.clear();
     }
 
