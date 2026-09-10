@@ -61,11 +61,21 @@ REFUSE_PROMPT = """你是车主手册问答"标准答案"的质检员。本题�
 
 
 def cloud_chat(prompt):
-    """直连云端网关（密钥从 liteclaw 配置读取，不经 liteclaw 进程）。"""
-    cfg = json.load(open(LITECLAW_CFG))["model_endpoints"][VERIFY_MODEL]
-    r = requests.post(f"{cfg['base_url'].rstrip('/')}/chat/completions",
-                      headers={"Authorization": f"Bearer {cfg['api_key']}"},
-                      json={"model": VERIFY_MODEL, "temperature": 0,
+    """质检端点解析优先级：JUDGE_OPENAI_BASE/KEY 环境变量（同 judge.py，
+    模板见 judge_env.example.sh）> ~/.liteclaw/config.json 的 model_endpoints。"""
+    base = os.environ.get("JUDGE_OPENAI_BASE")
+    key = os.environ.get("JUDGE_OPENAI_KEY")
+    model = os.environ.get("VERIFY_MODEL") or os.environ.get("JUDGE_MODEL") or VERIFY_MODEL
+    if not (base and key):
+        ep = json.load(open(LITECLAW_CFG)).get("model_endpoints", {}).get(model)
+        if not ep:
+            raise SystemExit(f"未找到质检端点：请 source judge_env（设 JUDGE_OPENAI_BASE/"
+                             f"JUDGE_OPENAI_KEY），或在 {LITECLAW_CFG} 的 model_endpoints "
+                             f"里配置 \"{model}\"")
+        base, key = ep["base_url"], ep["api_key"]
+    r = requests.post(f"{base.rstrip('/')}/chat/completions",
+                      headers={"Authorization": f"Bearer {key}"},
+                      json={"model": model, "temperature": 0,
                             "messages": [{"role": "user", "content": prompt}]},
                       timeout=180)
     r.raise_for_status()

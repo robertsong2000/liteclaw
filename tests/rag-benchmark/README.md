@@ -75,10 +75,9 @@ python3 judge.py runs/<再新> --vs baseline         # 日常：只跟基线比
   引用页码与 golden 不同但内容一致不算编造（检索召回相邻页是正常的）。
 - 分数锚点：9-10 全覆盖零编造 / 7-8 小遗漏 / 4-6 明显缺失 / 0-3 编造或答非所问。
 - 回归判定：verdict 下滑（PASS→WEAK/FAIL）即回归；单题分数掉 ≥2 记警告。
-- **评审模型可远程、可并发**：四个环境变量切换（模板 `~/judge_env.sh`，source 后再跑，
-  **不要**用后台 `export`——会被运行环境吞掉）：
-  `JUDGE_MODEL`（模型名）、`JUDGE_OPENAI_BASE` + `JUDGE_OPENAI_KEY`（OpenAI 兼容端点，
-  不设则走本地 ollama）、`JUDGE_CONCURRENCY`（并发路数，远程建议 3~4）。
+- **评审模型可远程、可并发**：四个环境变量切换（模板见仓库根 `config.example.json` 与
+  `tests/rag-benchmark/judge_env.example.sh`，复制后填真实值。**注意**：后台任务里
+  `export`/前缀式环境变量都可能丢失，务必用 `source ~/judge_env.sh` 这类文件 source 方式；
   当前基线评审 = `qwen38-local@121.40.234.38:16019`（4090 机器 new-api）。
 - **facts-v1 事实清单格式**：golden 由【核心事实】+【补充事实】组成——覆盖度按必答要点判定，
   补充事实被回答引用算加分，清单外内容不自动判编造（测量天花板已移除）。

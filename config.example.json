@@ -1,0 +1,18 @@
+{
+  "base_url": "http://172.21.0.1:11434/v1",
+  "api_key": "",
+  "model": "openbmb/minicpm5-2b:latest",
+  "model_endpoints": {
+    "qwen3.8-flash": {
+      "base_url": "http://<your-gateway-host>:16020/v1",
+      "api_key": "sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    "qwen38-local": {
+      "base_url": "http://<your-4090-host>:16019/v1",
+      "api_key": "sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    "openbmb/minicpm5-2b:latest": {
+      "tools": false
+    }
+  }
+}
