@@ -6,26 +6,56 @@ Usage:
   rag.py --ingest        (Re)build the index from /workspace/manual/.
 
 Self-contained script: importable helpers allow both modes in one file.
+
+Index layout under MANUAL_DIR/.index/ (all written by --ingest):
+  vectors.f32  raw float32 embedding matrix, row i = chunk i (row-major)
+  meta.json    chunk metadata + text, NO embeddings (small, fast to parse)
+  bm25.pkl     precomputed BM25 state: tf maps, doc lengths, df, avgdl,
+               plus row norms and the embedding dim
+
+A legacy single-file index.json (embeddings inline, ~20MB) is migrated to
+the 3-file layout automatically on first search; --ingest only ever writes
+the new layout.
 """
 
+import array
 import json
 import math
 import os
+import pickle
 import re
 import subprocess
 import sys
 import time
 import urllib.request
+from operator import mul
+
+try:  # optional: matrix multiply when numpy is installed, stdlib fallback otherwise
+    import numpy as np
+except ImportError:
+    np = None
 
 MANUAL_DIR = "/workspace/manual"
-INDEX_DIR = os.path.join(MANUAL_DIR, ".index")
-INDEX_FILE = os.path.join(INDEX_DIR, "index.json")
 OLLAMA = os.environ.get("OLLAMA_URL", "http://172.21.0.1:11434")
 EMBED_MODEL = os.environ.get("EMBED_MODEL", "bge-m3")
 MAX_CHARS = 700  # the embedding runner has a hard 512-token physical batch
 MAX_EMBED_CHARS = MAX_CHARS
 RRF_K = 60
 TOKEN_RE = re.compile(r"[\w]+", re.UNICODE)
+
+# Index files are derived from MANUAL_DIR at call time (not import time) so
+# test harnesses can repoint MANUAL_DIR on the imported module.
+
+
+def _paths():
+    d = os.path.join(MANUAL_DIR, ".index")
+    return {
+        "vectors": os.path.join(d, "vectors.f32"),
+        "meta": os.path.join(d, "meta.json"),
+        "bm25": os.path.join(d, "bm25.pkl"),
+        "legacy": os.path.join(d, "index.json"),
+    }
+
 
 # ---------------------------------------------------------------- embedding
 
@@ -75,23 +105,6 @@ def embed(texts):
         if (i + 1) % 50 == 0:
             print(f"embedded {i + 1}/{len(texts)}", file=sys.stderr)
     return vecs
-
-
-def self_check(records, sample=5, threshold=0.95):
-    """Re-embed a few stored chunks; vectors must match or the index is bad."""
-    import random
-    picks = random.sample(range(len(records)), min(sample, len(records)))
-    for i in picks:
-        vec = _embed_one(records[i]["text"])
-        dot = sum(x * y for x, y in zip(vec, records[i]["embedding"]))
-        norm = math.sqrt(sum(x * x for x in vec)) * math.sqrt(
-            sum(x * x for x in records[i]["embedding"])
-        )
-        if dot / norm < threshold:
-            raise ValueError(
-                f"self-check failed for chunk {i}: index vectors are corrupt, re-run ingest"
-            )
-    print(f"self-check passed on {len(picks)} sampled chunks", file=sys.stderr)
 
 
 # ---------------------------------------------------------------- ingest
@@ -197,6 +210,51 @@ def make_chunks(text):
     return chunks
 
 
+def _atomic_write(path, data_bytes):
+    tmp = path + ".tmp"
+    with open(tmp, "wb") as f:
+        f.write(data_bytes)
+    os.replace(tmp, path)
+
+
+def write_index(records):
+    """Serialize records into the 3-file index layout (atomic per file)."""
+    p = _paths()
+    os.makedirs(os.path.dirname(p["vectors"]), exist_ok=True)
+    dim = len(records[0]["embedding"])
+    flat = array.array("f", (float(x) for r in records for x in r["embedding"]))
+    _atomic_write(p["vectors"], flat.tobytes())
+
+    meta = [{k: v for k, v in r.items() if k != "embedding"} for r in records]
+    _atomic_write(p["meta"], json.dumps(meta, ensure_ascii=False).encode("utf-8"))
+
+    tfs, doclen, norms = [], [], []
+    df = {}
+    for r in records:
+        toks = tokens(r["text"])
+        tf = {}
+        for t in toks:
+            tf[t] = tf.get(t, 0) + 1
+        tfs.append(tf)
+        doclen.append(len(toks))
+        for t in tf:
+            df[t] = df.get(t, 0) + 1
+    n = len(records)
+    for i in range(n):
+        row = flat[i * dim:(i + 1) * dim]
+        nrm = math.sqrt(sum(map(mul, row, row)))
+        norms.append(nrm if nrm > 0 else 1.0)  # zero rows score 0 either way
+    ix = {
+        "dim": dim,
+        "avgdl": sum(doclen) / max(n, 1),
+        "doclen": doclen,
+        "df": df,
+        "tfs": tfs,
+        "norms": norms,
+    }
+    _atomic_write(p["bm25"], pickle.dumps(ix, protocol=4))
+
+
 def cmd_ingest():
     files = []
     for root, _, names in os.walk(MANUAL_DIR):
@@ -232,12 +290,12 @@ def cmd_ingest():
     for rec, vec in zip(records, vecs):
         rec["embedding"] = vec
 
-    self_check(records)
+    write_index(records)
+    self_check()
 
-    os.makedirs(INDEX_DIR, exist_ok=True)
-    with open(INDEX_FILE, "w", encoding="utf-8") as f:
-        json.dump(records, f, ensure_ascii=False)
-    print(f"indexed {len(records)} chunks from {len(files)} files -> {INDEX_FILE}")
+    p = _paths()
+    print(f"indexed {len(records)} chunks from {len(files)} files -> "
+          f"{p['vectors']}, {p['meta']}, {p['bm25']}")
     return 0
 
 
@@ -352,40 +410,48 @@ ZH_GLOSSARY = {
     "质保期": "warranty period",
 }
 
+
 def augment_query(query):
     extra = [en for zh, en in ZH_GLOSSARY.items() if zh in query]
     return query + (" " + " ".join(extra) if extra else "")
 
 
-
-def bm25_scores(query, docs):
-    """Okapi BM25 over the pre-tokenized docs. docs: list[list[str]]."""
-    k1, b, n = 1.5, 0.75, len(docs)
-    avgdl = sum(len(d) for d in docs) / max(n, 1)
-    df = {}
-    for d in docs:
-        for term in set(d):
-            df[term] = df.get(term, 0) + 1
+def bm25_scores(query, ix):
+    """Okapi BM25 over pre-tokenized docs (tf maps, df, avgdl from the index)."""
+    k1, b = 1.5, 0.75
+    tfs, doclen, df, avgdl = ix["tfs"], ix["doclen"], ix["df"], ix["avgdl"]
+    n = len(tfs)
     q_terms = tokens(query)
     scores = []
-    for d in docs:
-        score, tf = 0.0, {}
-        for t in d:
-            tf[t] = tf.get(t, 0) + 1
+    for i in range(n):
+        tf, dl = tfs[i], doclen[i]
+        score = 0.0
         for t in q_terms:
-            if t not in tf:
+            f = tf.get(t)
+            if not f:
                 continue
             idf = math.log((n - df[t] + 0.5) / (df[t] + 0.5) + 1)
-            score += idf * tf[t] * (k1 + 1) / (tf[t] + k1 * (1 - b + b * len(d) / avgdl))
+            score += idf * f * (k1 + 1) / (f + k1 * (1 - b + b * dl / avgdl))
         scores.append(score)
     return scores
 
 
-def cosine(a, b):
-    dot = sum(x * y for x, y in zip(a, b))
-    na = math.sqrt(sum(x * x for x in a))
-    nb = math.sqrt(sum(x * x for x in b))
-    return dot / (na * nb) if na and nb else 0.0
+def similarities(qvec, vecs, ix):
+    """Cosine of qvec against every index row, using precomputed row norms."""
+    n, dim, norms = len(ix["doclen"]), ix["dim"], ix["norms"]
+    if np is not None:
+        mat = np.frombuffer(memoryview(vecs), dtype=np.float32).reshape(n, dim)
+        q = np.asarray(qvec, dtype=np.float32)
+        qn = float(np.linalg.norm(q))
+        return (mat @ q / (qn * np.asarray(norms, dtype=np.float32))).tolist()
+    q = array.array("f", qvec)
+    qn = math.sqrt(sum(map(mul, q, q)))
+    out, base = [], 0
+    for i in range(n):
+        row = vecs[base:base + dim]
+        base += dim
+        out.append(sum(map(mul, q, row)) / (qn * norms[i]))
+    return out
 
 
 def embed_query(query):
@@ -401,20 +467,51 @@ def rrf(rankings, top_k):
     return sorted(scores, key=scores.get, reverse=True)[:top_k]
 
 
+def load_index():
+    """Load the 3-file index; migrate the legacy single JSON on first use.
+
+    Returns (records, vecs, ix) or None when no index exists at all.
+    """
+    p = _paths()
+    if not all(os.path.exists(p[k]) for k in ("vectors", "meta", "bm25")):
+        if not os.path.exists(p["legacy"]):
+            return None
+        print("migrating legacy index.json -> vectors.f32/meta.json/bm25.pkl ...",
+              file=sys.stderr)
+        t = time.time()
+        with open(p["legacy"], encoding="utf-8") as f:
+            records = json.load(f)
+        write_index(records)
+        print(f"migration done in {time.time() - t:.1f}s", file=sys.stderr)
+    with open(p["meta"], encoding="utf-8") as f:
+        records = json.load(f)
+    with open(p["bm25"], "rb") as f:
+        ix = pickle.load(f)
+    vecs = array.array("f")
+    expected = len(records) * ix["dim"]
+    try:
+        with open(p["vectors"], "rb") as f:
+            vecs.fromfile(f, expected)
+    except EOFError:
+        raise SystemExit("vectors.f32 is truncated — re-run: rag.py --ingest")
+    if len(vecs) != expected:
+        raise SystemExit("vectors.f32 size mismatch — re-run: rag.py --ingest")
+    return records, vecs, ix
+
+
 def cmd_search(query, top_k):
     query = augment_query(query)
-    with open(INDEX_FILE, encoding="utf-8") as f:
-        records = json.load(f)
-    if not records:
+    loaded = load_index()
+    if loaded is None:
         print("[]", file=sys.stderr)
         return 1
+    records, vecs, ix = loaded
 
-    doc_tokens = [tokens(r["text"]) for r in records]
-    bm = bm25_scores(query, doc_tokens)
+    bm = bm25_scores(query, ix)
     bm_rank = [i for i, _ in sorted(enumerate(bm), key=lambda x: x[1], reverse=True) if bm[i] > 0]
 
     qvec = embed_query(query)
-    sims = [cosine(qvec, r["embedding"]) for r in records]
+    sims = similarities(qvec, vecs, ix)
     vec_rank = [i for i, _ in sorted(enumerate(sims), key=lambda x: x[1], reverse=True) if sims[i] > 0.3]
 
     fused = rrf([bm_rank, vec_rank], top_k)
@@ -431,6 +528,24 @@ def cmd_search(query, top_k):
     ]
     print(json.dumps(hits, ensure_ascii=False, indent=2))
     return 0
+
+
+def self_check(sample=5, threshold=0.95):
+    """Re-embed a few stored chunks; vectors must match or the index is bad."""
+    import random
+    loaded = load_index()
+    if loaded is None:
+        raise ValueError("no index to self-check")
+    records, vecs, ix = loaded
+    picks = random.sample(range(len(records)), min(sample, len(records)))
+    for i in picks:
+        vec = _embed_one(records[i]["text"])
+        sims = similarities(vec, vecs, ix)
+        if sims[i] < threshold:
+            raise ValueError(
+                f"self-check failed for chunk {i}: index vectors are corrupt, re-run ingest"
+            )
+    print(f"self-check passed on {len(picks)} sampled chunks", file=sys.stderr)
 
 
 # ---------------------------------------------------------------- main
