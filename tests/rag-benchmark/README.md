@@ -22,7 +22,8 @@ cases.jsonl ──build_golden.py──> golden.jsonl ────────�
 | `judge.py` | 阶段3/4：LLM-as-judge 评审 + 跨次回归对比 |
 | `baseline.json` | 当前回归基线（含评审模型溯源标签） |
 | `manual_tool.py` | 手册 JSONL 挖掘工具（sections / grep / show），事实提取专用 |
-| `verify_golden.py` → `apply_golden_fixes.py` | golden 质检流水线：云端模型逐条核对 golden 与手册原文 → 自动融合漏点/改正矛盾 |
+| `verify_golden.py` → `apply_golden_fixes.py` | golden 质检流水线（两段式）：`--prep` 组装"问题+golden+top-12 宽检索段落"分片 → 对话模型（子代理）按 `golden_qc_tasks/VERIFY_RUBRIC.md` 逐条核对 → `--merge` 合并；`apply_golden_fixes.py` 自动融合漏点/改正矛盾 |
+| `build_golden_v2.py` | golden v2 生成：对话模型（子代理）按 `golden_gen_tasks/GEN_RUBRIC.md` 撰写——top-20 宽检索 + v1 页码段落合并取材，强制【核心事实】/【补充事实】两档；`golden_v1_backup.jsonl` 为 v1 存档（v2 取材依赖其页码） |
 | `factsheets/` | 事实清单原始成果（27 题 454 条事实，每条带页码与 chunk 溯源） |
 | `prep_agent_judge.py` / `agent_judge_tasks/RUBRIC.md` / `merge_agent_judge.py` | 发布级评审三件套：把评审分片派给对话模型（GLM-5.3）子代理，噪声远小于本地 30b |
 | `golden_review.md` | 2026-09-09 全量质检报告（31 条逐条核对，pass 5 / warn 19 / fail 7） |
@@ -47,10 +48,12 @@ python3 compare_models.py --smoke                  # 单模型单题冒烟
 python3 judge.py runs/2026-09-09T2315
 #    -> runs/<ts>/summary.md（人读榜单）+ summary.json（机读）+ judged.jsonl（逐题）
 
-# 3b. golden 质检流水线（手册或 golden 大改后建议跑一遍）
-python3 verify_golden.py            # 云端模型逐条核对 golden 与手册原文（宽检索 top12）
-python3 apply_golden_fixes.py      # 按质检结果自动融合漏点、改正矛盾、标 reviewed
-#    明细见 golden_review.jsonl / golden_review.md
+# 3b. golden 质检流水线（手册或 golden 大改后建议跑一遍；质检员=对话模型子代理）
+python3 verify_golden.py --prep --all  # 组装质检分片（问题+golden+top-12 宽检索段落）
+#    派子代理按 golden_qc_tasks/VERIFY_RUBRIC.md 核对各分片 -> out_NN.jsonl
+python3 verify_golden.py --merge       # 合并质检结果 -> golden_review.jsonl
+python3 apply_golden_fixes.py         # 按质检结果自动融合漏点、改正矛盾、标 reviewed
+#    人类可读报告见 golden_review.md；质检员与被评模型相互独立
 
 # 4. 回归对比：改动前后各跑一次，然后
 python3 judge.py runs/<新> --vs runs/<旧>          # 有回归则退出码 1（可当门禁）

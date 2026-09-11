@@ -1,5 +1,6 @@
 {
  "run_dir": "/home/ae/liteclaw/tests/rag-benchmark/runs/2026-09-09T2003-baseline-v3",
- "saved_at": "2026-09-10 13:34",
- "judge_model": "qwen38-local@121.40.234.38:16019"
+ "saved_at": "2026-09-11 23:43",
+ "judge_model": "zcode-agent(对话模型)",
+ "golden_version": "v2"
 }

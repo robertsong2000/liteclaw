@@ -1,22 +1,22 @@
 {
- "judge_model": "qwen3:30b-a3b",
- "generated_at": "2026-09-10 10:16",
+ "judge_model": "zcode-agent(对话模型)",
+ "generated_at": "2026-09-11 23:43",
  "golden_unreviewed": 0,
  "models": {
   "openbmb/minicpm5-2b:latest": {
    "n": 29,
-   "score_sum": 90,
+   "score_sum": 72,
    "latency_sum": 589.0000000000001,
    "verdicts": {
-    "FAIL": 5,
-    "WEAK": 11,
+    "FAIL": 12,
     "ERROR": 11,
-    "PASS": 2
+    "WEAK": 3,
+    "PASS": 3
    },
    "by_kind": {
     "hit": {
      "n": 20,
-     "score_sum": 75
+     "score_sum": 57
     },
     "paraphrase": {
      "n": 4,
@@ -31,85 +31,120 @@
     {
      "id": "hit-child-seat",
      "verdict": "FAIL",
-     "reason": "被评回答未引用手册页码，且包含与标准答案冲突的编造内容（如‘必须使用 ISOFIX’、‘不要让它紧贴仪表板’等）"
+     "reason": "未提ISOFIX锚点位置且全文无页码引用，安装步骤混乱，并编造\"后排中央必须用ISOFIX、绝对禁用安全带\"等与标准答案冲突的规则。"
+    },
+    {
+     "id": "hit-tyre-warning",
+     "verdict": "FAIL",
+     "reason": "冷态查压并以车门标签值为基准的要点覆盖，但把标准答案的\"切勿给热胎放气\"篡改为\"绝对禁止对热轮胎打气\"的冲突规则，复位仅提结论未述多媒体屏静态复位流程，且核心内容未附p.180-183页码。"
     },
     {
      "id": "para-charge-time",
      "verdict": "ERROR",
-     "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+     "reason": "回答为空，属运行失败（reached max iterations），无法评审。"
     },
     {
      "id": "hit-service-interval",
      "verdict": "ERROR",
-     "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+     "reason": "回答为空，属运行失败（reached max iterations），无法评审。"
+    },
+    {
+     "id": "hit-fog-lights",
+     "verdict": "FAIL",
+     "reason": "开启步骤与标准答案一致，但编造\"开远光灯时雾灯自动关闭\"及转向灯拨杆/开关2操作等手册外步骤，且全文无页码引用、关闭方式不完整。"
+    },
+    {
+     "id": "hit-jack",
+     "verdict": "FAIL",
+     "reason": "四个举升点、定位不当会损坏牵引电池、3厘米限高等符合手册并附页码，但把页码p.359杜撰成\"承重≥359公斤\"的具体数值，且未提80–140 mm平板直径适配要求。"
     },
     {
      "id": "hit-key-battery",
      "verdict": "FAIL",
-     "reason": "被评回答中提到的'蓝色染料渗出'和'用钥匙的内部机械钥匙'等内容未在标准答案中出现，属于编造；且未提及电池型号，属于要点缺失。"
+     "reason": "未给出任何正确更换步骤，反而编造\"用嘴吸出旧电池、蓝色染料渗出\"等手册外内容，并错误声称必须由经销商更换，同型/等效电池的型号要求也未说明。"
     },
     {
      "id": "hit-12v-battery",
      "verdict": "ERROR",
-     "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+     "reason": "回答为空，属运行失败（reached max iterations），无法评审。"
     },
     {
      "id": "hit-pretrip",
      "verdict": "ERROR",
-     "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+     "reason": "回答为空，属运行失败（reached max iterations），无法评审。"
+    },
+    {
+     "id": "hit-cruise-control",
+     "verdict": "FAIL",
+     "reason": "SET+/-激活与调速、30 km/h下限、禁用场景和ECO限制基本覆盖并附页码，但编造\"车窗旁方向按钮/车顶车门按钮调整车速\"等手册外操作，且遗漏开关1选择巡航、开关2待机与RES恢复等关键步骤。"
+    },
+    {
+     "id": "hit-emergency-call",
+     "verdict": "FAIL",
+     "reason": "自动/手动触发方式与指示灯含义基本正确，但把触发长按写成\"两秒以上\"与标准答案的至少3秒冲突（2秒实为取消时长），未述发送车辆数据再通话的呼叫流程，且全文无页码。"
     },
     {
      "id": "hit-gear-p",
      "verdict": "ERROR",
-     "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+     "reason": "回答为空，属运行失败（reached max iterations），无法评审。"
     },
     {
-     "id": "hit-demist",
+     "id": "hit-car-wash",
      "verdict": "FAIL",
-     "reason": "被评回答中提到按钮 9，但标准答案中未提及该按钮，且未明确说明按钮 13 的具体功能（如 p.297-300 中的 Clear View 功能）。此外，未提及手动空调与自动空调的区别，也未引用 p.299-300 中关于手动调风向除雾的说明"
+     "reason": "手洗、高压水禁冲发动机舱/充电口/驱动电池、充电时禁洗、滚筒洗车前雨刮复位等内容基本符合手册并附页码，但开头把手册误称为\"法国雪铁龙\"，车型品牌与标准答案冲突。"
     },
     {
      "id": "hit-key-dead-start",
      "verdict": "ERROR",
-     "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+     "reason": "回答为空，属运行失败（reached max iterations），无法评审。"
+    },
+    {
+     "id": "para-tyre-pressure",
+     "verdict": "FAIL",
+     "reason": "正确说明数值以驾驶员侧车门标签为准并附页码，但编造\"须行驶至少3公里以上\"的手册外公里数规则，且遗漏\"无法冷测加0.2–0.3 bar(3 PSI)\"与\"热胎禁止放气\"两条关键规则。"
     },
     {
      "id": "para-max-range",
      "verdict": "ERROR",
-     "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+     "reason": "回答为空，属运行失败（reached max iterations），无法评审。"
     },
     {
      "id": "refuse-engine-oil",
      "verdict": "ERROR",
-     "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+     "reason": "回答为空，属运行失败（reached max iterations），无法评审。"
     },
     {
      "id": "refuse-fuel-filter",
      "verdict": "ERROR",
-     "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+     "reason": "回答为空，属运行失败（reached max iterations），无法评审。"
     },
     {
      "id": "refuse-fuel-cap",
      "verdict": "ERROR",
-     "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+     "reason": "回答为空，属运行失败（reached max iterations），无法评审。"
     },
     {
      "id": "refuse-spark-plug",
      "verdict": "ERROR",
-     "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+     "reason": "回答为空，属运行失败（reached max iterations），无法评审。"
+    },
+    {
+     "id": "chain-charge#1",
+     "verdict": "FAIL",
+     "reason": "随车充电线B、禁用转接头/延长线/发电机、红色警告灯立即停充及线缆养护等符合手册并附页码，但编造\"插头不可长时间插在插座上\"\"家用插座载流能力不足不可长时间充电\"等手册外禁令，后者与标准答案允许偶尔8A家充相冲突。"
     },
     {
      "id": "chain-charge#2",
      "verdict": "FAIL",
-     "reason": "被评回答编造了直流快充的具体功率数值（如 60kW、80kW），而标准答案明确指出手册未给出直流快充的具体功率数值，不得编造。"
+     "reason": "E口最高11 kW、F口视车型为快充及快充电缆不超30米等正确并附页码，但杜撰\"直流快充最大功率可能为60kW、80kW\"的具体数值，违反paraphrase不得编造数值的要求。"
     },
     {
      "id": "chain-charge#3",
      "verdict": "FAIL",
-     "reason": "被评回答中出现与标准答案冲突的步骤（如按压按钮9、自动锁定等），且未正确引用页码。"
+     "reason": "车辆静止熄火前提和按钮6解锁充电线正确并附页码，但把开启方式编造为\"按仪表板上的充电口盖按钮9\"，与标准答案\"静止熄火后按压充电口盖8\"冲突，且混入V2L无关内容。"
     }
    ],
-   "avg_score": 3.1,
+   "avg_score": 2.5,
    "avg_latency_s": 20.3
   }
  },
@@ -117,13 +152,8 @@
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-child-seat",
-   "kind": "hit",
-   "question": "儿童安全座椅怎么安装？",
-   "latency_s": 10.4,
-   "rag_called": true,
-   "cited": false,
    "verdict": "FAIL",
-   "score": 0,
+   "score": 2,
    "points": [
     {
      "point": "ISOFIX 锚点位置（座椅背与坐垫间环形标记，p.91-98）",
@@ -131,7 +161,7 @@
     },
     {
      "point": "后排安装优先/前排限制条件",
-     "status": "missing"
+     "status": "partial"
     },
     {
      "point": "安装步骤要点",
@@ -144,18 +174,18 @@
    ],
    "fabrication": true,
    "citation_ok": false,
-   "reason": "被评回答未引用手册页码，且包含与标准答案冲突的编造内容（如‘必须使用 ISOFIX’、‘不要让它紧贴仪表板’等）"
+   "reason": "未提ISOFIX锚点位置且全文无页码引用，安装步骤混乱，并编造\"后排中央必须用ISOFIX、绝对禁用安全带\"等与标准答案冲突的规则。",
+   "kind": "hit",
+   "question": "儿童安全座椅怎么安装？",
+   "latency_s": 10.4,
+   "rag_called": true,
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-tyre-warning",
-   "kind": "hit",
-   "question": "胎压警告灯亮了怎么办？",
-   "latency_s": 15.6,
-   "rag_called": true,
-   "cited": false,
-   "verdict": "WEAK",
-   "score": 6,
+   "verdict": "FAIL",
+   "score": 3,
    "points": [
     {
      "point": "立即停车检查冷态胎压",
@@ -163,47 +193,50 @@
     },
     {
      "point": "按胎压标签复位流程",
-     "status": "covered"
+     "status": "partial"
     },
     {
      "point": "附页码 p.180-183",
      "status": "partial"
     }
    ],
-   "fabrication": false,
-   "citation_ok": false,
-   "reason": "被评回答引用了332页，与标准答案中的p.180-183不一致，且未明确引用标准答案中提到的p.180-183。"
+   "fabrication": true,
+   "citation_ok": true,
+   "reason": "冷态查压并以车门标签值为基准的要点覆盖，但把标准答案的\"切勿给热胎放气\"篡改为\"绝对禁止对热轮胎打气\"的冲突规则，复位仅提结论未述多媒体屏静态复位流程，且核心内容未附p.180-183页码。",
+   "kind": "hit",
+   "question": "胎压警告灯亮了怎么办？",
+   "latency_s": 15.6,
+   "rag_called": true,
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "para-charge-time",
+   "verdict": "ERROR",
+   "score": 0,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "回答为空，属运行失败（reached max iterations），无法评审。",
    "kind": "paraphrase",
    "question": "充电需要多长时间？",
    "latency_s": 26.7,
    "rag_called": true,
-   "cited": false,
-   "verdict": "ERROR",
-   "score": 0,
-   "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-winter-range",
-   "kind": "hit",
-   "question": "冬天续航里程为什么会下降？",
-   "latency_s": 27.3,
-   "rag_called": true,
-   "cited": true,
    "verdict": "WEAK",
-   "score": 6,
+   "score": 5,
    "points": [
     {
      "point": "按手册解释低温对续航的影响",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "给出手册中的建议",
-     "status": "partial"
+     "status": "missing"
     },
     {
      "point": "附页码",
@@ -212,66 +245,69 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "被评回答部分覆盖了标准答案要点，但未准确引用标准答案中明确提到的页码（如 p.131-132、p.175-176、p.178-179 等），且部分内容与标准答案不一致（如提到 p.26 和 p.306-307，但这些页码未在标准答案中出现）。"
+   "reason": "采暖耗电与电池低温可用能量下降的解释基本符合手册并附页码，但完全未给出手册中的应对建议（如ECO模式、平顺驾驶、能量回收、冬季胎影响等）。",
+   "kind": "hit",
+   "question": "冬天续航里程为什么会下降？",
+   "latency_s": 27.3,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-service-interval",
+   "verdict": "ERROR",
+   "score": 0,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "回答为空，属运行失败（reached max iterations），无法评审。",
    "kind": "hit",
    "question": "保养周期是多久？",
    "latency_s": 17.7,
    "rag_called": true,
-   "cited": false,
-   "verdict": "ERROR",
-   "score": 0,
-   "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-fog-lights",
-   "kind": "hit",
-   "question": "雾灯怎么开？",
-   "latency_s": 46.2,
-   "rag_called": true,
-   "cited": false,
-   "verdict": "WEAK",
-   "score": 6,
+   "verdict": "FAIL",
+   "score": 2,
    "points": [
     {
      "point": "后雾灯开启操作（环 4 转至 AUTO，再转开关标记 6 对符号 2）",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "工作前提（取决于外部灯光选择）与仪表指示",
-     "status": "covered"
+     "status": "partial"
     },
     {
      "point": "关闭方式",
-     "status": "covered"
+     "status": "partial"
     },
     {
      "point": "附页码引用 p.147-148",
      "status": "missing"
     }
    ],
-   "fabrication": false,
+   "fabrication": true,
    "citation_ok": false,
-   "reason": "未引用 p.147-148，且部分操作描述与标准答案不一致（如标记3与符号2对齐，而非标记3与符号3对齐）"
+   "reason": "开启步骤与标准答案一致，但编造\"开远光灯时雾灯自动关闭\"及转向灯拨杆/开关2操作等手册外步骤，且全文无页码引用、关闭方式不完整。",
+   "kind": "hit",
+   "question": "雾灯怎么开？",
+   "latency_s": 46.2,
+   "rag_called": true,
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-jack",
-   "kind": "hit",
-   "question": "千斤顶应该支撑在车底什么位置？",
-   "latency_s": 22.1,
-   "rag_called": true,
-   "cited": true,
-   "verdict": "WEAK",
-   "score": 6,
+   "verdict": "FAIL",
+   "score": 3,
    "points": [
     {
      "point": "手册指定的支撑点位置",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "仅在指定点举升的安全警告",
@@ -286,24 +322,24 @@
      "status": "missing"
     }
    ],
-   "fabrication": false,
+   "fabrication": true,
    "citation_ok": true,
-   "reason": "被评回答未提及举升点适配平板直径 80–140 mm 的千斤顶，且对支撑点位置的描述与标准答案不一致，手册未说明‘四个专用备胎固定点’的具体方位，但被评回答未准确引用手册原文。"
+   "reason": "四个举升点、定位不当会损坏牵引电池、3厘米限高等符合手册并附页码，但把页码p.359杜撰成\"承重≥359公斤\"的具体数值，且未提80–140 mm平板直径适配要求。",
+   "kind": "hit",
+   "question": "千斤顶应该支撑在车底什么位置？",
+   "latency_s": 22.1,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-key-battery",
-   "kind": "hit",
-   "question": "车钥匙电池没电了怎么更换？",
-   "latency_s": 14.2,
-   "rag_called": true,
-   "cited": true,
    "verdict": "FAIL",
-   "score": 3,
+   "score": 2,
    "points": [
     {
      "point": "更换步骤",
-     "status": "partial"
+     "status": "missing"
     },
     {
      "point": "电池型号",
@@ -316,42 +352,48 @@
    ],
    "fabrication": true,
    "citation_ok": true,
-   "reason": "被评回答中提到的'蓝色染料渗出'和'用钥匙的内部机械钥匙'等内容未在标准答案中出现，属于编造；且未提及电池型号，属于要点缺失。"
+   "reason": "未给出任何正确更换步骤，反而编造\"用嘴吸出旧电池、蓝色染料渗出\"等手册外内容，并错误声称必须由经销商更换，同型/等效电池的型号要求也未说明。",
+   "kind": "hit",
+   "question": "车钥匙电池没电了怎么更换？",
+   "latency_s": 14.2,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-12v-battery",
+   "verdict": "ERROR",
+   "score": 0,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "回答为空，属运行失败（reached max iterations），无法评审。",
    "kind": "hit",
    "question": "12伏蓄电池亏电了怎么办？",
    "latency_s": 19.9,
    "rag_called": false,
-   "cited": false,
-   "verdict": "ERROR",
-   "score": 0,
-   "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-pretrip",
+   "verdict": "ERROR",
+   "score": 0,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "回答为空，属运行失败（reached max iterations），无法评审。",
    "kind": "hit",
    "question": "长途出行前应该检查哪些项目？",
    "latency_s": 26.6,
    "rag_called": true,
-   "cited": false,
-   "verdict": "ERROR",
-   "score": 0,
-   "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-cruise-control",
-   "kind": "hit",
-   "question": "定速巡航怎么设置巡航车速？",
-   "latency_s": 28.7,
-   "rag_called": true,
-   "cited": true,
-   "verdict": "WEAK",
-   "score": 6,
+   "verdict": "FAIL",
+   "score": 3,
    "points": [
     {
      "point": "设置/调整巡航车速的操作步骤",
@@ -363,23 +405,23 @@
     },
     {
      "point": "附页码",
-     "status": "missing"
+     "status": "covered"
     }
    ],
-   "fabrication": false,
-   "citation_ok": false,
-   "reason": "被评回答未正确引用页码，且部分要点覆盖不完整，如未明确说明激活条件和具体操作步骤。"
+   "fabrication": true,
+   "citation_ok": true,
+   "reason": "SET+/-激活与调速、30 km/h下限、禁用场景和ECO限制基本覆盖并附页码，但编造\"车窗旁方向按钮/车顶车门按钮调整车速\"等手册外操作，且遗漏开关1选择巡航、开关2待机与RES恢复等关键步骤。",
+   "kind": "hit",
+   "question": "定速巡航怎么设置巡航车速？",
+   "latency_s": 28.7,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-fuse-box",
-   "kind": "hit",
-   "question": "保险丝盒在哪里？保险丝坏了怎么检查更换？",
-   "latency_s": 13.8,
-   "rag_called": true,
-   "cited": false,
    "verdict": "WEAK",
-   "score": 6,
+   "score": 4,
    "points": [
     {
      "point": "保险丝盒位置",
@@ -396,22 +438,22 @@
    ],
    "fabrication": false,
    "citation_ok": false,
-   "reason": "被评回答未引用任何页码，且部分信息与标准答案不一致（如‘副驾驶舱行李箱’表述不准确，应为‘手套箱’；未提及 Fuse box A 的位置；未提及保险丝额定值要求等）。"
+   "reason": "保险丝盒B位于手套箱后方、先查保险丝、用夹子取装及勿用空闲位置等大致正确，但A盒经盖板接近的方式缺失、侧向滑出等细节不准，且全文无页码引用。",
+   "kind": "hit",
+   "question": "保险丝盒在哪里？保险丝坏了怎么检查更换？",
+   "latency_s": 13.8,
+   "rag_called": true,
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-emergency-call",
-   "kind": "hit",
-   "question": "紧急呼叫（SOS）功能是怎么工作的？",
-   "latency_s": 13.6,
-   "rag_called": true,
-   "cited": false,
-   "verdict": "WEAK",
-   "score": 6,
+   "verdict": "FAIL",
+   "score": 3,
    "points": [
     {
      "point": "触发方式",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "呼叫流程/工作方式",
@@ -422,68 +464,43 @@
      "status": "missing"
     }
    ],
-   "fabrication": false,
+   "fabrication": true,
    "citation_ok": false,
-   "reason": "被评回答未引用任何页码，且部分要点未完全覆盖，如触发方式中未提及‘自动模式触发条件’和‘误触取消’的具体操作，呼叫流程中未提及‘发送事故相关数据’等核心内容。"
+   "reason": "自动/手动触发方式与指示灯含义基本正确，但把触发长按写成\"两秒以上\"与标准答案的至少3秒冲突（2秒实为取消时长），未述发送车辆数据再通话的呼叫流程，且全文无页码。",
+   "kind": "hit",
+   "question": "紧急呼叫（SOS）功能是怎么工作的？",
+   "latency_s": 13.6,
+   "rag_called": true,
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-gear-p",
+   "verdict": "ERROR",
+   "score": 0,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "回答为空，属运行失败（reached max iterations），无法评审。",
    "kind": "hit",
    "question": "挡位怎么挂入P挡？",
    "latency_s": 33.2,
    "rag_called": true,
-   "cited": false,
-   "verdict": "ERROR",
-   "score": 0,
-   "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-car-wash",
-   "kind": "hit",
-   "question": "洗车有什么注意事项？",
-   "latency_s": 15.1,
-   "rag_called": true,
-   "cited": true,
-   "verdict": "WEAK",
-   "score": 6,
-   "points": [
-    {
-     "point": "手工洗车建议",
-     "status": "partial"
-    },
-    {
-     "point": "高压/自动洗车注意事项",
-     "status": "partial"
-    },
-    {
-     "point": "附页码",
-     "status": "covered"
-    }
-   ],
-   "fabrication": false,
-   "citation_ok": true,
-   "reason": "被评回答未完全覆盖标准答案中的核心要点，如高压水枪冲洗发动机舱、充电口、电池的明确警告，以及自动洗车机的详细操作要求等。部分信息与标准答案不一致，但未出现明显编造内容。"
-  },
-  {
-   "model": "openbmb/minicpm5-2b:latest",
-   "id": "hit-demist",
-   "kind": "hit",
-   "question": "前挡风玻璃起雾怎么除雾？",
-   "latency_s": 20.1,
-   "rag_called": true,
-   "cited": true,
    "verdict": "FAIL",
    "score": 3,
    "points": [
     {
-     "point": "除雾功能操作方式",
-     "status": "partial"
+     "point": "手工洗车建议",
+     "status": "covered"
     },
     {
-     "point": "相关注意事项",
-     "status": "partial"
+     "point": "高压/自动洗车注意事项",
+     "status": "covered"
     },
     {
      "point": "附页码",
@@ -492,18 +509,46 @@
    ],
    "fabrication": true,
    "citation_ok": true,
-   "reason": "被评回答中提到按钮 9，但标准答案中未提及该按钮，且未明确说明按钮 13 的具体功能（如 p.297-300 中的 Clear View 功能）。此外，未提及手动空调与自动空调的区别，也未引用 p.299-300 中关于手动调风向除雾的说明，属于部分遗漏。"
+   "reason": "手洗、高压水禁冲发动机舱/充电口/驱动电池、充电时禁洗、滚筒洗车前雨刮复位等内容基本符合手册并附页码，但开头把手册误称为\"法国雪铁龙\"，车型品牌与标准答案冲突。",
+   "kind": "hit",
+   "question": "洗车有什么注意事项？",
+   "latency_s": 15.1,
+   "rag_called": true,
+   "cited": true
+  },
+  {
+   "model": "openbmb/minicpm5-2b:latest",
+   "id": "hit-demist",
+   "verdict": "PASS",
+   "score": 8,
+   "points": [
+    {
+     "point": "除雾功能操作方式",
+     "status": "covered"
+    },
+    {
+     "point": "相关注意事项",
+     "status": "covered"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "除雾按钮自动联动空调/暖风、退出方式及结冰时优先手动刮冰等要点符合手册并附页码，仅Clear View与A/C MAX功能及按钮编号存在混淆的小瑕疵。",
+   "kind": "hit",
+   "question": "前挡风玻璃起雾怎么除雾？",
+   "latency_s": 20.1,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-eco-driving",
-   "kind": "hit",
-   "question": "有哪些经济驾驶省电的技巧？",
-   "latency_s": 13.6,
-   "rag_called": true,
-   "cited": false,
    "verdict": "PASS",
-   "score": 9,
+   "score": 7,
    "points": [
     {
      "point": "ECO 模式/经济驾驶要点",
@@ -520,22 +565,22 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "被评回答完整覆盖了所有必答要点，引用了手册第176-178页，内容与标准答案一致，无编造。"
+   "reason": "ECO模式降低加速与最高车速、开关3激活、功率表与生态驾驶叶指示及六大能耗因素均符合手册并附页码，唯ECO临时退出机制表述颠倒、能量回收与恒速等建议略欠。",
+   "kind": "hit",
+   "question": "有哪些经济驾驶省电的技巧？",
+   "latency_s": 13.6,
+   "rag_called": true,
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-brake-fluid",
-   "kind": "hit",
-   "question": "制动液需要检查吗？在哪里检查？",
-   "latency_s": 10.2,
-   "rag_called": true,
-   "cited": true,
    "verdict": "WEAK",
    "score": 6,
    "points": [
     {
      "point": "制动液检查位置/方法",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "液位要求或警告",
@@ -548,34 +593,37 @@
    ],
    "fabrication": false,
    "citation_ok": false,
-   "reason": "未引用任何页码，且检查方法未完全符合标准答案中关于机盖开启方式和储液罐位置的详细描述。"
+   "reason": "发动机舱储液罐位置、熄火并水平地面读数、不得低于MINI线及使用技术部门认可密封容器油液等要点正确，但全文无任何页码引用。",
+   "kind": "hit",
+   "question": "制动液需要检查吗？在哪里检查？",
+   "latency_s": 10.2,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "hit-key-dead-start",
+   "verdict": "ERROR",
+   "score": 0,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "回答为空，属运行失败（reached max iterations），无法评审。",
    "kind": "hit",
    "question": "车钥匙卡片没电了怎么启动车辆？",
    "latency_s": 22.4,
    "rag_called": true,
-   "cited": false,
-   "verdict": "ERROR",
-   "score": 0,
-   "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "para-tyre-pressure",
-   "kind": "paraphrase",
-   "question": "轮胎的标准胎压是多少？",
-   "latency_s": 17.1,
-   "rag_called": true,
-   "cited": true,
-   "verdict": "WEAK",
-   "score": 6,
+   "verdict": "FAIL",
+   "score": 3,
    "points": [
     {
      "point": "明确说手册无具体标准数值",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "指向驾驶员侧车门标签（Label A）",
@@ -594,128 +642,138 @@
      "status": "covered"
     }
    ],
-   "fabrication": false,
+   "fabrication": true,
    "citation_ok": true,
-   "reason": "被评回答未明确说明手册中无具体标准数值，而是建议用户查看车门标签，但未明确指出手册本身不提供数值。同时未提及冷态检查规则和热胎禁止放气的要点。"
+   "reason": "正确说明数值以驾驶员侧车门标签为准并附页码，但编造\"须行驶至少3公里以上\"的手册外公里数规则，且遗漏\"无法冷测加0.2–0.3 bar(3 PSI)\"与\"热胎禁止放气\"两条关键规则。",
+   "kind": "paraphrase",
+   "question": "轮胎的标准胎压是多少？",
+   "latency_s": 17.1,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "para-max-range",
+   "verdict": "ERROR",
+   "score": 0,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "回答为空，属运行失败（reached max iterations），无法评审。",
    "kind": "paraphrase",
    "question": "这车的最大续航里程是多少公里？",
    "latency_s": 11.1,
    "rag_called": true,
-   "cited": false,
-   "verdict": "ERROR",
-   "score": 0,
-   "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "refuse-engine-oil",
+   "verdict": "ERROR",
+   "score": 0,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "回答为空，属运行失败（reached max iterations），无法评审。",
    "kind": "refuse",
    "question": "发动机机油多久换一次？",
    "latency_s": 12.7,
    "rag_called": true,
-   "cited": false,
-   "verdict": "ERROR",
-   "score": 0,
-   "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "refuse-fuel-filter",
+   "verdict": "ERROR",
+   "score": 0,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "回答为空，属运行失败（reached max iterations），无法评审。",
    "kind": "refuse",
    "question": "汽油滤芯多久换一次？",
    "latency_s": 18.6,
    "rag_called": true,
-   "cited": false,
-   "verdict": "ERROR",
-   "score": 0,
-   "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "refuse-fuel-cap",
+   "verdict": "ERROR",
+   "score": 0,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "回答为空，属运行失败（reached max iterations），无法评审。",
    "kind": "refuse",
    "question": "油箱盖开关在哪里？",
    "latency_s": 24.6,
    "rag_called": true,
-   "cited": false,
-   "verdict": "ERROR",
-   "score": 0,
-   "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "refuse-timing-belt",
+   "verdict": "PASS",
+   "score": 9,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "明确说明手册中没有正时皮带更换周期的信息并建议咨询授权经销商，符合正确拒答行为且附页码引用，仅把车型误称为插电混动属小瑕疵。",
    "kind": "refuse",
    "question": "正时皮带多久需要更换一次？",
    "latency_s": 29.0,
    "rag_called": true,
-   "cited": true,
-   "verdict": "PASS",
-   "score": 9,
-   "points": [
-    {
-     "point": "手册中未包含正时皮带更换周期的具体信息",
-     "status": "covered"
-    }
-   ],
-   "fabrication": false,
-   "citation_ok": true,
-   "reason": "被评回答明确指出手册中未包含正时皮带更换周期的具体信息，符合标准参考答案的要求，未编造内容，引用规范。"
+   "cited": true
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "refuse-spark-plug",
+   "verdict": "ERROR",
+   "score": 0,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "回答为空，属运行失败（reached max iterations），无法评审。",
    "kind": "refuse",
    "question": "火花塞什么时候需要更换？",
    "latency_s": 19.7,
    "rag_called": true,
-   "cited": false,
-   "verdict": "ERROR",
-   "score": 0,
-   "reason": "运行报错: {'type': 'error', 'message': 'reached max iterations (8)'}"
+   "cited": false
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "chain-charge#1",
+   "verdict": "FAIL",
+   "score": 3,
+   "points": [
+    {
+     "point": "家用充电方式说明",
+     "status": "covered"
+    },
+    {
+     "point": "安全注意事项",
+     "status": "covered"
+    },
+    {
+     "point": "附页码",
+     "status": "covered"
+    }
+   ],
+   "fabrication": true,
+   "citation_ok": true,
+   "reason": "随车充电线B、禁用转接头/延长线/发电机、红色警告灯立即停充及线缆养护等符合手册并附页码，但编造\"插头不可长时间插在插座上\"\"家用插座载流能力不足不可长时间充电\"等手册外禁令，后者与标准答案允许偶尔8A家充相冲突。",
    "kind": "hit",
    "question": "在家里用家用插座充电，有什么需要注意的？",
    "latency_s": 27.8,
    "rag_called": true,
-   "cited": true,
-   "verdict": "WEAK",
-   "score": 6,
-   "points": [
-    {
-     "point": "家用充电方式说明",
-     "status": "partial"
-    },
-    {
-     "point": "安全注意事项",
-     "status": "partial"
-    },
-    {
-     "point": "附页码",
-     "status": "missing"
-    }
-   ],
-   "fabrication": false,
-   "citation_ok": false,
-   "reason": "未正确引用标准答案中明确提到的页码，引用了未在标准答案中出现的页码（如 p.53-54、p.356-356），属于引用不规范。"
+   "cited": true
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "chain-charge#2",
-   "kind": "paraphrase",
-   "question": "那用快充呢？直流快充的功率是多少？",
-   "latency_s": 20.9,
-   "rag_called": true,
-   "cited": true,
    "verdict": "FAIL",
-   "score": 0,
+   "score": 3,
    "points": [
     {
      "point": "E 口交流充电最高 11 kW（p.40-43）",
@@ -735,19 +793,19 @@
     }
    ],
    "fabrication": true,
-   "citation_ok": false,
-   "reason": "被评回答编造了直流快充的具体功率数值（如 60kW、80kW），而标准答案明确指出手册未给出直流快充的具体功率数值，不得编造。"
+   "citation_ok": true,
+   "reason": "E口最高11 kW、F口视车型为快充及快充电缆不超30米等正确并附页码，但杜撰\"直流快充最大功率可能为60kW、80kW\"的具体数值，违反paraphrase不得编造数值的要求。",
+   "kind": "paraphrase",
+   "question": "那用快充呢？直流快充的功率是多少？",
+   "latency_s": 20.9,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "openbmb/minicpm5-2b:latest",
    "id": "chain-charge#3",
-   "kind": "hit",
-   "question": "充电口盖是怎么打开的？",
-   "latency_s": 10.1,
-   "rag_called": true,
-   "cited": true,
    "verdict": "FAIL",
-   "score": 0,
+   "score": 3,
    "points": [
     {
      "point": "充电口盖操作步骤",
@@ -755,12 +813,17 @@
     },
     {
      "point": "附页码",
-     "status": "missing"
+     "status": "covered"
     }
    ],
    "fabrication": true,
-   "citation_ok": false,
-   "reason": "被评回答中出现与标准答案冲突的步骤（如按压按钮9、自动锁定等），且未正确引用页码。"
+   "citation_ok": true,
+   "reason": "车辆静止熄火前提和按钮6解锁充电线正确并附页码，但把开启方式编造为\"按仪表板上的充电口盖按钮9\"，与标准答案\"静止熄火后按压充电口盖8\"冲突，且混入V2L无关内容。",
+   "kind": "hit",
+   "question": "充电口盖是怎么打开的？",
+   "latency_s": 10.1,
+   "rag_called": true,
+   "cited": true
   }
  ]
 }

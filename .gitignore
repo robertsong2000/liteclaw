@@ -27,3 +27,7 @@ __pycache__/
 # Benchmark intermediates
 tests/rag-benchmark/agent_judge_tasks/
 tests/rag-benchmark/golden_prose_v1.backup.jsonl
+
+# Benchmark QC/generation task batches (ephemeral, reproducible)
+tests/rag-benchmark/golden_gen_tasks/
+tests/rag-benchmark/golden_qc_tasks/

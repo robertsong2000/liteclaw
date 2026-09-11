@@ -1,32 +1,39 @@
 {
  "judge_model": "zcode-agent(对话模型)",
- "generated_at": "2026-09-11 22:33",
+ "generated_at": "2026-09-11 23:43",
  "golden_unreviewed": 0,
  "models": {
   "qwen3.8-flash": {
    "n": 35,
-   "score_sum": 283,
+   "score_sum": 309,
    "latency_sum": 510.9000000000001,
    "verdicts": {
-    "PASS": 30,
-    "WEAK": 5
+    "PASS": 33,
+    "FAIL": 1,
+    "WEAK": 1
    },
    "by_kind": {
     "hit": {
      "n": 25,
-     "score_sum": 198
+     "score_sum": 223
     },
     "paraphrase": {
      "n": 5,
-     "score_sum": 40
+     "score_sum": 43
     },
     "refuse": {
      "n": 5,
-     "score_sum": 45
+     "score_sum": 43
     }
    },
-   "fails": [],
-   "avg_score": 8.1,
+   "fails": [
+    {
+     "id": "hit-demist",
+     "verdict": "FAIL",
+     "reason": "将Clear View误述为出风模式位置，与标准答案中其为一键除雾按钮的描述冲突构成编造，且全文未附任何页码引用。"
+    }
+   ],
+   "avg_score": 8.8,
    "avg_latency_s": 14.6
   }
  },
@@ -34,17 +41,12 @@
   {
    "model": "qwen3.8-flash",
    "id": "hit-child-seat",
-   "kind": "hit",
-   "question": "儿童安全座椅怎么安装？",
-   "latency_s": 16.0,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
-   "score": 7,
+   "score": 9,
    "points": [
     {
      "point": "ISOFIX 锚点位置（座椅背与坐垫间环形标记，p.91-98）",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "后排安装优先/前排限制条件",
@@ -61,18 +63,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "ISOFIX锚点位置仅提到'靠背与坐垫缝隙'，未提及标准答案中'专门符号标记/环形标记'这一识别特征，属部分覆盖；其余要点（后排优先、前排气囊停用限制、安全带/ISOFIX/增高垫安装步骤、页码引用）均有体现且与标准答案一致，无编造。"
+   "reason": "锚点位置、后排优先与前排气囊限制、安全带/ISOFIX/增高垫/反向座椅步骤全覆盖并附页码；气囊需静止熄火方可操作等细节是对手册p.109关闭程序的真实延伸，不计编造。",
+   "kind": "hit",
+   "question": "儿童安全座椅怎么安装？",
+   "latency_s": 16.0,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-tyre-warning",
-   "kind": "hit",
-   "question": "胎压警告灯亮了怎么办？",
-   "latency_s": 11.1,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
-   "score": 7,
+   "score": 9,
    "points": [
     {
      "point": "立即停车检查冷态胎压",
@@ -89,18 +91,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "三个必答要点均覆盖，引用页码在 p.180-183 范围内且附了 p.337（补充事实范围内）。存在一处小瑕疵：将复位未成功的提示写为 'Check TPW'，而标准答案中 'Check TPW' 对应系统故障、复位未成功的提示应为 'Check tyre press and init.'，属消息名称张冠李戴但不构成整体编造；另'不是补胎液瓶上写的数字'为清单外内容，不与标准矛盾。整体覆盖完整、建议正确，扣 1-2 分。"
+   "reason": "停车冷态检查、以车门标签为准、0.2-0.3 bar补偿、热胎禁放气与复位/故障处理均覆盖并附页码，仅报警信息含义归类略混杂。",
+   "kind": "hit",
+   "question": "胎压警告灯亮了怎么办？",
+   "latency_s": 11.1,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "para-charge-time",
-   "kind": "paraphrase",
-   "question": "充电需要多长时间？",
-   "latency_s": 16.3,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
-   "score": 9,
+   "score": 10,
    "points": [
     {
      "point": "如实转述手册：充电时间取决于剩余电量与充电桩功率（p.45-46）",
@@ -121,26 +123,26 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "四个必答要点全部覆盖，未给出任何固定小时数，页码引用均在标准答案范围内（p.45对应p.45-46，p.41对应p.40-43，p.42对应p.42-43），额外覆盖了11kW、30米电缆、95%阈值、80%建议等多个补充事实，零编造，整体质量优秀。"
+   "reason": "如实说明无固定时长并指向仪表估计显示，未编造小时数，补充要点均出自手册且附页码。",
+   "kind": "paraphrase",
+   "question": "充电需要多长时间？",
+   "latency_s": 16.3,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-winter-range",
-   "kind": "hit",
-   "question": "冬天续航里程为什么会下降？",
-   "latency_s": 9.5,
-   "rag_called": false,
-   "cited": true,
-   "verdict": "WEAK",
-   "score": 6,
+   "verdict": "PASS",
+   "score": 9,
    "points": [
     {
      "point": "按手册解释低温对续航的影响",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "给出手册中的建议",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码",
@@ -149,18 +151,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "覆盖了电池低温机理、加热/空调、车速、programming预热、ECO模式等核心点，但遗漏了手册中冬胎显著降低续航(p.333-334)、用刮板手动除冰替代de-icing(p.300-301)、低温能量回收受限(p.162)、负温低电量时行驶后立即充电(p.42-43)等多个核心事实与建议；胎压和大灯属清单外内容，不与标准答案矛盾，不判编造。"
+   "reason": "加热用量、轮胎与电池温度等低温影响及编程模式、ECO、平顺驾驶等建议均覆盖并附页码，页码与标准答案不同但内容一致。",
+   "kind": "hit",
+   "question": "冬天续航里程为什么会下降？",
+   "latency_s": 9.5,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-service-interval",
-   "kind": "hit",
-   "question": "保养周期是多久？",
-   "latency_s": 16.2,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
-   "score": 9,
+   "score": 10,
    "points": [
     {
      "point": "如实转述手册不含具体周期表、指向保养日程/保养文档（maintenance schedule）",
@@ -181,18 +183,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "四个必答要点均覆盖：明确指出手册无固定周期、指向保养计划；完整复述 Service in/due/required 三级显示及 10 秒重置规则；未编造任何周期数值；附 p.122-124 页码引用，与标准答案一致。"
+   "reason": "明确说明手册无固定周期并正确转述Service in/due/required显示阈值与长按约10秒复位规则，未编造周期数值且附页码。",
+   "kind": "hit",
+   "question": "保养周期是多久？",
+   "latency_s": 16.2,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-fog-lights",
-   "kind": "hit",
-   "question": "雾灯怎么开？",
-   "latency_s": 8.0,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
-   "score": 7,
+   "score": 9,
    "points": [
     {
      "point": "后雾灯开启操作（环 4 转至 AUTO，再转开关标记 6 对符号 2）",
@@ -208,23 +210,23 @@
     },
     {
      "point": "附页码引用 p.147-148",
-     "status": "partial"
+     "status": "covered"
     }
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "必答要点基本全覆盖，操作描述与标准一致；页码仅引用 p.148 缺 p.147（相邻页，不判编造）；'雾或雪天/车顶载物超高'属清单外内容，无法从清单判断真伪，不判编造；补充事实'及时关闭以免影响他人'已覆盖。"
+   "reason": "环转AUTO再对符号2的开启操作、手动控制前提与仪表指示、关闭方式及页码均覆盖。",
+   "kind": "hit",
+   "question": "雾灯怎么开？",
+   "latency_s": 8.0,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-jack",
-   "kind": "hit",
-   "question": "千斤顶应该支撑在车底什么位置？",
-   "latency_s": 16.5,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
-   "score": 8,
+   "score": 10,
    "points": [
     {
      "point": "手册指定的支撑点位置",
@@ -232,7 +234,7 @@
     },
     {
      "point": "仅在指定点举升的安全警告",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码",
@@ -245,16 +247,16 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "四个必答要点中三个完整覆盖，安全警告要点仅提及损坏/受伤风险但未明确'举升点只能用于更换车轮、不得用于维修或进入车底'的用途限制，属部分覆盖；无编造，页码引用正确。"
+   "reason": "四个专用举升点、80-140mm平板千斤顶适配、定位不当损坏电池等警告与页码齐全，无编造。",
+   "kind": "hit",
+   "question": "千斤顶应该支撑在车底什么位置？",
+   "latency_s": 16.5,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-key-battery",
-   "kind": "hit",
-   "question": "车钥匙电池没电了怎么更换？",
-   "latency_s": 15.8,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
    "score": 9,
    "points": [
@@ -273,16 +275,16 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "三个必答要点全覆盖：步骤与p.61一致，电池型号正确表述为'同型号或等效'未编造具体型号，页码引用规范；额外覆盖了补充事实中的污渍检查、废旧电池回收、应急启动等内容，零编造。"
+   "reason": "更换步骤、同型/等效电池要求及页码齐全，四次按键消除提示与机械钥匙应急等均出自手册内容。",
+   "kind": "hit",
+   "question": "车钥匙电池没电了怎么更换？",
+   "latency_s": 15.8,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-12v-battery",
-   "kind": "hit",
-   "question": "12伏蓄电池亏电了怎么办？",
-   "latency_s": 21.3,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
    "score": 9,
    "points": [
@@ -301,22 +303,22 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "必答要点全覆盖：明确禁止外接充电机/他车搭电、救援时禁止断开、不得用本车为他车搭电启动、专业人员操作等均与标准答案一致，页码规范、零编造，并加分答出亏电诱因与p.137警告灯等补充事实。"
+   "reason": "禁止外充/搭电、救援禁断开、专业人员操作与警告灯含义等电动车专属要点覆盖并附页码。",
+   "kind": "hit",
+   "question": "12伏蓄电池亏电了怎么办？",
+   "latency_s": 21.3,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-pretrip",
-   "kind": "hit",
-   "question": "长途出行前应该检查哪些项目？",
-   "latency_s": 16.7,
-   "rag_called": true,
-   "cited": true,
-   "verdict": "WEAK",
-   "score": 5,
+   "verdict": "PASS",
+   "score": 9,
    "points": [
     {
      "point": "综合多章节的检查清单",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "引用多条页码（≤4 条）",
@@ -325,18 +327,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "胎压、制动液、玻璃水三项核心要点有覆盖，但遗漏了冷却液液位（EV 关键项）、轮胎状况/磨损指示条、12V 电池三项核心事实；'保养到期提示'及'发动机舱安全注意事项'属清单外内容，未与标准答案矛盾故不判编造；引用 4 条页码满足要求，其中 p.122 对应清单外内容。"
+   "reason": "综合胎压、制动液、玻璃水、保养提示等多章节检查清单，恰好附4条页码且内容与手册一致。",
+   "kind": "hit",
+   "question": "长途出行前应该检查哪些项目？",
+   "latency_s": 16.7,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-cruise-control",
-   "kind": "hit",
-   "question": "定速巡航怎么设置巡航车速？",
-   "latency_s": 13.1,
-   "rag_called": false,
-   "cited": true,
-   "verdict": "WEAK",
-   "score": 7,
+   "verdict": "PASS",
+   "score": 9,
    "points": [
     {
      "point": "设置/调整巡航车速的操作步骤",
@@ -344,7 +346,7 @@
     },
     {
      "point": "激活/暂停条件",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码",
@@ -353,18 +355,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "设置与调整步骤、激活条件、页码引用均覆盖；暂停条件仅提到按「0」键，遗漏了标准答案中'踩下制动踏板'和'挂入空挡'两种暂停方式，属小遗漏；补充事实（ECO模式、能量回收/拨片不可用）有加分。"
+   "reason": "30km/h以上SET存储车速、上下拨调整、按0待机与RES恢复等步骤及使用禁忌覆盖并附页码。",
+   "kind": "hit",
+   "question": "定速巡航怎么设置巡航车速？",
+   "latency_s": 13.1,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-fuse-box",
-   "kind": "hit",
-   "question": "保险丝盒在哪里？保险丝坏了怎么检查更换？",
-   "latency_s": 11.8,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
-   "score": 8,
+   "score": 9,
    "points": [
     {
      "point": "保险丝盒位置",
@@ -381,16 +383,16 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "必答要点基本全覆盖，位置、镊子操作、同规格更换、不建议用空位均有涉及；小遗漏为未提及额定值过高可能导致电路过热/起火风险（p.349-352），且页码仅引 p.347-348 未覆盖 p.349-352 的安全警告段落，但核心内容正确、无编造。"
+   "reason": "手套箱后的保险丝盒B与盖板下的保险丝盒A位置、用夹子取下并侧向滑出等更换要点覆盖并附页码。",
+   "kind": "hit",
+   "question": "保险丝盒在哪里？保险丝坏了怎么检查更换？",
+   "latency_s": 11.8,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-emergency-call",
-   "kind": "hit",
-   "question": "紧急呼叫（SOS）功能是怎么工作的？",
-   "latency_s": 9.5,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
    "score": 9,
    "points": [
@@ -409,18 +411,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "三个必答要点全覆盖，自动/手动触发方式、呼叫流程（发送数据→语音通话）均与标准答案一致，页码引用 p.288–290 正确；额外覆盖了补充事实中事故后注意事项、故障红灯30分钟、电池4年寿命、目击事故停车等多条加分内容；'车牌铭牌'与标准答案'制造铭牌'有微小措辞偏差但不构成编造。"
+   "reason": "自动与手动（长按3秒或10秒内5次）触发、发送数据与语音通话流程、指示灯含义及取消方式覆盖并附页码。",
+   "kind": "hit",
+   "question": "紧急呼叫（SOS）功能是怎么工作的？",
+   "latency_s": 9.5,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-gear-p",
-   "kind": "hit",
-   "question": "挡位怎么挂入P挡？",
-   "latency_s": 10.9,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
-   "score": 9,
+   "score": 10,
    "points": [
     {
      "point": "指出手册换挡杆没有 P 挡（只有 R/N/D/B）",
@@ -437,18 +439,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "三个必答要点全部覆盖，页码引用正确；'拖车或上平板前需挂N并释放驻车制动'属清单外内容，与标准答案不矛盾，不判编造；整体简洁准确。"
+   "reason": "准确指出无P挡仅有R/N/D/B，给出挂N并施加电子驻车制动、经指示灯确认的停车程序，页码规范。",
+   "kind": "hit",
+   "question": "挡位怎么挂入P挡？",
+   "latency_s": 10.9,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-car-wash",
-   "kind": "hit",
-   "question": "洗车有什么注意事项？",
-   "latency_s": 18.8,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
-   "score": 7,
+   "score": 9,
    "points": [
     {
      "point": "手工洗车建议",
@@ -456,7 +458,7 @@
     },
     {
      "point": "高压/自动洗车注意事项",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码",
@@ -465,22 +467,22 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "手工洗车和自动洗车要点覆盖较好，页码引用规范；高压洗车部分缺少具体参数限制（压力<100 bar、喷嘴距离≥15 cm、水流量<15 L/min），属小遗漏；'漆面破损及时修补防锈'为清单外内容，不判编造。"
+   "reason": "手洗建议、高压水枪禁区（机舱/充电口/电池）、充电禁洗与滚刷洗车准备均覆盖并附页码。",
+   "kind": "hit",
+   "question": "洗车有什么注意事项？",
+   "latency_s": 18.8,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-demist",
-   "kind": "hit",
-   "question": "前挡风玻璃起雾怎么除雾？",
-   "latency_s": 21.1,
-   "rag_called": false,
-   "cited": false,
-   "verdict": "WEAK",
-   "score": 7,
+   "verdict": "FAIL",
+   "score": 3,
    "points": [
     {
      "point": "除雾功能操作方式",
-     "status": "covered"
+     "status": "partial"
     },
     {
      "point": "相关注意事项",
@@ -491,20 +493,20 @@
      "status": "missing"
     }
    ],
-   "fabrication": false,
+   "fabrication": true,
    "citation_ok": false,
-   "reason": "操作方式和注意事项均与标准答案一致（按钮13、自动启空调/暖风、除雾优先于内循环、结冰用刮冰器），但全文未附任何页码引用，'附页码'要点完全缺失。"
+   "reason": "将Clear View误述为出风模式位置，与标准答案中其为一键除雾按钮的描述冲突构成编造，且全文未附任何页码引用。",
+   "kind": "hit",
+   "question": "前挡风玻璃起雾怎么除雾？",
+   "latency_s": 21.1,
+   "rag_called": false,
+   "cited": false
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-eco-driving",
-   "kind": "hit",
-   "question": "有哪些经济驾驶省电的技巧？",
-   "latency_s": 6.8,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
-   "score": 8,
+   "score": 9,
    "points": [
     {
      "point": "ECO 模式/经济驾驶要点",
@@ -521,18 +523,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "三个必答要点全覆盖，ECO模式激活/退出/限速/空调接管、六项影响因素、页码引用均与标准答案一致；唯一小瑕疵是'反复拨开关往上/下调出叶子图标'这一操作描述在标准答案中无据（标准答案称驾驶风格指示器为'实时'显示），但不构成编造，整体准确完整。"
+   "reason": "ECO模式开启、约115km/h限速与踩尽油门临时退出、能量回收及车速路况暖风轮胎负载等能耗因素覆盖并附页码。",
+   "kind": "hit",
+   "question": "有哪些经济驾驶省电的技巧？",
+   "latency_s": 6.8,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-brake-fluid",
-   "kind": "hit",
-   "question": "制动液需要检查吗？在哪里检查？",
-   "latency_s": 10.6,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
-   "score": 9,
+   "score": 10,
    "points": [
     {
      "point": "制动液检查位置/方法",
@@ -549,16 +551,16 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "三个必答要点全覆盖，核心事实（位置、MINI线、经常检查、异常去经销商、专业人员更换）均准确复述；'伴随提示音'属清单外内容（标准答案仅提警告灯），不判编造；页码引用存在且与标准答案相邻页一致，整体规范。"
+   "reason": "发动机舱储液罐位置、熄火水平读数、不低于MINI下限、制动警告灯提示及专业人员更换要求全覆盖并附页码。",
+   "kind": "hit",
+   "question": "制动液需要检查吗？在哪里检查？",
+   "latency_s": 10.6,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "hit-key-dead-start",
-   "kind": "hit",
-   "question": "车钥匙卡片没电了怎么启动车辆？",
-   "latency_s": 7.3,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
    "score": 9,
    "points": [
@@ -573,18 +575,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "必答要点全覆盖：应急启动流程（机械钥匙开门→放置区放卡→踩刹车→按START）与标准答案一致，并额外覆盖了补充事实中的干扰原因、充电线/OTA限制等加分项；页码引用存在（p.357/65/53/158），个别页码与标准答案有偏差（如p.65 vs p.69-70、p.53 vs p.159-160）但内容一致，不构成编造。"
+   "reason": "机械钥匙开门后将卡片放放置区并踩刹车按START的应急启动流程覆盖并附页码，失效原因与启动前提均出自手册。",
+   "kind": "hit",
+   "question": "车钥匙卡片没电了怎么启动车辆？",
+   "latency_s": 7.3,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "para-tyre-pressure",
-   "kind": "paraphrase",
-   "question": "轮胎的标准胎压是多少？",
-   "latency_s": 10.6,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
-   "score": 8,
+   "score": 9,
    "points": [
     {
      "point": "明确说手册无具体标准数值",
@@ -609,18 +611,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "五个必答要点全部覆盖，0.2–0.3 bar/3 PSI 为正确转述非编造；第3点'重新设定胎压基准值/欠压提醒'属清单外内容（未与清单矛盾，不判编造）；引用页码 p.333/334 正确，p.181 与补充清单 p.179 略有偏差但不影响核心判定。"
+   "reason": "明确手册无统一数值并指向驾驶员车门Label A标签的B/C/D图例，正确转述冷态规则、0.2-0.3 bar补偿与热胎禁放气并附页码。",
+   "kind": "paraphrase",
+   "question": "轮胎的标准胎压是多少？",
+   "latency_s": 10.6,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "para-max-range",
-   "kind": "paraphrase",
-   "question": "这车的最大续航里程是多少公里？",
-   "latency_s": 19.9,
-   "rag_called": true,
-   "cited": false,
    "verdict": "WEAK",
-   "score": 6,
+   "score": 5,
    "points": [
     {
      "point": "不给拍脑袋的具体续航数字",
@@ -641,93 +643,93 @@
    ],
    "fabrication": false,
    "citation_ok": false,
-   "reason": "正确拒绝给出具体公里数并说明了续航随工况变化，但获取官方数值的指向为'车辆铭牌/经销商'而非标准答案要求的行车电脑（估算续航）或官方规格表，且全文无任何页码引用，要点4完全缺失。"
+   "reason": "未编造续航数字且说明其随工况变化，但全文未附页码，且将官方数值引向铭牌/经销商而非明确指向手册所述的行程电脑估计续航显示。",
+   "kind": "paraphrase",
+   "question": "这车的最大续航里程是多少公里？",
+   "latency_s": 19.9,
+   "rag_called": true,
+   "cited": false
   },
   {
    "model": "qwen3.8-flash",
    "id": "refuse-engine-oil",
+   "verdict": "PASS",
+   "score": 9,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "正确说明纯电车无发动机机油项目并建议按保养文档执行，替代液面提示属手册内合理延伸且附页码。",
    "kind": "refuse",
    "question": "发动机机油多久换一次？",
    "latency_s": 11.1,
    "rag_called": true,
-   "cited": true,
-   "verdict": "PASS",
-   "score": 9,
-   "points": [],
-   "fabrication": false,
-   "citation_ok": true,
-   "reason": "正确识别纯电车型无发动机机油系统并明确拒答，附加的机舱液体清单及保养文档建议属于合理延伸服务，引用页码对应替代内容，无编造。"
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "refuse-fuel-filter",
+   "verdict": "PASS",
+   "score": 8,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "正确说明纯电车无汽油滤芯且手册无相关内容，并延伸空调滤芯等替代方向，但未附页码引用。",
    "kind": "refuse",
    "question": "汽油滤芯多久换一次？",
    "latency_s": 14.6,
    "rag_called": true,
-   "cited": false,
-   "verdict": "PASS",
-   "score": 9,
-   "points": [],
-   "fabrication": false,
-   "citation_ok": true,
-   "reason": "正确识别纯电车型无汽油系统，明确告知手册无此内容，未编造任何周期/部件/位置，附加的替代建议（刹车油、空调滤芯）属合理延伸服务，符合拒答规范。"
+   "cited": false
   },
   {
    "model": "qwen3.8-flash",
    "id": "refuse-fuel-cap",
+   "verdict": "PASS",
+   "score": 9,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": true,
+   "reason": "正确说明纯电车无油箱盖并指向充电口盖操作，充电口盖使用要点与手册一致且附页码。",
    "kind": "refuse",
    "question": "油箱盖开关在哪里？",
    "latency_s": 20.7,
    "rag_called": true,
-   "cited": true,
-   "verdict": "PASS",
-   "score": 9,
-   "points": [],
-   "fabrication": false,
-   "citation_ok": true,
-   "reason": "被评回答明确说明该车为纯电无油箱盖，随后以充电口盖作为合理替代建议并附页码引用，符合规则中'明确说明无此部件后附加替代建议不算编造'的判定，必答要点为空，整体表现优秀。"
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "refuse-timing-belt",
+   "verdict": "PASS",
+   "score": 8,
+   "points": [],
+   "fabrication": false,
+   "citation_ok": false,
+   "reason": "明确说明手册无正时皮带更换周期内容并解释纯电车型无此部件，延伸保养项目合理但未附页码引用。",
    "kind": "refuse",
    "question": "正时皮带多久需要更换一次？",
    "latency_s": 15.3,
    "rag_called": true,
-   "cited": false,
-   "verdict": "PASS",
-   "score": 9,
-   "points": [],
-   "fabrication": false,
-   "citation_ok": true,
-   "reason": "正确拒答：明确告知手册无此内容，合理解释纯电车型无正时皮带，并主动提供替代保养项目建议，未编造任何周期/部件/位置，符合refuse题型的标准行为。"
+   "cited": false
   },
   {
    "model": "qwen3.8-flash",
    "id": "refuse-spark-plug",
-   "kind": "refuse",
-   "question": "火花塞什么时候需要更换？",
-   "latency_s": 11.7,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
    "score": 9,
    "points": [],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "正确识别纯电车型无火花塞并明确拒答，附加的替代保养建议（冷却液/制动液/玻璃水等）属于规则允许的合理延伸服务，引用页码对应替代内容，无编造。"
+   "reason": "正确说明纯电车无火花塞，替代保养项目提示合理并附页码引用。",
+   "kind": "refuse",
+   "question": "火花塞什么时候需要更换？",
+   "latency_s": 11.7,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "chain-charge#1",
-   "kind": "hit",
-   "question": "在家里用家用插座充电，有什么需要注意的？",
-   "latency_s": 14.7,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
-   "score": 8,
+   "score": 9,
    "points": [
     {
      "point": "家用充电方式说明",
@@ -744,18 +746,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "三个必答要点均覆盖：第1点说明了家用插座8A临时充电与14A/16A专用插座的区别；第2-7点涵盖多项安全禁忌（禁适配器/排插/发电机、水渍异物禁充、红灯即停等）；附了p.34、p.35-37等页码引用。第5点'定时插座'属清单外内容，不判编造；p.72页码与标准答案清洁充电线对应页(p.35-37)不完全一致但内容吻合，属相邻页召回正常现象。"
+   "reason": "家用8A与专用14A/16A充电方式、禁止转接头排插与发电机、插座悬挂及故障排查等安全要点覆盖并附页码。",
+   "kind": "hit",
+   "question": "在家里用家用插座充电，有什么需要注意的？",
+   "latency_s": 14.7,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "chain-charge#2",
-   "kind": "paraphrase",
-   "question": "那用快充呢？直流快充的功率是多少？",
-   "latency_s": 17.0,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
-   "score": 8,
+   "score": 10,
    "points": [
     {
      "point": "E 口交流充电最高 11 kW（p.40-43）",
@@ -776,18 +778,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "四个必答要点全部覆盖，明确说明手册无直流快充具体功率数值且未编造数字；引用页码基本对应；额外出现的'建议充到80%''不要洗车/机舱作业'等内容属清单外内容，与标准答案不矛盾，不判编造，但属助手自行补充，略扣分。"
+   "reason": "准确给出E口最高11kW交流与F口视车型快充，明确说明手册无直流快充功率数值且不编造，页码齐全。",
+   "kind": "paraphrase",
+   "question": "那用快充呢？直流快充的功率是多少？",
+   "latency_s": 17.0,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "chain-charge#3",
-   "kind": "hit",
-   "question": "充电口盖是怎么打开的？",
-   "latency_s": 17.8,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
-   "score": 8,
+   "score": 9,
    "points": [
     {
      "point": "充电口盖操作步骤",
@@ -800,16 +802,16 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "必答要点均覆盖：按压解锁开启、关闭落锁、仪表提示均有涉及，且附了页码引用；额外命中多条补充事实（两按键功能、高压水枪、挂线、锁止机构异常），无编造；小瑕疵是未明确提及'点火关闭'这一前置条件，扣1分。"
+   "reason": "静止时按压开启、盖内两按键功能、关闭锁止与仪表提示及注意事项覆盖并附页码。",
+   "kind": "hit",
+   "question": "充电口盖是怎么打开的？",
+   "latency_s": 17.8,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "chain-tyre#1",
-   "kind": "hit",
-   "question": "胎压警告灯亮了怎么办？",
-   "latency_s": 10.2,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
    "score": 9,
    "points": [
@@ -828,16 +830,16 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "必答要点全覆盖，页码引用规范（p.180-183），无编造；额外覆盖了补充事实中的每月检查、辅助功能定位、故障信息处理等，仅复位流程未明确提及'多媒体屏幕操作'和'车辆静止、点火接通'两个细节条件，属小遗漏。"
+   "reason": "停车冷态检查、按标签调整、0.2-0.3 bar补偿、热胎禁放气及复位与故障处理流程覆盖并附页码。",
+   "kind": "hit",
+   "question": "胎压警告灯亮了怎么办？",
+   "latency_s": 10.2,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "chain-tyre#2",
-   "kind": "paraphrase",
-   "question": "那标准胎压到底是多少？",
-   "latency_s": 12.1,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
    "score": 9,
    "points": [
@@ -856,16 +858,16 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "三个必答要点全覆盖，正确转述了图例说明（B/C/D）及热胎补偿规则（0.2–0.3 bar），引用页码与标准答案一致；'停车3小时/行驶不到2公里'为清单外冷胎定义，不判编造但属额外补充；'胎压复位'亦为清单外内容，不影响判定。"
+   "reason": "明确无统一标准数值并指向车门标签B/C/D图例，正确说明0.2-0.3 bar仅为热胎补偿而非标准值，未编造数值。",
+   "kind": "paraphrase",
+   "question": "那标准胎压到底是多少？",
+   "latency_s": 12.1,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "chain-tyre#3",
-   "kind": "hit",
-   "question": "胎压不足时应该怎么调整？",
-   "latency_s": 13.9,
-   "rag_called": false,
-   "cited": true,
    "verdict": "PASS",
    "score": 9,
    "points": [
@@ -888,16 +890,16 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "四个必答要点全部覆盖且与标准答案一致；引用页码与标准答案相邻（p.181-182、p.332-333 vs 标准 p.333-334），属正常召回范围；第5点'品牌网络认可设备'及第4点'报警不可靠'为清单外内容，无法从标准答案判断真伪，不判编造；整体准确、引用规范。"
+   "reason": "冷态按标签调整、无法冷测加0.2-0.3 bar、热胎禁放气及调整后复位规则全覆盖并附页码。",
+   "kind": "hit",
+   "question": "胎压不足时应该怎么调整？",
+   "latency_s": 13.9,
+   "rag_called": false,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "chain-key#1",
-   "kind": "hit",
-   "question": "车钥匙电池没电了怎么更换？",
-   "latency_s": 23.1,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
    "score": 9,
    "points": [
@@ -916,18 +918,18 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "三个必答要点全覆盖：步骤与标准答案一致，电池型号正确表述为'同型号或等效'未编造具体型号，页码引用(p.61/p.62-64/p.357)均在标准答案范围内；额外覆盖了补充事实中的污渍检查、回收、应急启动等内容，无编造。"
+   "reason": "按A区滑盖、取电池盖、换同型/等效电池及按四次按键确认等步骤与页码齐全。",
+   "kind": "hit",
+   "question": "车钥匙电池没电了怎么更换？",
+   "latency_s": 23.1,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "chain-key#2",
-   "kind": "hit",
-   "question": "钥匙没电的情况下怎么启动车辆？",
-   "latency_s": 23.6,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
-   "score": 8,
+   "score": 9,
    "points": [
     {
      "point": "应急启动方式",
@@ -940,26 +942,26 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "必答要点全覆盖：机械钥匙开门→放置区→踩刹车按START的核心应急启动流程完整，页码引用齐全且与标准答案基本对应；'响一声'和'约5 km/h以上提示消失'属清单外内容，与标准答案不矛盾，不判编造；数字钥匙细节（放在放置区）标准答案未明确，属清单外补充，整体质量良好。"
+   "reason": "机械钥匙开门、卡片放置区加刹车按START的应急启动及READY确认覆盖并附页码，附加条件均出自手册。",
+   "kind": "hit",
+   "question": "钥匙没电的情况下怎么启动车辆？",
+   "latency_s": 23.6,
+   "rag_called": true,
+   "cited": true
   },
   {
    "model": "qwen3.8-flash",
    "id": "chain-key#3",
-   "kind": "hit",
-   "question": "数字钥匙是什么？怎么用？",
-   "latency_s": 17.3,
-   "rag_called": true,
-   "cited": true,
    "verdict": "PASS",
-   "score": 7,
+   "score": 9,
    "points": [
     {
      "point": "数字钥匙功能说明",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "开通/使用方式",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码",
@@ -968,7 +970,12 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "核心定义、校准流程、48小时联网、卡片互斥等关键内容均有覆盖且与标准答案一致，无编造；但功能范围缺少行李厢/死锁/远程照明/远程鸣笛，开通步骤未明确提及'激活订阅'和'应用内激活数字钥匙'，外借与撤销流程未涉及，属基本覆盖有小遗漏。"
+   "reason": "数字钥匙功能、App安装校准与48小时联网保持有效等开通使用方式覆盖并附页码。",
+   "kind": "hit",
+   "question": "数字钥匙是什么？怎么用？",
+   "latency_s": 17.3,
+   "rag_called": true,
+   "cited": true
   }
  ]
 }
