@@ -1,0 +1,12 @@
+# LiteLLM proxy configuration.
+# Copy .env.example to .env and fill in the provider credentials before use.
+
+model_list:
+  - model_name: default
+    litellm_params:
+      model: os.environ/LITELLM_MODEL
+      api_base: os.environ/LITELLM_API_BASE
+      api_key: os.environ/LITELLM_API_KEY
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
