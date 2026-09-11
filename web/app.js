@@ -1208,6 +1208,10 @@ async function streamChat() {
   // GPU; lower it there if a bigger model needs the VRAM.
   if (GATEWAY_MODELS.includes(model)) {
     if (document.getElementById('no_think').checked) {
+      // 两个网关通道认的开关不同: deepseek 通道只认 reasoning_effort=none
+      // (服务端收到 no_think 才会生成它), qwen 通道只认 enable_thinking=false。
+      // 都发,各通道取自己认的那个,互不干扰。
+      cfg.no_think = true;
       cfg.extra_body = { enable_thinking: false };
     }
   } else {
