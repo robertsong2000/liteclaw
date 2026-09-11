@@ -59,14 +59,13 @@ def load_cases():
 
 
 def load_rag():
-    """加载 rag.py（宿主机路径跑检索，改写 MANUAL_DIR/INDEX_FILE）。"""
+    """加载 rag.py（宿主机路径跑检索，改写 MANUAL_DIR 即可，索引路径由其内部推导）。"""
     import importlib.util
     os.environ.setdefault("OLLAMA_URL", OLLAMA)
     spec = importlib.util.spec_from_file_location("rag", RAG_SCRIPT)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     mod.MANUAL_DIR = MANUAL_DIR
-    mod.INDEX_FILE = os.path.join(MANUAL_DIR, ".index", "index.json")
     return mod
 
 
