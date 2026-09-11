@@ -63,6 +63,11 @@ pub async fn run_loop(
     // before the model starts producing, so TPS reflects generation speed.
     let mut gen_start: Option<std::time::Instant> = None;
     let mut gen_end: Option<std::time::Instant> = None;
+    // Gateway reasoning models (deepseek-flash behind new-api) occasionally
+    // stream a whole turn as reasoning_content and stop: no tool calls, no
+    // visible answer — the UI would show nothing but a collapsed think
+    // block. Retry such turns a bounded number of times.
+    let mut empty_answer_retries = 0usize;
 
     for _iter in 0..max_iters {
         // 1. Stream the model response, accumulating text + tool calls.
@@ -96,7 +101,9 @@ pub async fn run_loop(
             }
         }
 
-        // 2. Record the assistant turn.
+        // 2. Record the assistant turn. The visible-answer check must run
+        // before `text` is moved into the recorded message.
+        let answer_is_empty = visible_answer(&text).is_empty();
         messages.push(Message {
             role: liteclaw_model::Role::Assistant,
             content: if text.is_empty() {
@@ -114,6 +121,24 @@ pub async fn run_loop(
 
         // 3. No tool calls → the model answered in plain text; done.
         if tool_calls.is_empty() {
+            // Reasoning-only turn: everything streamed inside <think> blocks.
+            // The deltas were already forwarded (the UI shows a collapsed
+            // think block), but there is no answer to read — drop the turn
+            // and retry with a corrective nudge instead of ending here.
+            if answer_is_empty && empty_answer_retries < MAX_EMPTY_ANSWER_RETRIES {
+                empty_answer_retries += 1;
+                messages.pop(); // the reasoning-only assistant turn
+                messages.push(Message {
+                    role: liteclaw_model::Role::User,
+                    content: Some(serde_json::Value::String(
+                        "（系统提示：你上一轮只输出了思考过程，没有正式回答。请直接给出正式回答，不要再重复思考。）"
+                            .into(),
+                    )),
+                    tool_calls: None,
+                    tool_call_id: None,
+                });
+                continue;
+            }
             // Compute generation-only elapsed time (first delta → last delta),
             // excluding pre-generation queue/network latency.
             let gen_ms = match (gen_start, gen_end) {
@@ -208,6 +233,29 @@ pub async fn run_loop(
     Ok(())
 }
 
+/// How many times `run_loop` retries a turn that produced no visible answer
+/// (reasoning-only output). One retry is enough in practice: the failure is
+/// sampler-dependent, not deterministic.
+const MAX_EMPTY_ANSWER_RETRIES: usize = 1;
+
+/// The part of a streamed response the user actually reads: everything
+/// outside `<think>…</think>` blocks, trimmed. An unclosed trailing block
+/// swallows the rest (the decoder closes one at stream end, but don't rely
+/// on it when deciding whether an answer exists).
+fn visible_answer(text: &str) -> String {
+    let mut out = String::new();
+    let mut rest = text;
+    while let Some(start) = rest.find("<think>") {
+        out.push_str(&rest[..start]);
+        match rest.find("</think>") {
+            Some(end) => rest = &rest[end + "</think>".len()..],
+            None => return out.trim().to_string(),
+        }
+    }
+    out.push_str(rest);
+    out.trim().to_string()
+}
+
 /// Convenience: run the loop and collect all events into a channel-backed
 /// stream. Used by the web handler to pump SSE.
 pub fn into_stream(
@@ -251,4 +299,31 @@ impl Counter {
 /// Convert a channel receiver into a stream that yields `None` when closed.
 pub fn rx_to_stream(rx: mpsc::Receiver<AgentEvent>) -> impl Stream<Item = AgentEvent> {
     tokio_stream::wrappers::ReceiverStream::new(rx)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::visible_answer;
+
+    #[test]
+    fn plain_text_is_visible() {
+        assert_eq!(visible_answer("后雾灯：旋环 4 转 AUTO。"), "后雾灯：旋环 4 转 AUTO。");
+    }
+
+    #[test]
+    fn think_only_turn_has_no_visible_answer() {
+        assert!(visible_answer("<think>reasoning draft…</think>").is_empty());
+        assert!(visible_answer("<think>unclosed reasoning…").is_empty());
+        assert!(visible_answer("").is_empty());
+        assert!(visible_answer("  \n").is_empty());
+    }
+
+    #[test]
+    fn text_after_think_blocks_survives() {
+        let t = "<think>phase 1</think><think>phase 2</think>按除雾键（按钮 13）。";
+        assert_eq!(visible_answer(t), "按除雾键（按钮 13）。");
+        // Interleaved: reasoning wraps around a visible fragment.
+        let t = "先看这里<think>mid-turn reasoning</think>然后是结论。";
+        assert_eq!(visible_answer(t), "先看这里然后是结论。");
+    }
 }
