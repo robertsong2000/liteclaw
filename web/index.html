@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>车书助手 🚗 v2</title>
-<link rel="stylesheet" href="style.css?v=20260908d" />
+<link rel="stylesheet" href="style.css?v=20260911a" />
 </head>
 <body>
 
@@ -23,7 +23,7 @@
 <div id="sidebar" style="position:fixed;left:0;top:0;bottom:0;width:200px;background:var(--panel);border-right:1px solid var(--border);display:none;flex-direction:column;z-index:100">
   <button id="new-session" style="margin:10px;background:var(--accent);color:var(--lime);border:none;padding:8px;border-radius:6px;cursor:pointer;font-size:13px">＋ 新会话</button>
   <div id="suggestions">
-    <div class="sug-title">常见问题</div>
+    <div class="sug-title" id="sug-title">常见问题</div>
     <select id="sug-select">
       <option value="">选择问题，点击即发送…</option>
     </select>
@@ -38,14 +38,16 @@
       <option value="qwen3:30b-a3b">Qwen3-30B-A3B</option>
       <option value="openbmb/minicpm5-2b:latest">MiniCPM5-2B</option>
       <option value="qwen3.8-flash">Qwen3.8-Flash (NewAPI)</option>
+      <option value="deepseek-flash">DeepSeek-Flash (NewAPI)</option>
     </select>
-    <label title="思考开关:勾选后对所有模型发送禁思考指令。会思考的模型(MiniCPM5-2B、Qwen3-30B-A3B 默认思考)将直接回答,更快更省 token;不会思考的模型无变化。" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
-      <input type="checkbox" id="no_think" /> 禁用思考
+    <label id="no_think_wrap" title="思考开关:勾选后对所有模型发送禁思考指令。会思考的模型(MiniCPM5-2B、Qwen3-30B-A3B 默认思考)将直接回答,更快更省 token;不会思考的模型无变化。" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
+      <input type="checkbox" id="no_think" /> <span id="no_think_label">禁用思考</span>
     </label>
-    <label title="开启 = 每轮提问强制先触发一轮 RAG 检索:服务器代查手册原文并注入给模型,回答只依据检索内容,更稳定(检索过程界面不可见)。关闭 = 模型自行决定是否调 skill 检索(界面能看到工具卡片),小模型容易漏检或编造参数,不建议关闭。默认:开启。" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
-      <input type="checkbox" id="auto_rag" checked /> 强制RAG检索
+    <label id="auto_rag_wrap" title="开启 = 每轮提问强制先触发一轮 RAG 检索:服务器代查手册原文并注入给模型,回答只依据检索内容,更稳定(检索过程界面不可见)。关闭 = 模型自行决定是否调 skill 检索(界面能看到工具卡片),小模型容易漏检或编造参数,不建议关闭。默认:开启。" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer">
+      <input type="checkbox" id="auto_rag" checked /> <span id="auto_rag_label">强制RAG检索</span>
     </label>
     <button id="save_cfg">保存</button>
+    <button id="lang_btn" title="切换到英文">EN</button>
     <button id="help_btn" title="怎么提问、能问什么：打开 RAG 问题地图" onclick="window.open('/help','_blank')">❓ Help</button>
   </div>
 </header>
@@ -64,6 +66,6 @@
   <span id="img-remove" style="color:#ef5350;cursor:pointer;margin-left:8px;font-size:12px">✕ 移除</span>
 </div>
 
-<script src="app.js?v=20260908d"></script>
+<script src="app.js?v=20260911a"></script>
 </body>
 </html>

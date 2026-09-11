@@ -18,6 +18,131 @@ function hideLogin() {
   newSession();
 }
 
+// --- i18n: 中英双语切换 ---
+// 语言存在 localStorage；界面文案、建议问题、系统提示词全部联动：
+// 英文模式下提示词强制模型用英文回答，中文模式下用中文回答。
+const LANG_KEY = 'liteclaw_lang';
+let LANG = localStorage.getItem(LANG_KEY) === 'en' ? 'en' : 'zh';
+
+const I18N = {
+  zh: {
+    title: '车书助手 🚗 v2',
+    appName: '🚗 车书助手',
+    newSessionShort: '新会话',
+    rename: '重命名',
+    commonQ: '常见问题',
+    sugPlaceholder: '选择问题，点击即发送…',
+    selectModel: '选择模型',
+    noThink: '禁用思考',
+    noThinkTip: '思考开关:勾选后对所有模型发送禁思考指令。会思考的模型(MiniCPM5-2B、Qwen3-30B-A3B 默认思考)将直接回答,更快更省 token;不会思考的模型无变化。',
+    autoRag: '强制RAG检索',
+    autoRagTip: '开启 = 每轮提问强制先触发一轮 RAG 检索:服务器代查手册原文并注入给模型,回答只依据检索内容,更稳定(检索过程界面不可见)。关闭 = 模型自行决定是否调 skill 检索(界面能看到工具卡片),小模型容易漏检或编造参数,不建议关闭。默认:开启。',
+    save: '保存',
+    saved: '✓ 已保存(本浏览器)',
+    saveFail: '✗ 保存失败',
+    helpTip: '怎么提问、能问什么：打开 RAG 问题地图',
+    langBtn: 'EN',
+    langTip: '切换到英文：界面、建议问题与回答都改为 English',
+    inputPlaceholder: '说点什么… (Enter 发送, Shift+Enter 换行, 可粘贴/拖拽图片)',
+    send: '发送',
+    stop: '⏹ 停止',
+    remove: '✕ 移除',
+    login: '登录',
+    loginUser: '用户名',
+    loginPass: '密码',
+    loginErr: '用户名或密码错误',
+    needConfirm: ' ⚠️ 需确认',
+    allow: '✓ 允许',
+    deny: '✗ 拒绝',
+    executing: '⏳ 执行中…',
+    denied: '🚫 已拒绝',
+    confirmFail: '⚠️ 确认发送失败',
+    chars: ' 字符',
+    kChars: 'K 字符',
+    result: ' 结果 ',
+    clickTo: ' · 点击',
+    expand: '展开',
+    collapse: '收起',
+    thinking: '💭 思考过程',
+    truncated: 'ℹ️ (为节省上下文,已截断 {n} 条较早的消息)',
+    stopped: '⏹ 已停止',
+    connLost: '⚠️ 连接中断: ',
+    connFailHint: '⚠️ 无法连接服务器\n请检查:\n1. lc serve 是否在运行\n2. 模型 base_url 是否正确\n3. 模型是否已加载',
+    reqFail: '⚠️ 请求失败 (HTTP {code})',
+    reqFailCause: '\n可能原因: 模型 API 地址错误、模型未加载、或网络不通',
+    ttft: '⚡ 首token ',
+    describeImage: '请描述这张图片',
+    imgHandled: '[图片已处理]',
+    unknownErr: '未知错误',
+    errModel: '\n→ 请检查模型名称是否正确,或模型是否已加载',
+    errUrl: '\n→ 请检查 base_url 是否正确(应以 /v1 结尾)',
+    errTimeout: '\n→ 模型响应超时,可能是推理负载过重',
+    errConn: '\n→ 模型服务未运行,请先启动 Ollama/LM Studio',
+    connectFail: '连接失败',
+    sessionExpired: '⏰ 会话已过期,请重新登录',
+  },
+  en: {
+    title: 'Car Manual Assistant 🚗 v2',
+    appName: '🚗 Car Manual Assistant',
+    newSessionShort: 'New chat',
+    rename: 'Rename',
+    commonQ: 'Common questions',
+    sugPlaceholder: 'Pick a question, click to send…',
+    selectModel: 'Select model',
+    noThink: 'No thinking',
+    noThinkTip: 'Thinking toggle: sends a no-think directive to all models. Thinking models (MiniCPM5-2B, Qwen3-30B-A3B by default) answer directly — faster, fewer tokens; non-thinking models are unaffected.',
+    autoRag: 'Force RAG',
+    autoRagTip: 'On = every question triggers one forced RAG retrieval: the server queries the manual and injects the passages, so answers stay grounded (retrieval invisible in the UI). Off = the model decides whether to call the retrieval skill (tool cards visible); small models then tend to skip retrieval or invent parameters — keep it on.',
+    save: 'Save',
+    saved: '✓ Saved (this browser)',
+    saveFail: '✗ Save failed',
+    helpTip: 'What to ask and how: open the RAG question map',
+    langBtn: '中文',
+    langTip: 'Switch to Chinese: UI, suggested questions and answers all in Chinese',
+    inputPlaceholder: 'Ask something… (Enter to send, Shift+Enter for newline, paste/drag images)',
+    send: 'Send',
+    stop: '⏹ Stop',
+    remove: '✕ Remove',
+    login: 'Sign in',
+    loginUser: 'Username',
+    loginPass: 'Password',
+    loginErr: 'Wrong username or password',
+    needConfirm: ' ⚠️ needs confirm',
+    allow: '✓ Allow',
+    deny: '✗ Deny',
+    executing: '⏳ Running…',
+    denied: '🚫 Denied',
+    confirmFail: '⚠️ Failed to send confirmation',
+    chars: ' chars',
+    kChars: 'K chars',
+    result: ' result ',
+    clickTo: ' · click to ',
+    expand: 'expand',
+    collapse: 'collapse',
+    thinking: '💭 Thinking',
+    truncated: 'ℹ️ ({n} earlier messages trimmed to save context)',
+    stopped: '⏹ Stopped',
+    connLost: '⚠️ Connection lost: ',
+    connFailHint: '⚠️ Cannot reach the server\nCheck:\n1. Is lc serve running?\n2. Is the model base_url correct?\n3. Is the model loaded?',
+    reqFail: '⚠️ Request failed (HTTP {code})',
+    reqFailCause: '\nPossible causes: wrong model API address, model not loaded, or network down',
+    ttft: '⚡ TTFT ',
+    describeImage: 'Please describe this image',
+    imgHandled: '[image processed]',
+    unknownErr: 'Unknown error',
+    errModel: '\n→ Check the model name is correct, or that the model is loaded',
+    errUrl: '\n→ Check base_url is correct (should end with /v1)',
+    errTimeout: '\n→ Model response timed out; the inference backend may be overloaded',
+    errConn: '\n→ Model service not running; start Ollama/LM Studio first',
+    connectFail: 'Connect failed',
+    sessionExpired: '⏰ Session expired, please sign in again',
+  },
+};
+function t(key) {
+  const d = I18N[LANG] || I18N.zh;
+  return d[key] !== undefined ? d[key] : (I18N.zh[key] !== undefined ? I18N.zh[key] : key);
+}
+
 // --- Session management (state machine) ---
 //
 // Invariants:
@@ -88,7 +213,7 @@ function sessionTitle(msgs) {
       if (text) return text.slice(0, 30);
     }
   }
-  return '新会话';
+  return t('newSessionShort');
 }
 
 /// Extract plain text from a message content (string or multimodal array).
@@ -152,7 +277,7 @@ async function renderSidebar() {
   // at the very top so the user sees their new conversation exists.
   if (isNewSession && currentSessionId) {
     list.appendChild(makeSessionItem({
-      id: currentSessionId, title: '✦ 新会话', updated: Date.now(),
+      id: currentSessionId, title: '✦ ' + t('newSessionShort'), updated: Date.now(),
     }, true));
   }
 
@@ -183,7 +308,7 @@ function makeSessionItem(s, isNew) {
   // Inline rename: click ✎ → swap label for an <input>, Enter/blur to commit.
   const editBtn = document.createElement('span');
   editBtn.textContent = '✎';
-  editBtn.title = '重命名';
+  editBtn.title = t('rename');
   editBtn.style.color = 'var(--muted)'; editBtn.style.marginLeft = '4px';
   editBtn.style.cursor = 'pointer'; editBtn.style.flexShrink = '0';
   editBtn.style.opacity = '0'; editBtn.style.transition = 'opacity .15s';
@@ -329,7 +454,7 @@ async function doLogin() {
       err.style.display = 'block';
     }
   } catch (e) {
-    err.textContent = '连接失败';
+    err.textContent = t('connectFail');
     err.style.display = 'block';
   }
 }
@@ -354,7 +479,7 @@ setInterval(async () => {
       showLogin();
       const note = document.createElement('div');
       note.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:8px 16px;border-radius:6px;z-index:99999;font-size:13px';
-      note.textContent = '⏰ 会话已过期,请重新登录';
+      note.textContent = t('sessionExpired');
       document.body.appendChild(note);
       setTimeout(() => note.remove(), 3000);
     }
@@ -373,7 +498,7 @@ const DEFAULT_BASE_URL = 'http://172.21.0.1:11434/v1';
 // frontend. This list decides the protocol and the 禁思考 parameter:
 // gateway → /v1 + enable_thinking via extra_body; every other model is
 // local Ollama → NATIVE /api/chat + think:false + per-request num_ctx.
-const GATEWAY_MODELS = ['qwen3.8-flash'];
+const GATEWAY_MODELS = ['qwen3.8-flash', 'deepseek-flash'];
 function fillCfg(c) {
   // Respect the saved model; fall back to the fast default on first visit or
   // when the saved model is no longer in the dropdown.
@@ -413,9 +538,9 @@ async function saveCfg() {
   const orig = btn.textContent;
   try {
     localStorage.setItem(LC_CFG_KEY, JSON.stringify(c));
-    btn.textContent = '✓ 已保存(本浏览器)';
+    btn.textContent = t('saved');
   } catch (e) {
-    btn.textContent = '✗ 保存失败';
+    btn.textContent = t('saveFail');
   }
   setTimeout(() => { btn.textContent = orig; }, 1500);
 }
@@ -495,7 +620,7 @@ function renderMarkdown(md) {
   const thinkBlocks = [];
   text = text.replace(/\u0002T([\s\S]*?)\u0002/g, (m, content) => {
     const idx = thinkBlocks.length;
-    thinkBlocks.push('<details style="margin:6px 0;border:1px solid var(--border);border-radius:6px;padding:4px 10px"><summary style="cursor:pointer;color:var(--muted);font-size:13px">💭 思考过程</summary><div style="margin-top:6px;color:var(--muted);font-size:13px;white-space:pre-wrap">' + content + '</div></details>');
+    thinkBlocks.push('<details style="margin:6px 0;border:1px solid var(--border);border-radius:6px;padding:4px 10px"><summary style="cursor:pointer;color:var(--muted);font-size:13px">' + t('thinking') + '</summary><div style="margin-top:6px;color:var(--muted);font-size:13px;white-space:pre-wrap">' + content + '</div></details>');
     return '\u0000TB' + idx + '\u0000';
   });
   // 2. Extract fenced code blocks (```lang\n...\n```) → placeholders.
@@ -611,68 +736,111 @@ let busy = false;
 //   condition; fabricating an answer is a failure. Full checklist lives in
 //   docs/rag-boundary-tests.md.
 const QUESTION_GROUPS = [
-  { label: '常见问题', items: [
-    { q: '车辆如何启动？仪表上出现 READY 代表什么？', expect: '预期：启动步骤与 READY 指示含义，引用 driving 章节，附页码' },
-    { q: 'R5 E-Tech 支持哪些充电方式？如何开始和结束充电？', expect: '预期：按 EV 章节说明 AC/DC 充电方式与插拔流程，附页码' },
-    { q: 'D 挡和 B 挡有什么区别？如何切换？', expect: '预期：按 Gear control 章节说明 D/B 挡差异与能量回收关联，附页码' },
-    { q: '仪表上的警告灯是什么意思？', expect: '预期：说明警告灯分类并指向 Warning lights 章节，附页码' },
-    { q: 'V2L 对外放电如何使用？', expect: '预期：按 V2L 章节说明用法与限制，附页码' },
+  { label: '常见问题', label_en: 'Common', items: [
+    { q: '车辆如何启动？仪表上出现 READY 代表什么？', expect: '预期：启动步骤与 READY 指示含义，引用 driving 章节，附页码',
+      q_en: 'How do I start the vehicle? What does READY on the cluster mean?', expect_en: 'Expect: starting steps and the READY indicator meaning, citing the Driving chapter, with page numbers' },
+    { q: 'R5 E-Tech 支持哪些充电方式？如何开始和结束充电？', expect: '预期：按 EV 章节说明 AC/DC 充电方式与插拔流程，附页码',
+      q_en: 'What charging methods does the R5 E-Tech support? How do I start and stop charging?', expect_en: 'Expect: AC/DC charging modes and the plug-in/out procedure per the EV chapter, with page numbers' },
+    { q: 'D 挡和 B 挡有什么区别？如何切换？', expect: '预期：按 Gear control 章节说明 D/B 挡差异与能量回收关联，附页码',
+      q_en: 'What is the difference between D and B gears? How do I switch?', expect_en: 'Expect: D/B differences and their regen linkage per the Gear control chapter, with page numbers' },
+    { q: '仪表上的警告灯是什么意思？', expect: '预期：说明警告灯分类并指向 Warning lights 章节，附页码',
+      q_en: 'What do the warning lights on the instrument cluster mean?', expect_en: 'Expect: warning-light categories, pointing to the Warning lights chapter, with page numbers' },
+    { q: 'V2L 对外放电如何使用？', expect: '预期：按 V2L 章节说明用法与限制，附页码',
+      q_en: 'How do I use the V2L external power supply?', expect_en: 'Expect: V2L usage and limits per the V2L chapter, with page numbers' },
   ]},
-  { label: '基础', items: [
-    { q: '儿童安全座椅怎么安装？', expect: '预期：按 Child safety 章节作答（ISOFIX 锚点位置、安装要点），结尾附页码引用' },
-    { q: '胎压警告灯亮了怎么办？', expect: '预期：按 Tyre pressure loss warning 章节作答（停车检查冷态胎压、复位），附页码' },
-    { q: '充电需要多长时间？', expect: '预期：说明时间随充电功率不同，引用手册数值/表格并附页码，不编造时间' },
-    { q: '冬天续航里程为什么会下降？', expect: '预期：按手册解释低温对续航的影响并给出建议，附页码' },
-    { q: '保养周期是多久？', expect: '预期：手册将具体周期指向单独保养文档，应如实转述并附页码，不编公里数' },
-    { q: '雾灯怎么开？', expect: '预期：按照明章节说明开启操作与前提条件，附页码' },
+  { label: '基础', label_en: 'Basics', items: [
+    { q: '儿童安全座椅怎么安装？', expect: '预期：按 Child safety 章节作答（ISOFIX 锚点位置、安装要点），结尾附页码引用',
+      q_en: 'How do I install a child seat?', expect_en: 'Expect: answer per the Child safety chapter (ISOFIX anchor positions, fitting points), pages cited at the end' },
+    { q: '胎压警告灯亮了怎么办？', expect: '预期：按 Tyre pressure loss warning 章节作答（停车检查冷态胎压、复位），附页码',
+      q_en: 'The tyre pressure warning light is on — what should I do?', expect_en: 'Expect: Tyre pressure loss warning chapter (stop, check cold pressures, reset), with page numbers' },
+    { q: '充电需要多长时间？', expect: '预期：说明时间随充电功率不同，引用手册数值/表格并附页码，不编造时间',
+      q_en: 'How long does charging take?', expect_en: 'Expect: time varies with charging power; cite manual values/tables with pages, no made-up durations' },
+    { q: '冬天续航里程为什么会下降？', expect: '预期：按手册解释低温对续航的影响并给出建议，附页码',
+      q_en: 'Why does the range drop in winter?', expect_en: 'Expect: manual-based explanation of cold-weather range loss plus advice, with page numbers' },
+    { q: '保养周期是多久？', expect: '预期：手册将具体周期指向单独保养文档，应如实转述并附页码，不编公里数',
+      q_en: 'What is the service interval?', expect_en: 'Expect: the manual defers to a separate maintenance document — relay honestly with pages, no invented mileage' },
+    { q: '雾灯怎么开？', expect: '预期：按照明章节说明开启操作与前提条件，附页码',
+      q_en: 'How do I turn on the fog lights?', expect_en: 'Expect: operation and preconditions per the lighting chapter, with page numbers' },
   ]},
-  { label: '边界测试', items: [
-    { q: '轮胎的标准胎压是多少？', expect: '预期（转述）：手册无具体数值（p.332 仅为标签说明图），应指向驾驶员车门 Label A，并转述冷态检查、无法冷测加 0.2–0.3 bar、热胎禁止放气，附页码；编造 bar 数 = 失败' },
-    { q: '千斤顶应该支撑在车底什么位置？', expect: '预期（命中）：指出手册规定的支撑点位置及安全警告，附页码' },
-    { q: '车钥匙电池没电了怎么更换？', expect: '预期（命中）：给出更换步骤与电池型号，附页码' },
-    { q: '12伏蓄电池亏电了怎么办？', expect: '预期（命中）：按手册应急启动/充电说明作答，附页码' },
-    { q: '长途出行前应该检查哪些项目？', expect: '预期（命中）：综合多章节给出检查清单，引用多条页码（≤4 条）' },
-    { q: '发动机机油多久换一次？', expect: '预期（拒答）：纯电手册无此内容，应明确说未找到；编造周期或硬凑无关段落 = 失败' },
-    { q: '汽油滤芯多久换一次？', expect: '预期（拒答）：纯电手册无汽油系统，应明确说未找到；硬答 = 失败' },
-    { q: '油箱盖开关在哪里？', expect: '预期（拒答）：纯电车无油箱，应明确说未找到；硬答 = 失败' },
+  { label: '边界测试', label_en: 'Boundary tests', items: [
+    { q: '轮胎的标准胎压是多少？', expect: '预期（转述）：手册无具体数值（p.332 仅为标签说明图），应指向驾驶员车门 Label A，并转述冷态检查、无法冷测加 0.2–0.3 bar、热胎禁止放气，附页码；编造 bar 数 = 失败',
+      q_en: 'What is the standard tyre pressure?', expect_en: 'Expect (paraphrase): no concrete value in the manual (p.332 is only the label legend); point to driver-door Label A and relay the cold-check rule, +0.2–0.3 bar when a cold check is impossible, never deflate hot tyres, with pages; inventing bar values = fail' },
+    { q: '千斤顶应该支撑在车底什么位置？', expect: '预期（命中）：指出手册规定的支撑点位置及安全警告，附页码',
+      q_en: 'Where under the car should the jack be positioned?', expect_en: 'Expect (hit): the manual-specified jacking points and the safety warning, with page numbers' },
+    { q: '车钥匙电池没电了怎么更换？', expect: '预期（命中）：给出更换步骤与电池型号，附页码',
+      q_en: 'The key card battery is dead — how do I replace it?', expect_en: 'Expect (hit): replacement steps and the battery type, with page numbers' },
+    { q: '12伏蓄电池亏电了怎么办？', expect: '预期（命中）：按手册应急启动/充电说明作答，附页码',
+      q_en: 'The 12 V battery is flat — what should I do?', expect_en: 'Expect (hit): the manual jump-start/charging procedure (EV precautions included), with page numbers' },
+    { q: '长途出行前应该检查哪些项目？', expect: '预期（命中）：综合多章节给出检查清单，引用多条页码（≤4 条）',
+      q_en: 'What should I check before a long trip?', expect_en: 'Expect (hit): a multi-chapter checklist citing several pages (≤4)' },
+    { q: '发动机机油多久换一次？', expect: '预期（拒答）：纯电手册无此内容，应明确说未找到；编造周期或硬凑无关段落 = 失败',
+      q_en: 'How often should the engine oil be changed?', expect_en: 'Expect (refuse): the EV manual has no such content; explicitly say not found; inventing an interval or forcing unrelated passages = fail' },
+    { q: '汽油滤芯多久换一次？', expect: '预期（拒答）：纯电手册无汽油系统，应明确说未找到；硬答 = 失败',
+      q_en: 'How often should the fuel filter be replaced?', expect_en: 'Expect (refuse): an EV has no petrol system; explicitly say not found; answering anyway = fail' },
+    { q: '油箱盖开关在哪里？', expect: '预期（拒答）：纯电车无油箱，应明确说未找到；硬答 = 失败',
+      q_en: 'Where is the fuel filler release?', expect_en: 'Expect (refuse): an EV has no fuel tank; explicitly say not found; answering anyway = fail' },
   ]},
-  { label: '驾驶辅助', items: [
-    { q: '自适应巡航在堵车时能用吗？', expect: '预期：按 Stop and Go 章节说明跟车/停走功能与激活限制，附页码' },
-    { q: '车道保持辅助怎么开启？', expect: '预期：按 Active driver assist 章节说明开启方式与工作条件，附页码' },
-    { q: '倒车雷达和倒车影像怎么用？', expect: '预期：按 Parking aids 章节说明雷达提示音与影像使用，附页码' },
-    { q: '自动泊车功能怎么触发？', expect: '预期：按 Parking aids 章节说明触发条件与操作步骤，附页码' },
-    { q: '能量回收强度怎么调节？', expect: '预期：按 Regenerative braking 章节说明换拨片/模式调节，附页码' },
+  { label: '驾驶辅助', label_en: 'Driving aids', items: [
+    { q: '自适应巡航在堵车时能用吗？', expect: '预期：按 Stop and Go 章节说明跟车/停走功能与激活限制，附页码',
+      q_en: 'Can adaptive cruise control be used in traffic jams?', expect_en: 'Expect: Stop and Go chapter — following/stop-and-go capability and activation limits, with page numbers' },
+    { q: '车道保持辅助怎么开启？', expect: '预期：按 Active driver assist 章节说明开启方式与工作条件，附页码',
+      q_en: 'How do I enable lane keeping assist?', expect_en: 'Expect: Active driver assist chapter — how to enable and operating conditions, with page numbers' },
+    { q: '倒车雷达和倒车影像怎么用？', expect: '预期：按 Parking aids 章节说明雷达提示音与影像使用，附页码',
+      q_en: 'How do the parking sensors and the reversing camera work?', expect_en: 'Expect: Parking aids chapter — sensor tones and camera use, with page numbers' },
+    { q: '自动泊车功能怎么触发？', expect: '预期：按 Parking aids 章节说明触发条件与操作步骤，附页码',
+      q_en: 'How do I trigger the automatic parking feature?', expect_en: 'Expect: Parking aids chapter — trigger conditions and steps, with page numbers' },
+    { q: '能量回收强度怎么调节？', expect: '预期：按 Regenerative braking 章节说明换挡拨片/模式调节，附页码',
+      q_en: 'How do I adjust the regenerative braking level?', expect_en: 'Expect: Regenerative braking chapter — paddle/mode adjustment, with page numbers' },
   ]},
-  { label: '车辆功能', items: [
-    { q: '车窗起雾怎么快速除雾？', expect: '预期：按空调/除雾章节说明除雾按钮与风量设置，附页码' },
-    { q: '补胎工具包怎么使用？', expect: '预期：按 Tyre repair kit 章节说明打胶步骤与 15 分钟/1.8 bar 判定阈值语境，附页码' },
-    { q: '后排童锁怎么设置？', expect: '预期：按 Child safety 章节说明童锁位置与操作，附页码' },
-    { q: '洗车需要注意什么？', expect: '预期：按 Cleaning 章节说明高压水枪距离与禁止事项，附页码' },
-    { q: '紧急呼叫 SOS 是怎么工作的？', expect: '预期：按 Emergency call 章节说明触发方式与工作原理，附页码' },
+  { label: '车辆功能', label_en: 'Features', items: [
+    { q: '车窗起雾怎么快速除雾？', expect: '预期：按空调/除雾章节说明除雾按钮与风量设置，附页码',
+      q_en: 'The windows fog up — how do I demist them quickly?', expect_en: 'Expect: HVAC/demisting chapter — the demisting button and airflow settings, with page numbers' },
+    { q: '补胎工具包怎么使用？', expect: '预期：按 Tyre repair kit 章节说明打胶步骤与 15 分钟/1.8 bar 判定阈值语境，附页码',
+      q_en: 'How do I use the tyre repair kit?', expect_en: 'Expect: Tyre repair kit chapter — sealing steps and the 15 min / 1.8 bar threshold context, with page numbers' },
+    { q: '后排童锁怎么设置？', expect: '预期：按 Child safety 章节说明童锁位置与操作，附页码',
+      q_en: 'How do I set the rear door child locks?', expect_en: 'Expect: Child safety chapter — lock location and operation, with page numbers' },
+    { q: '洗车需要注意什么？', expect: '预期：按 Cleaning 章节说明高压水枪距离与禁止事项，附页码',
+      q_en: 'What should I watch out for when washing the car?', expect_en: 'Expect: Cleaning chapter — pressure-washer distance and prohibitions, with page numbers' },
+    { q: '紧急呼叫 SOS 是怎么工作的？', expect: '预期：按 Emergency call 章节说明触发方式与工作原理，附页码',
+      q_en: 'How does the emergency call (SOS) work?', expect_en: 'Expect: Emergency call chapter — triggering and how it works, with page numbers' },
   ]},
-  { label: '扩展边界', items: [
-    { q: '火花塞多久换一次？', expect: '预期（拒答）：纯电车无火花塞，应明确说未找到；硬答 = 失败' },
-    { q: '正时皮带多少公里换一次？', expect: '预期（拒答）：纯电车无正时皮带，应明确说未找到；硬答 = 失败' },
-    { q: '变速箱油需要更换吗？', expect: '预期（谨慎）：电驱减速器油如手册未提及更换周期应如实说明；编造公里数 = 失败' },
-    { q: '电池质保是多少年？', expect: '预期（转述）：手册通常指向单独质保文档，应如实转述不编年限' },
-    { q: '百公里加速需要几秒？', expect: '预期（边界）：按手册技术规格如实回答，规格无此数据应明确说明；编造秒数 = 失败' },
+  { label: '扩展边界', label_en: 'Extended boundary', items: [
+    { q: '火花塞多久换一次？', expect: '预期（拒答）：纯电车无火花塞，应明确说未找到；硬答 = 失败',
+      q_en: 'How often do the spark plugs need replacing?', expect_en: 'Expect (refuse): an EV has no spark plugs; explicitly say not found; answering anyway = fail' },
+    { q: '正时皮带多少公里换一次？', expect: '预期（拒答）：纯电车无正时皮带，应明确说未找到；硬答 = 失败',
+      q_en: 'After how many km should the timing belt be replaced?', expect_en: 'Expect (refuse): an EV has no timing belt; explicitly say not found; answering anyway = fail' },
+    { q: '变速箱油需要更换吗？', expect: '预期（谨慎）：电驱减速器油如手册未提及更换周期应如实说明；编造公里数 = 失败',
+      q_en: 'Does the gearbox oil need changing?', expect_en: 'Expect (caution): if the manual gives no interval for the drive-reducer oil, say so honestly; inventing mileage = fail' },
+    { q: '电池质保是多少年？', expect: '预期（转述）：手册通常指向单独质保文档，应如实转述不编年限',
+      q_en: 'How many years does the battery warranty last?', expect_en: 'Expect (paraphrase): the manual defers to a separate warranty document; relay honestly, no invented years' },
+    { q: '百公里加速需要几秒？', expect: '预期（边界）：按手册技术规格如实回答，规格无此数据应明确说明；编造秒数 = 失败',
+      q_en: 'What is the 0–100 km/h acceleration time?', expect_en: 'Expect (boundary): answer only from the manual tech specs; if absent, say so explicitly; inventing seconds = fail' },
   ]},
 ];
 // Suggested questions render as ONE dropdown (grouped by optgroup): picks a
 // question, sends it, then resets so the same question can be picked again.
+// Bilingual: rebuilt by applyLang() on language switch.
 const sugSelect = document.getElementById('sug-select');
-for (const g of QUESTION_GROUPS) {
-  const og = document.createElement('optgroup');
-  og.label = g.label;
-  for (const q of g.items) {
-    const o = document.createElement('option');
-    o.value = q.q;
-    o.textContent = q.q;
-    o.title = q.expect;
-    og.appendChild(o);
+function renderSuggestions() {
+  sugSelect.innerHTML = '';
+  const ph = document.createElement('option');
+  ph.value = '';
+  ph.textContent = t('sugPlaceholder');
+  sugSelect.appendChild(ph);
+  for (const g of QUESTION_GROUPS) {
+    const og = document.createElement('optgroup');
+    og.label = LANG === 'en' ? (g.label_en || g.label) : g.label;
+    for (const q of g.items) {
+      const o = document.createElement('option');
+      o.value = LANG === 'en' ? (q.q_en || q.q) : q.q;
+      o.textContent = LANG === 'en' ? (q.q_en || q.q) : q.q;
+      o.title = LANG === 'en' ? (q.expect_en || q.expect) : q.expect;
+      og.appendChild(o);
+    }
+    sugSelect.appendChild(og);
   }
-  sugSelect.appendChild(og);
 }
+renderSuggestions();
 sugSelect.addEventListener('change', () => {
   if (!sugSelect.value) return;
   input.value = sugSelect.value;
@@ -767,6 +935,42 @@ const SYSTEM_PROMPT =
   '不得把特定场景的数值泛化为通用参数（例如补胎流程中的压力阈值不是标准胎压）；' +
   '凡手册写明以车门标签(Label A)为准的参数，必须提示用户查看车门标签。\n' +
   '\n其他需求先用工具收集信息再行动。简洁回答，操作后报告结果。';
+
+// SYSTEM_PROMPT 的英文版：界面切到 English 时使用。内容与中文版逐条对应，
+// 参考来源、拒答、数值转述纪律完全一致，只是语言换成英文。
+const SYSTEM_PROMPT_EN =
+  'You are the vehicle Q&A assistant for the Renault 5 E-Tech (Car Manual Assistant), and you can also handle routine coding tasks. Available tools:\n' +
+  '- read(path): read a file or list a directory\n' +
+  '- grep(pattern,path): search file contents\n' +
+  '- glob(pattern,path): match files by pattern (e.g. **/*.rs)\n' +
+  '- audit(path): security scan\n' +
+  '- fetch(url): fetch web content\n' +
+  '- edit(path,old,new): modify a file\n' +
+  '- write(path,content): create/overwrite a file\n' +
+  '- bash(command): run a shell command (build, run, git, etc.)\n' +
+  '- skill_list(): list all available skills (capability extensions)\n' +
+  '- skill_run(id,args?): run a skill (script-type executes, prompt-type returns content)\n' +
+  '\n[VEHICLE Q&A RULES — HIGHEST PRIORITY, MUST FOLLOW] For ANY vehicle question (features, operations, buttons, warning lights, charging, range, maintenance, specs):\n' +
+  'Step 1: first call skill_run("manual-rag", "<the user question verbatim>") to query the manual knowledge base;\n' +
+  'Step 2: answer ONLY from the retrieved passages; quote numbers and warning wording exactly;\n' +
+  'Step 3: if the retrieval finds nothing, explicitly say "the manual does not cover this" and omit the sources section.\n' +
+  'Example flow:\nUser: How do I turn on the fog lights?\nCorrect: first call skill_run("manual-rag", "How do I turn on the fog lights?"), then answer from the returned passages and end with sources.\n' +
+  'Wrong: calling no tool and answering vehicle questions from memory.\n' +
+  "\n[ANSWER STYLE — you are the owner's in-car assistant, not a knowledge-base query UI]\n" +
+  '- Warm, plain, conversational tone — like a car-savvy friend sitting next to the owner; avoid jargon;\n' +
+  '- Keep it short: under 150 words for normal questions; lead with the conclusion and the steps; no preamble, no summary, no closing pleasantries;\n' +
+  '- No tables or multi-level headings; short sentences; numbered steps for complex operations; safety warnings must be kept, never trimmed for brevity;\n' +
+  '- Never say "according to the manual", "page X", "chapter", "retrieval", "chunk" or "knowledge base"; never narrate the retrieval process;\n' +
+  '- State the steps and precautions directly; when the content only partially covers the question, answer the covered part naturally without declaring "not covered".\n' +
+  '\n[SOURCE FORMAT] End every answer with (max 4 entries, only those actually used, owner-friendly wording):\n' +
+  'Sources:\n- Owner manual p.<page> (<topic>)\n' +
+  'Example: - Owner manual p.148 (Lighting and signals)\n' +
+  'Fabricating citations is strictly forbidden: without a skill_run retrieval, never output any page number or the word "Sources";\n' +
+  'Never put file paths or chunk ids into the sources.\n' +
+  '[NUMBER DISCIPLINE] When quoting any number, relay its original qualifiers verbatim (chapter, scenario, precondition);\n' +
+  'do not generalise scenario-specific numbers into universal specs (e.g. the pressure threshold in the tyre-repair flow is not the standard tyre pressure);\n' +
+  'wherever the manual defers to the driver-door label (Label A), tell the user to check that label.\n' +
+  '\nFor other requests, gather information with tools first, then act. Answer concisely and report results after actions.';
 // 无工具模型的系统提示词(服务端 config.json 对该模型 tools:false):
 // 不提供工具列表、不要求调用 skill —— 检索由服务端自动完成并以
 // 【本轮手册检索结果】消息注入, 模型只需读材料答题。
@@ -789,10 +993,38 @@ const NO_TOOL_SYSTEM_PROMPT =
   '严禁编造引用：未经检索，绝不允许输出任何页码或"参考来源"字样。\n' +
   '【数值转述纪律】引用数值时必须连同原文的限定条件（场景、前提）一起转述；手册写明以车门标签(Label A)为准的参数，必须提示用户查看车门标签。';
 
+// NO_TOOL_SYSTEM_PROMPT 的英文版（MiniCPM5-2B 等无工具模型，服务端自动注入检索）。
+const NO_TOOL_SYSTEM_PROMPT_EN =
+  'You are the vehicle Q&A assistant for the Renault 5 E-Tech (Car Manual Assistant).\n' +
+  '\n[ANSWER BASIS] The official-manual retrieval results for each question are provided as a [Manual retrieval results for this turn] message:\n' +
+  '- Answer ONLY from the retrieved passages; quote numbers and warning wording exactly;\n' +
+  '- If the retrieval does not cover the question, explicitly say "the manual does not cover this" and omit the sources section;\n' +
+  '- Never attempt to call any tool, and never output function / tool_calls style invocation text.\n' +
+  "\n[ANSWER STYLE — for car owners]\n" +
+  '- Warm, plain, conversational tone — like a car-savvy friend sitting next to the owner; avoid jargon;\n' +
+  '- Keep it short: under 150 words for normal questions; lead with the conclusion and the steps; no preamble, no summary, no closing pleasantries;\n' +
+  '- No tables or multi-level headings; short sentences; numbered steps for complex operations; safety warnings must be kept;\n' +
+  '- Never say "according to the manual", "page X", "retrieval" or "knowledge base"; never narrate the retrieval process;\n' +
+  '- When the content only partially covers the question, answer the covered part naturally without declaring "not covered".\n' +
+  '\n[SOURCE FORMAT] End every answer with (max 4 entries, only those actually used):\n' +
+  'Sources:\n- Owner manual p.<page> (<topic>)\n' +
+  'Example: - Owner manual p.148 (Lighting and signals)\n' +
+  'Fabricating citations is strictly forbidden: without retrieval, never output any page number or the word "Sources".\n' +
+  '[NUMBER DISCIPLINE] When quoting numbers, relay their original qualifiers (scenario, precondition) verbatim; wherever the manual defers to the driver-door label (Label A), tell the user to check that label.';
+
 // 与服务端 config.json 的 tools:false 配置保持同步
 const NO_TOOL_MODELS = ['openbmb/minicpm5-2b:latest'];
+// 语言强制规则：拼在系统提示词末尾（服务端注入的 AGENTS.md 在最前），
+// 英文会话强制英文回答，中文会话强制中文回答——覆盖 AGENTS.md 里的默认语言。
+const LANG_RULE = {
+  zh: '\n【回答语言——最高优先级】必须始终用中文回答，即使用户问题或本提示词的其他部分是英文；按钮名、功能名等专有名词可保留英文。\n',
+  en: '\n[RESPONSE LANGUAGE — HIGHEST PRIORITY] You must ALWAYS respond in English, even if the user question or other parts of this prompt are in Chinese; proper nouns (button names, feature names) may stay in their official form.\n',
+};
 function systemPromptFor(model) {
-  return NO_TOOL_MODELS.includes(model) ? NO_TOOL_SYSTEM_PROMPT : SYSTEM_PROMPT;
+  const base = NO_TOOL_MODELS.includes(model)
+    ? (LANG === 'en' ? NO_TOOL_SYSTEM_PROMPT_EN : NO_TOOL_SYSTEM_PROMPT)
+    : (LANG === 'en' ? SYSTEM_PROMPT_EN : SYSTEM_PROMPT);
+  return base + LANG_RULE[LANG];
 }
 
 function scrollDown() { chat.scrollTop = chat.scrollHeight; }
@@ -810,7 +1042,7 @@ function addToolCard(tool, args, needsConfirm, confirmId) {
   const div = document.createElement('div');
   div.className = 'tool-card';
   div.innerHTML =
-    '<div class="tname">🔧 ' + tool + (needsConfirm ? ' ⚠️ 需确认' : '') + '</div>' +
+    '<div class="tname">🔧 ' + tool + (needsConfirm ? t('needConfirm') : '') + '</div>' +
     '<div class="targs">' + (typeof args === 'string' ? args : JSON.stringify(args)) + '</div>' +
     '<div class="tres-toggle" hidden></div>' +
     '<div class="tres"></div>';
@@ -823,7 +1055,7 @@ function addToolCard(tool, args, needsConfirm, confirmId) {
   const FOLD_THRESHOLD = 200;
   let folded = true;
   let lastOk = true, lastText = '';
-  const fmtChars = (n) => (n >= 1000 ? (n / 1000).toFixed(1) + 'K 字符' : n + ' 字符');
+  const fmtChars = (n) => (n >= 1000 ? (n / 1000).toFixed(1) + t('kChars') : n + t('chars'));
   toggle.onclick = () => { folded = !folded; tres.setResult(lastOk, lastText); };
   tres.setResult = (ok, text) => {
     lastOk = ok; lastText = text || '';
@@ -831,8 +1063,8 @@ function addToolCard(tool, args, needsConfirm, confirmId) {
     if (lastText.length > FOLD_THRESHOLD) {
       toggle.hidden = false;
       toggle.className = 'tres-toggle' + cls;
-      toggle.textContent = (folded ? '▶' : '▼') + ' ' + (ok ? '✓' : '✗') + ' 结果 ' +
-        fmtChars(lastText.length) + ' · 点击' + (folded ? '展开' : '收起');
+      toggle.textContent = (folded ? '▶' : '▼') + ' ' + (ok ? '✓' : '✗') + t('result') +
+        fmtChars(lastText.length) + t('clickTo') + (folded ? t('expand') : t('collapse'));
       tres.hidden = folded;
       tres.textContent = lastText;
     } else {
@@ -849,12 +1081,12 @@ function addToolCard(tool, args, needsConfirm, confirmId) {
     btns.className = 'confirm-btns';
     btns.style.marginTop = '6px';
     const allow = document.createElement('button');
-    allow.textContent = '✓ 允许'; allow.style.marginRight = '8px';
+    allow.textContent = t('allow'); allow.style.marginRight = '8px';
     allow.style.background = '#43a047'; allow.style.color = '#fff';
     allow.style.border = 'none'; allow.style.padding = '4px 12px';
     allow.style.borderRadius = '4px'; allow.style.cursor = 'pointer';
     const deny = document.createElement('button');
-    deny.textContent = '✗ 拒绝';
+    deny.textContent = t('deny');
     deny.style.background = '#e53935'; deny.style.color = '#fff';
     deny.style.border = 'none'; deny.style.padding = '4px 12px';
     deny.style.borderRadius = '4px'; deny.style.cursor = 'pointer';
@@ -867,9 +1099,9 @@ function addToolCard(tool, args, needsConfirm, confirmId) {
         body: JSON.stringify({ confirm_id: confirmId, allowed: allowed }),
       }).then(() => {
         btns.remove();
-        tres.textContent = allowed ? '⏳ 执行中…' : '🚫 已拒绝';
+        tres.textContent = allowed ? t('executing') : t('denied');
       }).catch(() => {
-        tres.textContent = '⚠️ 确认发送失败';
+        tres.textContent = t('confirmFail');
       });
     };
     allow.onclick = () => sendConfirm(true);
@@ -896,7 +1128,7 @@ async function send() {
   let content;
   if (pendingImage) {
     content = [
-      { type: 'text', text: text || '请描述这张图片' },
+      { type: 'text', text: text || t('describeImage') },
       { type: 'image_url', image_url: { url: pendingImage.dataUrl } },
     ];
     clearImage();
@@ -907,13 +1139,13 @@ async function send() {
 
   busy = true;
   abortCtrl = new AbortController();
-  sendBtn.textContent = '⏹ 停止';
+  sendBtn.textContent = t('stop');
   sendBtn.disabled = false;
   sendBtn.onclick = () => { if (abortCtrl) abortCtrl.abort(); };
   await streamChat();
   busy = false;
   abortCtrl = null;
-  sendBtn.textContent = '发送';
+  sendBtn.textContent = t('send');
   sendBtn.onclick = send;
 }
 
@@ -990,7 +1222,7 @@ async function streamChat() {
   const nonSystem = messages.filter(m => m.role !== 'system');
   const trimmed = trimContext(nonSystem);
   if (trimmed.length < nonSystem.length) {
-    addBubble('assistant', 'ℹ️ (为节省上下文,已截断 ' + (nonSystem.length - trimmed.length) + ' 条较早的消息)');
+    addBubble('assistant', t('truncated').replace('{n}', nonSystem.length - trimmed.length));
   }
   const selectedModel = document.getElementById('model').value.trim();
   const reqMessages = [
@@ -1038,8 +1270,8 @@ async function streamChat() {
     });
     if (resp.status === 401) { showLogin(); return; }
     if (!resp.ok) {
-      let hint = '⚠️ 请求失败 (HTTP ' + resp.status + ')';
-      if (resp.status === 500) hint += '\n可能原因: 模型 API 地址错误、模型未加载、或网络不通';
+      let hint = t('reqFail').replace('{code}', resp.status);
+      if (resp.status === 500) hint += t('reqFailCause');
       addBubble('assistant', hint);
       return;
     }
@@ -1074,15 +1306,15 @@ async function streamChat() {
       }
       const stopNote = document.createElement('div');
       stopNote.style.cssText = 'font-size:12px;color:var(--muted);margin-top:4px';
-      stopNote.textContent = '⏹ 已停止';
+      stopNote.textContent = t('stopped');
       chat.appendChild(stopNote);
       scrollDown();
       return;
     }
     const msg = e.message || '';
-    let hint = '⚠️ 连接中断: ' + msg;
+    let hint = t('connLost') + msg;
     if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
-      hint = '⚠️ 无法连接服务器\n请检查:\n1. lc serve 是否在运行\n2. 模型 base_url 是否正确\n3. 模型是否已加载';
+      hint = t('connFailHint');
     }
     addBubble('assistant', hint);
   }
@@ -1164,7 +1396,7 @@ async function streamChat() {
       if (ev.tps) {
         const stat = document.createElement('div');
         stat.style.cssText = 'font-size:12px;color:var(--muted);margin-top:4px;align-self:flex-end';
-        stat.textContent = '⚡ 首token ' + (ttftMs !== null ? (ttftMs / 1000).toFixed(1) + 's' : '--') + ' · ' + ev.tps.toFixed(1) + ' tok/s · ' + ev.tokens + ' tok · ' + (ev.elapsed_ms / 1000).toFixed(1) + 's';
+        stat.textContent = t('ttft') + (ttftMs !== null ? (ttftMs / 1000).toFixed(1) + 's' : '--') + ' · ' + ev.tps.toFixed(1) + ' tok/s · ' + ev.tokens + ' tok · ' + (ev.elapsed_ms / 1000).toFixed(1) + 's';
         chat.appendChild(stat);
         scrollDown();
       }
@@ -1175,7 +1407,7 @@ async function streamChat() {
       messages.forEach(m => {
         if (m.role === 'user' && Array.isArray(m.content)) {
           const textPart = m.content.find(p => p.type === 'text');
-          m.content = textPart ? textPart.text : '[图片已处理]';
+          m.content = textPart ? textPart.text : t('imgHandled');
         }
       });
       // Persist this session after each completed reply.
@@ -1183,16 +1415,16 @@ async function streamChat() {
     } else if (ev.type === 'error') {
       const div = document.createElement('div');
       div.className = 'err';
-      let msg = ev.message || '未知错误';
+      let msg = ev.message || t('unknownErr');
       // Add actionable hints for common errors.
       if (msg.includes('model_not_found') || msg.includes('No models loaded')) {
-        msg += '\n→ 请检查模型名称是否正确,或模型是否已加载';
+        msg += t('errModel');
       } else if (msg.includes('404') || msg.includes('Not Found')) {
-        msg += '\n→ 请检查 base_url 是否正确(应以 /v1 结尾)';
+        msg += t('errUrl');
       } else if (msg.includes('timeout') || msg.includes('Timeout')) {
-        msg += '\n→ 模型响应超时,可能是推理负载过重';
+        msg += t('errTimeout');
       } else if (msg.includes('Connection refused') || msg.includes('ECONNREFUSED')) {
-        msg += '\n→ 模型服务未运行,请先启动 Ollama/LM Studio';
+        msg += t('errConn');
       }
       div.textContent = '⚠️ ' + msg;
       chat.appendChild(div); scrollDown();
@@ -1208,3 +1440,39 @@ input.addEventListener('keydown', (e) => {
     send();
   }
 });
+
+// --- Language toggle: UI text, suggested questions, help page and the system
+// prompt (answer language) all follow. Persisted per browser; the help page
+// reads the same localStorage key.
+function applyLang() {
+  document.documentElement.lang = LANG === 'en' ? 'en' : 'zh';
+  document.title = t('title');
+  document.querySelector('header h1').textContent = t('appName');
+  const loginTitle = document.querySelector('#login-overlay h2');
+  if (loginTitle) loginTitle.textContent = t('appName');
+  document.getElementById('login-user').placeholder = t('loginUser');
+  document.getElementById('login-pass').placeholder = t('loginPass');
+  document.getElementById('login-btn').textContent = t('login');
+  document.getElementById('login-err').textContent = t('loginErr');
+  document.getElementById('new-session').textContent = '＋ ' + t('newSessionShort');
+  document.getElementById('sug-title').textContent = t('commonQ');
+  document.getElementById('model').title = t('selectModel');
+  document.getElementById('no_think_label').textContent = t('noThink');
+  document.getElementById('no_think_wrap').title = t('noThinkTip');
+  document.getElementById('auto_rag_label').textContent = t('autoRag');
+  document.getElementById('auto_rag_wrap').title = t('autoRagTip');
+  document.getElementById('save_cfg').textContent = t('save');
+  document.getElementById('lang_btn').textContent = t('langBtn');
+  document.getElementById('lang_btn').title = t('langTip');
+  document.getElementById('help_btn').title = t('helpTip');
+  document.getElementById('input').placeholder = t('inputPlaceholder');
+  document.getElementById('send').textContent = t('send');
+  document.getElementById('img-remove').textContent = t('remove');
+  renderSuggestions();
+}
+document.getElementById('lang_btn').onclick = () => {
+  LANG = LANG === 'zh' ? 'en' : 'zh';
+  try { localStorage.setItem(LANG_KEY, LANG); } catch (e) {}
+  applyLang();
+};
+applyLang();
