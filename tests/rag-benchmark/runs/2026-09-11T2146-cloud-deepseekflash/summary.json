@@ -1,32 +1,32 @@
 {
  "judge_model": "zcode-agent(对话模型)",
- "generated_at": "2026-09-11 22:33",
+ "generated_at": "2026-09-11 23:43",
  "golden_unreviewed": 0,
  "models": {
   "deepseek-flash": {
    "n": 35,
-   "score_sum": 299,
+   "score_sum": 295,
    "latency_sum": 180.6,
    "verdicts": {
-    "WEAK": 9,
-    "PASS": 26
+    "PASS": 29,
+    "WEAK": 6
    },
    "by_kind": {
     "hit": {
      "n": 25,
-     "score_sum": 212
+     "score_sum": 210
     },
     "paraphrase": {
      "n": 5,
-     "score_sum": 44
+     "score_sum": 41
     },
     "refuse": {
      "n": 5,
-     "score_sum": 43
+     "score_sum": 44
     }
    },
    "fails": [],
-   "avg_score": 8.5,
+   "avg_score": 8.4,
    "avg_latency_s": 5.2
   }
  },
@@ -34,12 +34,12 @@
   {
    "model": "deepseek-flash",
    "id": "hit-child-seat",
-   "verdict": "WEAK",
-   "score": 6,
+   "verdict": "PASS",
+   "score": 9,
    "points": [
     {
      "point": "ISOFIX 锚点位置（座椅背与坐垫间环形标记，p.91-98）",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "后排安装优先/前排限制条件",
@@ -47,7 +47,7 @@
     },
     {
      "point": "安装步骤要点",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码引用",
@@ -56,7 +56,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "锚点位置只答了座椅靠背上的锚点，漏掉'两个ISOFIX环位于座椅靠背与坐垫之间并带专门符号标记'的关键细节，且把后排侧座的座椅前移后移调整法误接到前排乘客位后向安装场景，其余要点与页码引用基本到位，无编造数值。",
+   "reason": "ISOFIX锚点位置、后排优先与前排气囊关闭条件、安全带/ISOFIX安装步骤均覆盖，页码与标准答案不同但内容一致，零编造。",
    "kind": "hit",
    "question": "儿童安全座椅怎么安装？",
    "latency_s": 6.3,
@@ -66,8 +66,8 @@
   {
    "model": "deepseek-flash",
    "id": "hit-tyre-warning",
-   "verdict": "PASS",
-   "score": 9,
+   "verdict": "WEAK",
+   "score": 7,
    "points": [
     {
      "point": "立即停车检查冷态胎压",
@@ -75,7 +75,7 @@
     },
     {
      "point": "按胎压标签复位流程",
-     "status": "covered"
+     "status": "partial"
     },
     {
      "point": "附页码 p.180-183",
@@ -84,7 +84,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "冷态检查四轮并按车门标签调整、无法冷测加0.2~0.3 bar、热胎禁放气、充气后复位、闪烁后常亮的重复位与故障找经销商均答到，数值均见标准答案，页码引用规范。",
+   "reason": "冷态查压与复位时机完整，但复位流程漏掉经多媒体屏幕、车辆静止且点火接通执行的关键渠道，判部分覆盖。",
    "kind": "hit",
    "question": "胎压警告灯亮了怎么办？",
    "latency_s": 3.3,
@@ -116,7 +116,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "明确说明手册无固定充电时长并如实转述取决于剩余电量与充电桩功率、仪表盘显示估计时间及实际可能更久与80%建议，未编造小时数，页码齐全。",
+   "reason": "如实说明手册无固定时长并转述剩余电量与桩功率两因素及仪表盘显示，无编造小时数，引用规范。",
    "kind": "paraphrase",
    "question": "充电需要多长时间？",
    "latency_s": 3.9,
@@ -126,12 +126,12 @@
   {
    "model": "deepseek-flash",
    "id": "hit-winter-range",
-   "verdict": "WEAK",
-   "score": 8,
+   "verdict": "PASS",
+   "score": 9,
    "points": [
     {
      "point": "按手册解释低温对续航的影响",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "给出手册中的建议",
@@ -144,7 +144,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "以暖风能耗和冬季高速/拥堵大量使用热舒适功能的显示示例解释续航下降并给出ECO、预约预热、胎压、降速等手册建议，但漏掉低温使电池可用能量减少的机理，页码齐全。",
+   "reason": "低温影响（加热用量、冬季胎、Low档显示）与ECO、编程模式、胎压、降速等手册建议齐全，附页码零编造。",
    "kind": "hit",
    "question": "冬天续航里程为什么会下降？",
    "latency_s": 5.5,
@@ -176,7 +176,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "如实说明手册无具体保养周期并指向保养文档，Service in/due/required 阈值显示与保养后按住复位按钮约10秒的规则完整，932英里为标准答案已有的显示阈值而非周期数值，无编造。",
+   "reason": "如实说明手册无周期数值并指向保养文档，Service in/due/required显示与约10秒复位规则转述准确，932英里为标准答案已有数字不算编造。",
    "kind": "hit",
    "question": "保养周期是多久？",
    "latency_s": 5.4,
@@ -208,7 +208,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "开启（环转至AUTO再对准雾灯符号）与关闭操作、仪表指示灯点亮及随外部灯光关闭而熄灭的前提均答到，页码p.148在标准范围内。",
+   "reason": "开启与关闭操作、仪表指示灯确认及雾雪天不自动点亮提醒覆盖完整，页码p.148与标准p.147-148相邻且内容一致。",
    "kind": "hit",
    "question": "雾灯怎么开？",
    "latency_s": 5.6,
@@ -240,7 +240,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "车底四个专用举升点、托盘须贴靠举升点、80–140 mm平板千斤顶及大于车轴允许重量、3 cm限高、手刹空载平地条件与错位损坏动力电池的警告均答到，页码规范。",
+   "reason": "四个举升点、80–140 mm平板直径、离地不超3厘米与错位损坏动力电池警告齐全，引用页码不同但内容一致。",
    "kind": "hit",
    "question": "千斤顶应该支撑在车底什么位置？",
    "latency_s": 2.9,
@@ -268,7 +268,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "滑动后盖、取电池盖、按盖内方向装新电池、装回后按任意键四次等步骤完整，未编造具体电池型号仅要求正确型号并可在经销商购买，两年寿命与标准答案一致，页码齐全。",
+   "reason": "更换步骤与复装后按四次按键确认完整，未编造电池型号并指出经销店可购、寿命约两年，与手册一致。",
    "kind": "hit",
    "question": "车钥匙电池没电了怎么更换？",
    "latency_s": 5.2,
@@ -278,8 +278,8 @@
   {
    "model": "deepseek-flash",
    "id": "hit-12v-battery",
-   "verdict": "WEAK",
-   "score": 8,
+   "verdict": "PASS",
+   "score": 9,
    "points": [
     {
      "point": "应急启动/充电说明",
@@ -287,7 +287,7 @@
     },
     {
      "point": "电动车专属注意事项",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码",
@@ -296,7 +296,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "充电禁令、禁止断开与联系经销商/救援均正确，并正确引用卡片失效与p.141助力转向角度重置等补充事实（属真实手册内容，不构成编造），但未提'不得用本电动车为他车救援启动'这一关键电动车专属禁令，故该要点partial；'熄火等约一分钟'为标准答案之外的细微添加。",
+   "reason": "禁止外充搭电、须专业人员操作等要点与亏电后方向盘重置等电动车注意事项覆盖完整，附页码无编造。",
    "kind": "hit",
    "question": "12伏蓄电池亏电了怎么办？",
    "latency_s": 6.8,
@@ -307,7 +307,7 @@
    "model": "deepseek-flash",
    "id": "hit-pretrip",
    "verdict": "WEAK",
-   "score": 7,
+   "score": 5,
    "points": [
     {
      "point": "综合多章节的检查清单",
@@ -320,7 +320,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "胎压、轮胎状况与制动液三项检查详细且引用恰4条页码，但对比标准答案缺冷却液、玻璃水与12V电池等检查项，清单不够完整。",
+   "reason": "仅覆盖轮胎与制动液两类检查，缺仪表警告消息、保养间隔、驾驶辅助传感器清洁与12V电池等清单项，覆盖面明显窄于标准清单；所引1.6mm、+0.2~0.3bar等为手册其他章节真实内容，不构成编造。",
    "kind": "hit",
    "question": "长途出行前应该检查哪些项目？",
    "latency_s": 6.1,
@@ -348,7 +348,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "选巡航模式、30 km/h以上推SET存速、绿色指示确认、Invalid Speed提示及ECO限制等准确，但完全未提暂停/待命条件（按0、踩制动、挂N），激活/暂停要点只答一半。",
+   "reason": "设定步骤与激活条件（30km/h下Invalid Speed）清楚，但完全未提暂停待机与RES恢复操作，激活/暂停条件仅部分覆盖。",
    "kind": "hit",
    "question": "定速巡航怎么设置巡航车速？",
    "latency_s": 5.5,
@@ -358,12 +358,12 @@
   {
    "model": "deepseek-flash",
    "id": "hit-fuse-box",
-   "verdict": "WEAK",
-   "score": 8,
+   "verdict": "PASS",
+   "score": 9,
    "points": [
     {
      "point": "保险丝盒位置",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "检查/更换要点",
@@ -376,7 +376,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "手套箱后的B盒、镊子取丝、侧滑取下、不用空置保险丝位与同额定值防过热警告完整，但A盒仅说掰开盖板未说明位于乘客舱仪表台区域，位置要点不完整。",
+   "reason": "A/B两处保险丝盒位置、夹子取件侧滑取下、不建议使用空位等要点齐全，页码与标准相邻且内容一致。",
    "kind": "hit",
    "question": "保险丝盒在哪里？保险丝坏了怎么检查更换？",
    "latency_s": 2.5,
@@ -386,8 +386,8 @@
   {
    "model": "deepseek-flash",
    "id": "hit-emergency-call",
-   "verdict": "PASS",
-   "score": 9,
+   "verdict": "WEAK",
+   "score": 7,
    "points": [
     {
      "point": "触发方式",
@@ -395,7 +395,7 @@
     },
     {
      "point": "呼叫流程/工作方式",
-     "status": "covered"
+     "status": "partial"
     },
     {
      "point": "附页码",
@@ -404,7 +404,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "自动触发（预紧器/气囊）、手动长按3秒或10秒内按5次、接通前长按约2秒取消、仅呼叫中心能挂断及各指示灯含义齐全，数值均在标准答案内，页码规范。",
+   "reason": "自动/手动触发、误按取消与指示灯含义覆盖好，但漏掉发送车辆数据、语音通话、必要时援助的固定呼叫流程。",
    "kind": "hit",
    "question": "紧急呼叫（SOS）功能是怎么工作的？",
    "latency_s": 3.7,
@@ -415,7 +415,7 @@
    "model": "deepseek-flash",
    "id": "hit-gear-p",
    "verdict": "PASS",
-   "score": 10,
+   "score": 8,
    "points": [
     {
      "point": "指出手册换挡杆没有 P 挡（只有 R/N/D/B）",
@@ -432,7 +432,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "准确指出无P挡仅R/N/D/B，停车程序含停稳挂N、施加电子驻车并以仪表和开关指示灯确认，自动施加条件与N挡不锁驱动轮、未停稳不关点火等警告齐全，零编造、页码规范。",
+   "reason": "无P挡说明、挂N加驻车制动并经指示灯确认的停车程序均正确，但熄火或解安全带或开门自动施加电子驻车为标准答案未载的附加说法，小幅扣分。",
    "kind": "hit",
    "question": "挡位怎么挂入P挡？",
    "latency_s": 6.2,
@@ -442,8 +442,8 @@
   {
    "model": "deepseek-flash",
    "id": "hit-car-wash",
-   "verdict": "WEAK",
-   "score": 7,
+   "verdict": "PASS",
+   "score": 9,
    "points": [
     {
      "point": "手工洗车建议",
@@ -451,7 +451,7 @@
     },
     {
      "point": "高压/自动洗车注意事项",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码",
@@ -460,7 +460,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "手工洗车、充电中禁洗与禁高压冲机舱/充电口/动力电池及滚刷洗车前的雨刮天线等准备齐全，但漏掉高压设备须低于100 bar、距15 cm、15 L/min的许可条件，且把哑光漆专属禁忌泛化成通用建议。",
+   "reason": "手工洗车、高压水枪禁区、滚刷洗车准备与充电中禁洗、禁冲充电口等要点全面，附页码且零编造。",
    "kind": "hit",
    "question": "洗车有什么注意事项？",
    "latency_s": 5.0,
@@ -488,7 +488,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "Clear View按钮13操作、再按或调风向风量内循环退出、一键除雾自动联动空调与后窗除冰及结冰时改用刮板省电的注意事项均与标准答案一致，页码规范。",
+   "reason": "Clear View一键除雾操作、自动介入空调与退出方式正确，并给出结冰时先手动刮冰的注意事项，内容与手册一致。",
    "kind": "hit",
    "question": "前挡风玻璃起雾怎么除雾？",
    "latency_s": 4.4,
@@ -516,7 +516,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "ECO激活方式、约115 km/h限速、油门踩到底临时退出并自动恢复、驾驶风格叶片与功率表及车速/路况/暖风/轮胎/电器/载荷六项因素均与标准答案一致，页码齐全。",
+   "reason": "ECO开法、约115km/h限速与六项能耗因素全覆盖，数字均出自标准答案，引用规范零编造。",
    "kind": "hit",
    "question": "有哪些经济驾驶省电的技巧？",
    "latency_s": 3.5,
@@ -544,7 +544,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "发动机舱储液罐位置、平地熄火读数、不低于MINI、制动效率下降立即检查、认可油液取自密封容器与专业人员换液及充电中禁作业、雨刮回Park等警告完整，页码规范。",
+   "reason": "熄火平地检查、不低于MINI、认可油液取自密封容器及液位异常就医等要求齐全，附页码无编造。",
    "kind": "hit",
    "question": "制动液需要检查吗？在哪里检查？",
    "latency_s": 4.4,
@@ -568,7 +568,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "卡片放到专用放置区并踩刹车按START的应急启动、失步时用内置钥匙开门再同步均与标准答案一致，p.156引用与手册印刷页码相符，多媒体升级期间无法启动等补充也在标准答案内，无编造。",
+   "reason": "放置区加刹车加START的应急启动与卡片失步同步处理正确，附页码，延伸提醒均为手册内容。",
    "kind": "hit",
    "question": "车钥匙卡片没电了怎么启动车辆？",
    "latency_s": 4.0,
@@ -579,7 +579,7 @@
    "model": "deepseek-flash",
    "id": "para-tyre-pressure",
    "verdict": "PASS",
-   "score": 10,
+   "score": 9,
    "points": [
     {
      "point": "明确说手册无具体标准数值",
@@ -604,7 +604,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "明确说明手册无数值并指向驾驶侧车门Label A（含B/C/D含义），冷态无法测量加0.2–0.3 bar与热胎禁放气规则完整，转述了复位提醒且未编造任何压力值，页码规范。",
+   "reason": "明确说明手册无数值并指向驾驶员车门标签，冷态检查、无法冷测加0.2–0.3bar、热胎禁放气规则完整，无编造。",
    "kind": "paraphrase",
    "question": "轮胎的标准胎压是多少？",
    "latency_s": 2.7,
@@ -615,7 +615,7 @@
    "model": "deepseek-flash",
    "id": "para-max-range",
    "verdict": "WEAK",
-   "score": 7,
+   "score": 5,
    "points": [
     {
      "point": "不给拍脑袋的具体续航数字",
@@ -627,7 +627,7 @@
     },
     {
      "point": "指向行程电脑或官方规格表获取数值",
-     "status": "partial"
+     "status": "missing"
     },
     {
      "point": "附页码",
@@ -636,7 +636,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "明确未给具体续航数值并正确转述认证方式与工况影响、附页码，但未明确指向行程电脑或官方规格表获取数值，该要点仅部分覆盖。",
+   "reason": "如实说明无认证续航数字并转述影响因素与省电建议，但全程未指出应从仪表盘/行程电脑的估计续航显示获取实际数值，该要点缺失。",
    "kind": "paraphrase",
    "question": "这车的最大续航里程是多少公里？",
    "latency_s": 5.1,
@@ -651,7 +651,7 @@
    "points": [],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "明确说明纯电车型无发动机无需换机油并正确指向保养文档与仪表提示，无编造且附页码。",
+   "reason": "明确说明纯电车型无机油并指向保养文档与仪表保养提示，无编造周期，属规范拒答。",
    "kind": "refuse",
    "question": "发动机机油多久换一次？",
    "latency_s": 5.7,
@@ -666,7 +666,7 @@
    "points": [],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "明确说明纯电无汽油滤芯并合理延伸制动液、空调滤芯等替代建议，无编造且附页码。",
+   "reason": "明确拒答并说明纯电车型无汽油滤芯，补充的制动液、空调滤芯等替代信息均出自手册，无编造。",
    "kind": "refuse",
    "question": "汽油滤芯多久换一次？",
    "latency_s": 5.7,
@@ -681,7 +681,7 @@
    "points": [],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "明确说明无油箱并合理指向充电口盖替代，相关操作细节与手册一致且附页码，属合理延伸服务。",
+   "reason": "明确说明无油箱盖并合理延伸至充电口盖操作，延伸内容与手册一致，属细则允许的替代建议，不算编造。",
    "kind": "refuse",
    "question": "油箱盖开关在哪里？",
    "latency_s": 6.2,
@@ -696,7 +696,7 @@
    "points": [],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "明确说明手册无正时皮带更换周期内容并正确指向随车保养文档，无编造且附页码。",
+   "reason": "明确说明手册无正时皮带更换周期内容并指向随车保养文档，无任何编造周期数值。",
    "kind": "refuse",
    "question": "正时皮带多久需要更换一次？",
    "latency_s": 4.2,
@@ -707,11 +707,11 @@
    "model": "deepseek-flash",
    "id": "refuse-spark-plug",
    "verdict": "PASS",
-   "score": 7,
+   "score": 8,
    "points": [],
    "fabrication": false,
    "citation_ok": false,
-   "reason": "拒答正确、解释纯电无火花塞并指向保养文件，但全篇未附任何页码引用，引用不规范。",
+   "reason": "拒答明确并正确说明纯电车型无火花塞、指向保养文档，但回答未附任何页码引用。",
    "kind": "refuse",
    "question": "火花塞什么时候需要更换？",
    "latency_s": 5.2,
@@ -739,7 +739,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "家用充电方式（14A/16A、8A）与禁止适配器/延长线、防水异物、红灯停充等安全事项覆盖全面，数值均与标准一致并附页码。",
+   "reason": "专用充电线与8A家用、14A/16A专用插座说明齐全，禁用延长线转接头发电机等安全要点全面，附页码零编造。",
    "kind": "hit",
    "question": "在家里用家用插座充电，有什么需要注意的？",
    "latency_s": 7.1,
@@ -771,7 +771,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "正确给出E口11kW与F口快充（视车型），明确说明手册无直流快充功率数值且未编造，30米线缆限制等与标准一致并附页码。",
+   "reason": "明确说明手册无直流快充功率数值，正确给出E口最高11kW、F口视车型快充及30米线缆规则，无编造。",
    "kind": "paraphrase",
    "question": "那用快充呢？直流快充的功率是多少？",
    "latency_s": 6.2,
@@ -782,7 +782,7 @@
    "model": "deepseek-flash",
    "id": "chain-charge#3",
    "verdict": "PASS",
-   "score": 9,
+   "score": 8,
    "points": [
     {
      "point": "充电口盖操作步骤",
@@ -795,7 +795,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "按压解锁、白灯指示、充后关闭锁止及行驶禁开盖等操作步骤完整准确并附页码，无编造。",
+   "reason": "静止按压开盖、充后拔线锁盖及行驶禁开盖、高压水枪禁冲等注意事项完整，但卡片可解锁充电口盖为标准答案未载的附加说法，小幅扣分。",
    "kind": "hit",
    "question": "充电口盖是怎么打开的？",
    "latency_s": 14.9,
@@ -805,8 +805,8 @@
   {
    "model": "deepseek-flash",
    "id": "chain-tyre#1",
-   "verdict": "PASS",
-   "score": 9,
+   "verdict": "WEAK",
+   "score": 7,
    "points": [
     {
      "point": "停车检查冷态胎压",
@@ -814,7 +814,7 @@
     },
     {
      "point": "复位流程",
-     "status": "covered"
+     "status": "partial"
     },
     {
      "point": "附页码",
@@ -823,7 +823,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "停车冷态检查、复位参考值流程及复位失败处理覆盖完整，+0.2~0.3 bar等数值与标准一致并附页码。",
+   "reason": "安全停车冷态查压与复位时机、复位失败重做等清楚，但复位流程漏掉经多媒体屏幕、车辆静止且点火接通执行的关键步骤，判部分覆盖。",
    "kind": "hit",
    "question": "胎压警告灯亮了怎么办？",
    "latency_s": 5.1,
@@ -851,7 +851,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "明确说明手册无通用数值并正确指向驾驶员侧车门Label A标签，仅复述标准已有的+0.2~0.3 bar规则，未编造。",
+   "reason": "明确说明无通用数值并指向驾驶员车门标签，冷测与加0.2–0.3bar、热胎禁放气、复位提醒齐全且无编造数值。",
    "kind": "paraphrase",
    "question": "那标准胎压到底是多少？",
    "latency_s": 2.5,
@@ -883,7 +883,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "冷态调整规则、无法冷测加0.2~0.3 bar、严禁热胎放气及复位要求全部覆盖且附页码，无编造。",
+   "reason": "冷态按标签调整、无法冷测加0.2–0.3bar、热胎禁放气及调后复位要求全部覆盖，附页码无编造。",
    "kind": "hit",
    "question": "胎压不足时应该怎么调整？",
    "latency_s": 4.2,
@@ -893,8 +893,8 @@
   {
    "model": "deepseek-flash",
    "id": "chain-key#1",
-   "verdict": "WEAK",
-   "score": 7,
+   "verdict": "PASS",
+   "score": 9,
    "points": [
     {
      "point": "更换步骤",
@@ -902,7 +902,7 @@
     },
     {
      "point": "电池型号",
-     "status": "partial"
+     "status": "covered"
     },
     {
      "point": "附页码",
@@ -911,7 +911,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "更换步骤与注意事项清晰准确，但电池型号要点未说明手册无具体型号、需用同型号或等效类型电池，仅提及经销商购买，属部分覆盖。",
+   "reason": "更换步骤与复装后按四次按键确认完整，电池仅述经销店购买与约两年寿命而未编造型号代码，无编造。",
    "kind": "hit",
    "question": "车钥匙电池没电了怎么更换？",
    "latency_s": 6.2,
@@ -935,7 +935,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "应急启动步骤（踩刹车、卡片按钮面朝下放杯架放置区、按START）与标准一致并附页码，无编造。",
+   "reason": "放置区应急启动三步骤与仪表提示对应准确，附页码，卡片没电仍可锁解锁启动的说明与手册一致。",
    "kind": "hit",
    "question": "钥匙没电的情况下怎么启动车辆？",
    "latency_s": 4.4,
@@ -946,7 +946,7 @@
    "model": "deepseek-flash",
    "id": "chain-key#3",
    "verdict": "PASS",
-   "score": 9,
+   "score": 8,
    "points": [
     {
      "point": "数字钥匙功能说明",
@@ -963,7 +963,7 @@
    ],
    "fabrication": false,
    "citation_ok": true,
-   "reason": "数字钥匙定义、App开通管理与传输方式及48小时联网等使用条件覆盖完整，内容与标准一致并附页码。",
+   "reason": "App开通、48小时联网、手机电量与无卡无手机无法启动等覆盖良好，但漏掉蓝牙激活与放置区校准的使用细节，且卡片功能下次启动才恢复为标准答案未载说法。",
    "kind": "hit",
    "question": "数字钥匙是什么？怎么用？",
    "latency_s": 5.0,
