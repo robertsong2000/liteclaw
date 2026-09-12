@@ -129,3 +129,32 @@ footer button:disabled { opacity: 0.4; cursor: default; }
 }
 .msg.assistant th { background: var(--panel-2); font-weight: 700; }
 .msg.assistant td { vertical-align: top; }
+.manual-gallery { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 12px; }
+.manual-gallery h4 { grid-column: 1 / -1; margin: 0; font-size: 13px; }
+.manual-gallery figure { margin: 0; min-width: 0; }
+.manual-gallery button { width: 100%; padding: 4px; cursor: zoom-in; border: 1px solid var(--border); border-radius: 8px; background: white; color: #222; }
+.manual-gallery img { width: 100%; max-height: 200px; object-fit: contain; display: block; }
+.manual-gallery figcaption { font-size: 12px; line-height: 1.5; margin-top: 6px; overflow-wrap: anywhere; color: var(--muted); }
+.manual-primary { margin: 0 0 18px; padding: 0 0 14px; border-top: 0; border-bottom: 1px solid var(--border); }
+.manual-primary figure:first-of-type { grid-column: 1 / -1; }
+.manual-primary figure:first-of-type img { max-height: 360px; }
+.manual-references { margin-top: 16px; color: var(--muted); font-size: 12px; }
+.manual-references summary { cursor: pointer; padding: 8px 0; }
+.manual-image-dialog { width: min(1100px,94vw); max-height: 92vh; box-sizing: border-box; border: 0; border-radius: 12px; padding: 16px; }
+.manual-image-dialog::backdrop { background: #000b; }
+.manual-image-dialog > img { display: block; width: 100%; height: auto; }
+.manual-image-dialog > button { position: sticky; top: 0; cursor: pointer; padding: 8px 16px; }
+@media (max-width: 480px) { .manual-gallery { grid-template-columns: 1fr; } }
+@media (max-width: 640px) {
+    body { margin-left: 0; height: 100dvh; }
+    #sidebar { position: relative !important; width: 100% !important; bottom: auto !important; height: 150px; flex-shrink: 0; border-bottom: 1px solid var(--border); }
+    #sidebar #new-session { margin: 6px 10px; }
+    #sidebar #session-list { min-height: 30px; }
+    header { padding: 8px 10px; gap: 8px; }
+    header .cfg { min-width: 0; }
+    #chat { padding: 12px 10px; min-height: 0; }
+    .msg, .tool-card { max-width: 100%; min-width: 0; }
+    footer { padding: 8px; gap: 6px; }
+    footer textarea { min-width: 0; }
+    footer button { padding: 0 12px; }
+}

@@ -86,27 +86,29 @@ fn compact_history(messages: Vec<Message>) -> Vec<Message> {
 /// Run the RAG skill for the newest user question and insert the retrieved
 /// passages directly before that question, so the model reads fresh manual
 /// content every turn without needing to initiate retrieval itself.
-async fn inject_rag(messages: &mut Vec<Message>, skill_tool: &Tool, ctx: &Ctx) {
+async fn inject_rag(messages: &mut Vec<Message>, skill_tool: &Tool, ctx: &Ctx) -> Vec<serde_json::Value> {
     let Some(question) = messages
         .iter()
         .rev()
         .find(|m| m.role == Role::User)
         .map(|m| message_text(m))
     else {
-        return;
+        return Vec::new();
     };
     if question.trim().is_empty() {
-        return;
+        return Vec::new();
     }
     let args = serde_json::json!({ "id": AUTO_RAG_SKILL, "args": question });
     let outcome = skill_tool.execute(&args, ctx).await;
     if !outcome.ok || outcome.summary.trim().is_empty() {
-        return;
+        return Vec::new();
     }
     let grounding = format!(
         "【本轮手册检索结果——已由系统代为查询,无需再调 skill_run】\n{}\n\
          以上原文若已覆盖问题,直接作答即可;若未覆盖,可用不同关键词再检索一次;\
-         检索不到的内容明确说手册中没有,不要凭记忆作答。",
+         检索不到的内容明确说手册中没有,不要凭记忆作答。\n\
+         结果中的 images 是原手册图片引用,网页会自动显示;不需要生成图片链接,\
+         不要在存在图片引用时声称无法提供图片。图片未经过视觉解读,不要猜测图中数值。",
         outcome.summary
     );
     let grounding_msg = Message {
@@ -121,6 +123,7 @@ async fn inject_rag(messages: &mut Vec<Message>, skill_tool: &Tool, ctx: &Ctx) {
     if let Some(u) = user {
         messages.push(u);
     }
+    crate::manual_images::references(&outcome.summary)
 }
 
 /// Server-side model endpoint registry: for models listed in config.json's
@@ -144,6 +147,11 @@ fn resolve_model_endpoint(cfg: &mut ModelConfig) -> (bool, Option<Vec<String>>) 
     };
     if let Some(u) = ep.get("base_url").and_then(|x| x.as_str()) {
         cfg.base_url = u.to_string();
+    }
+    // Allow a stable frontend alias (for example `deepseek-flash`) to map to
+    // the provider's actual model id (for example `deepseek-v4-flash`).
+    if let Some(m) = ep.get("model").and_then(|x| x.as_str()) {
+        cfg.model = m.to_string();
     }
     if let Some(k) = ep.get("api_key").and_then(|x| x.as_str()) {
         cfg.api_key = k.to_string();
@@ -199,9 +207,10 @@ pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -
     // retrieval itself via skill_list/skill_run — visible as tool cards in
     // the UI. LITECLAW_AUTO_RAG=0 still force-disables it for everyone.
     let env_on = std::env::var("LITECLAW_AUTO_RAG").map(|v| v != "0").unwrap_or(true);
+    let mut source_images = Vec::new();
     if req.auto_rag && env_on {
         if let Some(t) = tools.iter().find(|t| t.name == "skill_run") {
-            inject_rag(&mut messages, t, &ctx).await;
+            source_images = inject_rag(&mut messages, t, &ctx).await;
             messages = compact_history(messages);
         }
     }
@@ -216,13 +225,20 @@ pub async fn chat(State(state): State<AppState>, Json(req): Json<ChatRequest>) -
     let (rx, _handle) = into_stream(model, messages, tools, ctx, confirm, 8);
 
     // Serialize each AgentEvent as an SSE frame.
-    let sse = tokio_stream::wrappers::ReceiverStream::new(rx).map(|event| {
+    let mut image_events = crate::manual_images::ImageEventTracker::default();
+    let sse = tokio_stream::wrappers::ReceiverStream::new(rx).flat_map(move |event| {
         let json = serde_json::to_string(&event).unwrap_or_else(|_| "{}".into());
-        // SSE frame: "data: <json>\n\n"
-        Ok::<_, std::convert::Infallible>(format!("data: {json}\n\n"))
+        let value: serde_json::Value = serde_json::from_str(&json).unwrap_or_default();
+        let mut frames = vec![Ok::<_, std::convert::Infallible>(format!("data: {json}\n\n"))];
+        if let Some(images) = image_events.consume(&value) {
+            frames.push(Ok(format!("data: {}\n\n", serde_json::json!({"type":"source_images","images":images}))));
+        }
+        futures::stream::iter(frames)
     });
-
-    let body = Body::from_stream(sse);
+    let initial = futures::stream::iter(if source_images.is_empty() { Vec::new() } else {
+        vec![Ok::<_, std::convert::Infallible>(format!("data: {}\n\n", serde_json::json!({"type":"source_images","images":source_images})))]
+    });
+    let body = Body::from_stream(initial.chain(sse));
     (
         StatusCode::OK,
         [
@@ -262,6 +278,11 @@ pub async fn help() -> Response {
     page("web/help.html", "text/html; charset=utf-8")
 }
 
+/// GET /visual-review — internal explainer for offline image annotation.
+pub async fn visual_review() -> Response {
+    page("web/visual-review.html", "text/html; charset=utf-8")
+}
+
 /// GET /style.css — UI styles.
 pub async fn style_css() -> Response {
     page("web/style.css", "text/css; charset=utf-8")
@@ -270,6 +291,10 @@ pub async fn style_css() -> Response {
 /// GET /app.js — UI logic.
 pub async fn app_js() -> Response {
     page("web/app.js", "application/javascript; charset=utf-8")
+}
+
+pub async fn manual_images_js() -> Response {
+    page("web/manual-images.js", "application/javascript; charset=utf-8")
 }
 
 /// Path to the persisted config file: `~/.liteclaw/config.json`.
@@ -340,7 +365,7 @@ pub struct Session {
     pub title: String,
     /// Full OpenAI-schema messages, including tool_calls / tool results, so a
     /// session can be restored with zero context loss on switch.
-    pub messages: Vec<liteclaw_model::Message>,
+    pub messages: Vec<serde_json::Value>,
     pub updated: u64,
 }
 

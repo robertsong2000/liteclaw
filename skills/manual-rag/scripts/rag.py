@@ -35,9 +35,16 @@ try:  # optional: matrix multiply when numpy is installed, stdlib fallback other
 except ImportError:
     np = None
 
-MANUAL_DIR = "/workspace/manual"
+from pathlib import Path
+
+# Deployment settings stay outside the repository, including credentials.
+_config_path = Path.home() / ".liteclaw" / "manual-rag.json"
+_config = json.loads(_config_path.read_text()) if _config_path.exists() else {}
+MANUAL_DIR = os.environ.get("MANUAL_DIR", _config.get("manual_dir", "/workspace/manual"))
+EMBED_BASE_URL = os.environ.get("EMBED_BASE_URL", _config.get("base_url", ""))
+EMBED_API_KEY = os.environ.get("EMBED_API_KEY", _config.get("api_key", ""))
 OLLAMA = os.environ.get("OLLAMA_URL", "http://172.21.0.1:11434")
-EMBED_MODEL = os.environ.get("EMBED_MODEL", "bge-m3")
+EMBED_MODEL = os.environ.get("EMBED_MODEL", _config.get("model", "bge-m3"))
 MAX_CHARS = 700  # the embedding runner has a hard 512-token physical batch
 MAX_EMBED_CHARS = MAX_CHARS
 RRF_K = 60
@@ -48,7 +55,7 @@ TOKEN_RE = re.compile(r"[\w]+", re.UNICODE)
 
 
 def _paths():
-    d = os.path.join(MANUAL_DIR, ".index")
+    d = os.environ.get("MANUAL_INDEX_DIR", _config.get("index_dir", os.path.join(MANUAL_DIR, ".index")))
     return {
         "vectors": os.path.join(d, "vectors.f32"),
         "meta": os.path.join(d, "meta.json"),
@@ -67,6 +74,17 @@ def _embed_one(text):
     vectors (verified 2026-09: related-text cos ~0 while legacy gives ~0.8),
     so we deliberately use the legacy one and validate every result.
     """
+    if EMBED_BASE_URL:
+        req = urllib.request.Request(
+            EMBED_BASE_URL.rstrip("/") + "/embeddings",
+            data=json.dumps({"model": EMBED_MODEL, "input": text}).encode(),
+            headers={"Content-Type": "application/json", "Authorization": "Bearer " + EMBED_API_KEY},
+        )
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            vec = json.load(resp)["data"][0]["embedding"]
+        if not vec or not all(math.isfinite(x) for x in vec) or sum(x*x for x in vec) < 1e-12:
+            raise ValueError("invalid embedding returned")
+        return vec
     req = urllib.request.Request(
         f"{OLLAMA}/api/embeddings",
         data=json.dumps({
@@ -500,6 +518,7 @@ def load_index():
 
 
 def cmd_search(query, top_k):
+    original_query = query
     query = augment_query(query)
     loaded = load_index()
     if loaded is None:
@@ -526,6 +545,66 @@ def cmd_search(query, top_k):
         }
         for rank, i in enumerate(fused)
     ]
+    catalog_path = Path(os.environ.get("MANUAL_IMAGE_DIR", str(Path.home() / ".liteclaw/manual-images"))) / "catalog.json"
+    catalog = json.loads(catalog_path.read_text()) if catalog_path.exists() else []
+    # Prefer illustrations to full-page context; explicit curated associations
+    # also cover diagrams on a different page from their explanatory table.
+    catalog.sort(key=lambda img: (not bool(img.get("retrieval_keywords")), img.get("kind") == "source_page"))
+    query_words = {word.rstrip('s') for word in re.findall(r'[a-z]{4,}', query.lower())}
+    # Curated multilingual keywords also identify the equivalent PDF heading.
+    for img in catalog:
+        if any(k.lower() in query.lower() for k in img.get('retrieval_keywords', [])):
+            query_words.update(word.rstrip('s') for word in re.findall(r'[a-z]{4,}', img.get('page_title', '').lower()))
+    explicit_topic = any(any(k.lower() in query.lower() for k in img.get('retrieval_keywords', [])) for img in catalog)
+    for hit, record_index in zip(hits, fused):
+        pages = re.search(r" p\.(\d+)-(\d+)$", hit.get("source", ""))
+        hit["images"] = []
+        # Text retrieval can intentionally return weak candidates for the model
+        # to reject. Do not automatically illustrate those uncertain results.
+        if pages and (explicit_topic or sims[record_index] >= 0.55):
+            candidates = []
+            first, last = map(int, pages.groups())
+            for img in catalog:
+                chunk_id = (hit.get("chunk_id") or "").split("#")[0]
+                chunk_link = chunk_id in img.get("chunk_ids", [])
+                same_source = hit["source"].startswith(img["source_file"] + " p.") or chunk_link
+                linked = any(k.lower() in query.lower() for k in img.get("retrieval_keywords", []))
+                if same_source and (chunk_link or first-1 <= img["pdf_page"] <= last+1 or linked):
+                    title_words = {word.rstrip('s') for word in re.findall(r'[a-z]{4,}', img.get('page_title', '').lower())}
+                    topic_match = bool(query_words & title_words) or linked
+                    candidates.append((img, 2 if linked else int(topic_match)))
+            # A chunk may cross a section boundary. When page headings identify
+            # the requested topic, omit neighboring-topic figures from that chunk.
+            has_topic_match = any(match for _, match in candidates)
+            hit['images'] = [
+                {'id': img['id'], 'pdf_page': img['pdf_page'], 'caption': img['alt_text'], 'priority': match}
+                for img, match in candidates if match or not has_topic_match
+            ]
+    # Page links generate candidates, not a ready-to-display gallery. Select
+    # by the original question and each figure's local explanation first.
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'lib'))
+    from image_select import select_images, shortlist
+    ids = list(dict.fromkeys(i['id'] for hit in hits for i in hit['images']))
+    by_id = {i['id']: i for i in catalog}
+    candidates = shortlist(query, [by_id[i] for i in ids if i in by_id])
+    # Select from grounded candidate descriptions using the configured model.
+    selected = select_images(original_query, candidates)
+    attachments = [{
+        'id':i['id'], 'pdf_page':i['pdf_page'], 'caption':i['alt_text'], 'kind':i['kind'],
+        'context':i.get('context', ''),
+        'role':i['role'], 'priority':2,
+    } for i in selected]
+    # Whole pages are optional provenance, not extra answer illustrations.
+    pages = {(i['source_file'], i['pdf_page']) for i in selected}
+    selected_ids = {i['id'] for i in selected}
+    references = [i for i in catalog if i['kind'] == 'source_page'
+                  and (i['source_file'], i['pdf_page']) in pages and i['id'] not in selected_ids]
+    attachments += [{'id':i['id'], 'pdf_page':i['pdf_page'], 'caption':i['alt_text'],
+                     'role':'reference', 'priority':0} for i in references[:3]]
+    for hit in hits:
+        hit['images'] = []
+    if hits:
+        hits[0]['images'] = attachments
     print(json.dumps(hits, ensure_ascii=False, indent=2))
     return 0
 

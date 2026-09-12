@@ -1,0 +1,10 @@
+# Optional override for the local manual corpus; does not alter native config.
+# docker compose -f docker-compose.yml -f docker-compose.manual.yml up -d --build
+services:
+  lc:
+    environment:
+      MANUAL_DIR: /workspace/manual
+      MANUAL_INDEX_DIR: /root/.liteclaw/manual-rag-index
+      MANUAL_IMAGE_DIR: /root/.liteclaw/manual-images
+    volumes:
+      - ${MANUAL_SOURCE_ROOT:-../renault_r5_manual}/data/chunks:/workspace/manual:ro

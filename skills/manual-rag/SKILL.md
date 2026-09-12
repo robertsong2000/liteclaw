@@ -6,7 +6,12 @@ version: 0.2.0
 
 # Manual RAG
 
-Retrieval-augmented QA over the car manual stored in `/workspace/manual/`.
+Retrieval-augmented QA over the configured car manual directory.
+Local settings are read from `~/.liteclaw/manual-rag.json`: `manual_dir`
+selects the source documents, `index_dir` selects generated index storage,
+and `base_url`, `model`, `api_key` configure an OpenAI-compatible embedding
+service. Without these settings, the container defaults remain in effect
+(`/workspace/manual` and Ollama). Never print credentials.
 Single entry script `scripts/rag.py`:
 
 - `rag.py "<question>"` — hybrid search (BM25 + vector), prints JSON hits

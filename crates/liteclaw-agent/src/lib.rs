@@ -271,8 +271,9 @@ pub fn into_stream(
 ) {
     let (tx, rx) = mpsc::channel(64);
     let handle = tokio::spawn(async move {
-        if let Err(e) = run_loop(tx, model, messages, tools, ctx, confirm, max_iters).await {
+        if let Err(e) = run_loop(tx.clone(), model, messages, tools, ctx, confirm, max_iters).await {
             tracing_log_error(&e);
+            let _ = tx.send(AgentEvent::error("模型调用失败，未能生成回答。请重试；具体原因见服务终端日志。 Model request failed; check server logs.")).await;
         }
         Ok::<(), anyhow::Error>(())
     });
@@ -304,6 +305,21 @@ pub fn rx_to_stream(rx: mpsc::Receiver<AgentEvent>) -> impl Stream<Item = AgentE
 #[cfg(test)]
 mod tests {
     use super::visible_answer;
+
+    #[tokio::test]
+    async fn model_failure_reaches_event_consumer() {
+        let config = liteclaw_model::ModelConfig {
+            base_url: "invalid://model".into(),
+            ..Default::default()
+        };
+        let model = liteclaw_model::OpenAiClient::new(config).unwrap();
+        let (mut rx, handle) = super::into_stream(
+            model, vec![], vec![], std::sync::Arc::new(liteclaw_core::Ctx::default()), None, 1,
+        );
+        assert!(matches!(rx.recv().await, Some(super::AgentEvent::Error { .. })));
+        assert!(rx.recv().await.is_none());
+        handle.await.unwrap().unwrap();
+    }
 
     #[test]
     fn plain_text_is_visible() {

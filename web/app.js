@@ -398,6 +398,7 @@ function renderChatFromMessages() {
       if (text) {
         const d = addBubble('assistant', '');
         d.innerHTML = renderMarkdown(text);
+        if (m.source_images) renderSourceImages(m.source_images, d);
       }
       // Reconstruct tool-call cards from tool_calls + matching tool results.
       if (m.tool_calls) {
@@ -1024,7 +1025,10 @@ function systemPromptFor(model) {
   const base = NO_TOOL_MODELS.includes(model)
     ? (LANG === 'en' ? NO_TOOL_SYSTEM_PROMPT_EN : NO_TOOL_SYSTEM_PROMPT)
     : (LANG === 'en' ? SYSTEM_PROMPT_EN : SYSTEM_PROMPT);
-  return base + LANG_RULE[LANG];
+  const imageRule = LANG === 'en'
+    ? '\nManual RAG images are already selected and rendered by the UI. primary/supporting images appear above your answer; reference pages are collapsed below. Their context is extracted source text, not a visual interpretation. Do not search files, run bash, generate image links, or call tools just to display images. If this turn already contains system-provided manual retrieval results, the initial retrieval requirement is satisfied; answer directly unless the text is insufficient.\n'
+    : '\n手册检索结果中的 images 已由系统选图并自动展示：primary/supporting 放在回答上方，reference 原文放在底部折叠。context 是图片附近的原文，不是视觉解读。不要为展示图片搜索文件、运行 bash、生成链接或再次调用工具。本轮已有系统提供的手册检索结果时，视为已完成首次检索，原文足够就直接回答。\n';
+  return base + imageRule + LANG_RULE[LANG];
 }
 
 function scrollDown() { chat.scrollTop = chat.scrollHeight; }
@@ -1193,6 +1197,7 @@ function trimContext(msgs) {
 }
 
 async function streamChat() {
+  const sourceImages = new Map();
   const model = document.getElementById('model').value.trim();
   // base_url/api_key: Ollama is a fixed deployment value; gateway models are
   // resolved server-side from config.json (model_endpoints). Nothing to send.
@@ -1243,15 +1248,37 @@ async function streamChat() {
   // Pending render flag for debounced markdown rendering. Must be declared
   // BEFORE the try block (handleEvent, called inside it, references it).
   let renderPending = false;
+  let renderFinished = false;
+  let imageOwner = null;
+  function updateAnswer() {
+    if (!assistantDiv) return;
+    // Transfer existing image nodes across tool preambles; never reload an
+    // unchanged picture just because streamed text acquired a new bubble.
+    if (imageOwner && imageOwner !== assistantDiv) {
+      for (const node of imageOwner.querySelectorAll(':scope > .manual-gallery, :scope > .manual-references')) assistantDiv.append(node);
+      if (imageOwner.dataset.sourceImages) assistantDiv.dataset.sourceImages = imageOwner.dataset.sourceImages;
+    }
+    imageOwner = assistantDiv;
+    let body = assistantDiv.querySelector(':scope > .answer-text');
+    if (!body) {
+      body = document.createElement('div');
+      body.className = 'answer-text';
+      const sources = assistantDiv.querySelector(':scope > .manual-references');
+      assistantDiv.insertBefore(body, sources);
+    }
+    body.innerHTML = renderMarkdown(assistantText);
+    renderSourceImages([...sourceImages.values()], assistantDiv);
+  }
   function renderAssistant() {
     if (renderPending) return;
     renderPending = true;
     requestAnimationFrame(() => {
       renderPending = false;
+      if (renderFinished) return;
       if (assistantDiv) {
         // 无可见内容(还在检索/思考)时隐藏气泡, 避免空白占位框
-        assistantDiv.style.display = assistantText.trim() ? '' : 'none';
-        assistantDiv.innerHTML = renderMarkdown(assistantText);
+        assistantDiv.style.display = assistantText.trim() || sourceImages.size ? '' : 'none';
+        updateAnswer();
         scrollDown();
       }
     });
@@ -1266,7 +1293,7 @@ async function streamChat() {
       headers: authHeaders({ 'Content-Type': 'application/json' }),
       signal: abortCtrl ? abortCtrl.signal : undefined,
       body: JSON.stringify({
-        messages: reqMessages,
+        messages: reqMessages.map(({source_images, ...message}) => message),
         model: cfg,
         auto_mode: true,
         auto_rag: document.getElementById('auto_rag').checked,
@@ -1325,6 +1352,21 @@ async function streamChat() {
 
   function handleEvent(ev) {
     if (ttftMs === null) ttftMs = performance.now() - ttftStart;
+    if (ev.type === 'source_images') {
+      // Each retrieval result replaces the prior set: a refined search must
+      // not keep unrelated images from an earlier search.
+      const latest = new Map();
+      for (const image of (ev.images || [])) {
+        if (latest.size < 6 && !latest.has(image.id)) latest.set(image.id, image);
+      }
+      sourceImages.clear();
+      for (const [id, image] of latest) sourceImages.set(id, image);
+      if (!assistantDiv && sourceImages.size) assistantDiv = addBubble('assistant', '');
+      if (assistantDiv) {
+        updateAnswer();
+      }
+      return;
+    }
     if (ev.type === 'text_delta') {
       // Strip <think>...</think> reasoning blocks (qwen3/deepseek-r1).
       const clean = thinkFilter.feed(ev.text);
@@ -1384,17 +1426,20 @@ async function streamChat() {
         last.setResult(ev.ok, ev.summary);
       }
     } else if (ev.type === 'done') {
+      renderFinished = true;
       const tail = thinkFilter.flush();
       if (tail) {
         assistantText += tail;
       }
       // Force final render (bypass debounce so the last chunk always shows).
       if (assistantDiv && assistantText) {
-        assistantDiv.innerHTML = renderMarkdown(assistantText);
+        updateAnswer();
         scrollDown();
       }
       if (assistantText && assistantText.trim()) {
-        messages.push({ role: 'assistant', content: assistantText });
+        const images = [...sourceImages.values()];
+        messages.push({ role: 'assistant', content: assistantText, source_images: images });
+        if (assistantDiv) updateAnswer();
       }
       // Show throughput stats if present.
       if (ev.tps) {

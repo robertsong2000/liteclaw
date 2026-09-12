@@ -4,6 +4,7 @@
 pub mod auth;
 pub mod confirm;
 pub mod handlers;
+mod manual_images;
 
 use anyhow::Result;
 use liteclaw_agent::ConfirmFn;
@@ -51,6 +52,7 @@ pub async fn serve(host: &str, port: u16, claws: Vec<Arc<dyn Claw>>, ctx: Ctx) -
     // Public routes: the page itself + login. Everything under /api/* (except
     // /api/login) requires a valid session token via the auth middleware.
     let api = axum::Router::new()
+        .route("/manual-images/:id", axum::routing::get(crate::manual_images::serve))
         .route("/chat", axum::routing::post(handlers::chat))
         .route("/config", axum::routing::get(handlers::get_config))
         .route("/config", axum::routing::post(handlers::post_config))
@@ -67,8 +69,10 @@ pub async fn serve(host: &str, port: u16, claws: Vec<Arc<dyn Claw>>, ctx: Ctx) -
     let app = axum::Router::new()
         .route("/", axum::routing::get(handlers::index))
         .route("/help", axum::routing::get(handlers::help))
+        .route("/visual-review", axum::routing::get(handlers::visual_review))
         .route("/style.css", axum::routing::get(handlers::style_css))
         .route("/app.js", axum::routing::get(handlers::app_js))
+        .route("/manual-images.js", axum::routing::get(handlers::manual_images_js))
         .route("/api/login", axum::routing::post(auth::login))
         .nest("/api", api)
         .with_state(state);

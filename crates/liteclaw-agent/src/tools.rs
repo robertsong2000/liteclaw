@@ -615,11 +615,7 @@ async fn exec_skill_run(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
                 combined.push_str("\n[stderr]\n");
                 combined.push_str(&stderr);
             }
-            let max = 8 * 1024;
-            if combined.len() > max {
-                combined.truncate(max);
-                combined.push_str(&format!("\n…[truncated at {max} bytes]"));
-            }
+            bound_skill_output(id, &mut combined);
             ToolOutcome {
                 ok: output.status.success(),
                 summary: format!(
@@ -631,6 +627,34 @@ async fn exec_skill_run(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
         }
         Ok(Err(e)) => ToolOutcome::failed(format!("skill run failed: {e}")),
         Err(_) => ToolOutcome::failed("skill run timed out after 60s"),
+    }
+}
+
+/// Keep structured manual hits intact, while bounding arbitrary skill output.
+fn bound_skill_output(id: &str, combined: &mut String) {
+    let max = if id == "manual-rag" { 128 * 1024 } else { 8 * 1024 };
+    if combined.len() > max {
+        let mut end = max;
+        while !combined.is_char_boundary(end) { end -= 1; }
+        combined.truncate(end);
+        combined.push_str(&format!("\n…[truncated at {max} bytes]"));
+    }
+}
+
+#[cfg(test)]
+mod skill_output_tests {
+    #[test]
+    fn manual_json_survives_normal_retrieval_size() {
+        let original = serde_json::json!([{"text":"x".repeat(12000), "images":[{"id":"figure-1"}]}]).to_string();
+        let mut output = original.clone();
+        super::bound_skill_output("manual-rag", &mut output);
+        assert_eq!(output, original);
+    }
+    #[test]
+    fn truncated_skill_output_respects_utf8() {
+        let mut output = "图".repeat(4000);
+        super::bound_skill_output("other-skill", &mut output);
+        assert!(output.ends_with("bytes]"));
     }
 }
 

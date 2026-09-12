@@ -1,11 +1,12 @@
 //! liteclaw-skills: discover, parse, and run claw-ecosystem skills.
 //!
 //! A "skill" is a directory containing a `SKILL.md` (YAML frontmatter + markdown
-//! body), optionally a `scripts/` folder. Skills are discovered from two roots:
+//! body), optionally a `scripts/` folder. Skills are discovered from three roots:
 //!   - global:  `~/.agents/skills`
+//!   - bundled: `<cwd>/skills`
 //!   - project: `<cwd>/.liteclaw/skills`
 //!
-//! Project skills override global ones with the same id.
+//! Project skills override bundled skills, which override global skills.
 
 pub mod identity;
 pub mod parser;
@@ -75,7 +76,11 @@ pub fn discover() -> Vec<Skill> {
     let project_root = std::env::current_dir()
         .unwrap_or_else(|_| PathBuf::from("."))
         .join(".liteclaw/skills");
-    discover_from(&global_root, &project_root)
+    let bundled_root = std::env::current_dir()
+        .unwrap_or_else(|_| PathBuf::from("."))
+        .join("skills");
+    let bundled = discover_from(&global_root, &bundled_root);
+    merge(bundled, scan_dir(&project_root, Source::Project))
 }
 
 /// Same as [`discover`] but with explicit roots — easier to test.
