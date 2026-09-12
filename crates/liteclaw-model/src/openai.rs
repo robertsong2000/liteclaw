@@ -24,7 +24,7 @@ use std::pin::Pin;
 
 use crate::config::ModelConfig;
 use crate::message::{Message, Role, ToolCall, ToolSpec};
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use futures::Stream;
 use futures::StreamExt;
 use serde::Deserialize;
@@ -105,7 +105,7 @@ impl OpenAiClient {
         let resp = req
             .send()
             .await
-            .map_err(|e| anyhow!("request failed: {e}"))?;
+            .context("request failed")?;
         if !resp.status().is_success() {
             let status = resp.status();
             let text = resp.text().await.unwrap_or_default();
@@ -138,7 +138,7 @@ impl OpenAiClient {
         let resp = req
             .send()
             .await
-            .map_err(|e| anyhow!("request failed: {e}"))?;
+            .context("request failed")?;
         if !resp.status().is_success() {
             let status = resp.status();
             let text = resp.text().await.unwrap_or_default();
@@ -757,6 +757,22 @@ fn handle_ollama_line(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn request_errors_preserve_transport_cause_in_both_protocols() {
+        for native in [false, true] {
+            let client = OpenAiClient::new(ModelConfig {
+                base_url: "unsupported://model".into(), native, ..Default::default()
+            }).unwrap();
+            let error = match client.chat_stream(&[], &[]).await {
+                Ok(_) => panic!("invalid scheme must fail"),
+                Err(error) => error,
+            };
+            assert!(error.chain().any(|cause| cause.downcast_ref::<reqwest::Error>().is_some()),
+                "transport error was reduced to a string: {error:#}");
+            assert!(error.chain().count() >= 2);
+        }
+    }
 
     /// Build a fake upstream that yields the given SSE frames as bytes.
     fn fake_stream(

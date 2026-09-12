@@ -1249,6 +1249,7 @@ async function streamChat() {
   // BEFORE the try block (handleEvent, called inside it, references it).
   let renderPending = false;
   let renderFinished = false;
+  let receivedTerminalEvent = false;
   let imageOwner = null;
   function updateAnswer() {
     if (!assistantDiv) return;
@@ -1328,6 +1329,11 @@ async function streamChat() {
         try { ev = JSON.parse(json); } catch (e) { continue; }
         handleEvent(ev);
       }
+    }
+    if (!receivedTerminalEvent) {
+      handleEvent({type: 'error', message: LANG === 'en'
+        ? 'Response ended before completion. Please retry.'
+        : '回答连接提前结束，未收到完成确认，请重试。'});
     }
   } catch (e) {
     // User clicked stop — not an error.
@@ -1426,6 +1432,7 @@ async function streamChat() {
         last.setResult(ev.ok, ev.summary);
       }
     } else if (ev.type === 'done') {
+      receivedTerminalEvent = true;
       renderFinished = true;
       const tail = thinkFilter.flush();
       if (tail) {
@@ -1462,6 +1469,7 @@ async function streamChat() {
       // Persist this session after each completed reply.
       saveCurrentSession();
     } else if (ev.type === 'error') {
+      receivedTerminalEvent = true;
       const div = document.createElement('div');
       div.className = 'err';
       let msg = ev.message || t('unknownErr');

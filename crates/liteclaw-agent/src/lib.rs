@@ -139,6 +139,12 @@ pub async fn run_loop(
                 });
                 continue;
             }
+            if answer_is_empty {
+                let _ = tx.send(AgentEvent::error(
+                    "模型重试后仍未返回正文，请重试。 No answer returned after retry.",
+                )).await;
+                return Ok(());
+            }
             // Compute generation-only elapsed time (first delta → last delta),
             // excluding pre-generation queue/network latency.
             let gen_ms = match (gen_start, gen_end) {
@@ -247,6 +253,9 @@ fn visible_answer(text: &str) -> String {
     let mut rest = text;
     while let Some(start) = rest.find("<think>") {
         out.push_str(&rest[..start]);
+        // Only search after this opening tag, ensuring forward progress even
+        // if ordinary output contains a stray closing tag beforehand.
+        rest = &rest[start + "<think>".len()..];
         match rest.find("</think>") {
             Some(end) => rest = &rest[end + "</think>".len()..],
             None => return out.trim().to_string(),
@@ -306,6 +315,59 @@ pub fn rx_to_stream(rx: mpsc::Receiver<AgentEvent>) -> impl Stream<Item = AgentE
 mod tests {
     use super::visible_answer;
 
+    async fn response_sequence(responses: &[&str]) -> Vec<super::AgentEvent> {
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = listener.local_addr().unwrap();
+        let responses: Vec<String> = responses.iter().map(|s| s.to_string()).collect();
+        let server = tokio::spawn(async move {
+            for content in responses {
+                let (mut socket, _) = listener.accept().await.unwrap();
+                let mut request = Vec::new();
+                let mut buffer = [0u8; 4096];
+                loop {
+                    let n = socket.read(&mut buffer).await.unwrap();
+                    assert!(n > 0);
+                    request.extend_from_slice(&buffer[..n]);
+                    if let Some(end) = request.windows(4).position(|s| s == b"\r\n\r\n") {
+                        let headers = String::from_utf8_lossy(&request[..end]).to_lowercase();
+                        let length: usize = headers.lines().find_map(|s| s.strip_prefix("content-length: ")).unwrap().parse().unwrap();
+                        if request.len() >= end + 4 + length { break; }
+                    }
+                }
+                let frame = serde_json::json!({"choices":[{"delta":{"content":content}}]});
+                let body = format!("data: {frame}\n\ndata: [DONE]\n\n");
+                let response = format!("HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nConnection: close\r\nContent-Length: {}\r\n\r\n{body}", body.len());
+                socket.write_all(response.as_bytes()).await.unwrap();
+            }
+        });
+        let config = liteclaw_model::ModelConfig { base_url: format!("http://{address}/v1"), ..Default::default() };
+        let (mut rx, task) = super::into_stream(liteclaw_model::OpenAiClient::new(config).unwrap(), vec![], vec![], std::sync::Arc::new(liteclaw_core::Ctx::default()), None, 8);
+        let mut events = Vec::new();
+        tokio::time::timeout(std::time::Duration::from_secs(10), async {
+            while let Some(event) = rx.recv().await { events.push(event); }
+        }).await.unwrap();
+        task.await.unwrap().unwrap();
+        server.await.unwrap();
+        events
+    }
+
+    #[tokio::test]
+    async fn exhausted_empty_answers_are_errors_not_success() {
+        for empty in ["", "<think>Only reasoning</think>"] {
+            let events = response_sequence(&[empty, empty]).await;
+            assert!(events.iter().any(|e| matches!(e, super::AgentEvent::Error { .. })));
+            assert!(!events.iter().any(|e| matches!(e, super::AgentEvent::Done { .. })));
+        }
+    }
+
+    #[tokio::test]
+    async fn empty_answer_retry_can_recover() {
+        let events = response_sequence(&["", "正式回答"]).await;
+        assert!(events.iter().any(|e| matches!(e, super::AgentEvent::TextDelta { text } if text == "正式回答")));
+        assert!(matches!(events.last(), Some(super::AgentEvent::Done { .. })));
+    }
+
     #[tokio::test]
     async fn model_failure_reaches_event_consumer() {
         let config = liteclaw_model::ModelConfig {
@@ -341,5 +403,6 @@ mod tests {
         // Interleaved: reasoning wraps around a visible fragment.
         let t = "先看这里<think>mid-turn reasoning</think>然后是结论。";
         assert_eq!(visible_answer(t), "先看这里然后是结论。");
+        assert_eq!(visible_answer("</think>前文<think>隐藏</think>正文"), "</think>前文正文");
     }
 }

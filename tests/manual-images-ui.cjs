@@ -98,6 +98,17 @@ const os = require('node:os');
       renderChatFromMessages();
     });
     assert.equal(await page.locator('.manual-gallery').count(),0, 'text-only history must not show an empty gallery');
-    console.log('PASS: streaming, provider isolation, persistence payload, authenticated thumbnail, modal');
+    await page.unroute('**/api/chat');
+    await page.route('**/api/chat', route => route.fulfill({
+      contentType:'text/event-stream',
+      body:'data: '+JSON.stringify({type:'source_images',images:[attachment]})+'\n\n'
+    }));
+    await page.evaluate(async()=>{
+      chat.innerHTML=''; messages=[{role:'user',content:'启动方法'}];
+      await streamChat();
+    });
+    assert.equal(await page.locator('#chat .err').count(), 1,
+      'EOF without done or error must not silently leave an image-only answer');
+    console.log('PASS: streaming, provider isolation, persistence payload, authenticated thumbnail, modal, incomplete stream');
   } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
