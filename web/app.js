@@ -503,9 +503,9 @@ const GATEWAY_MODELS = ['qwen3.8-flash', 'deepseek-flash'];
 function fillCfg(c) {
   // Respect the saved model; fall back to the fast default on first visit or
   // when the saved model is no longer in the dropdown.
-  const wanted = c.model || 'openbmb/minicpm5-2b:latest';
+  const wanted = c.model || 'deepseek-flash';
   const sel = document.getElementById('model');
-  sel.value = [...sel.options].some(o => o.value === wanted) ? wanted : 'openbmb/minicpm5-2b:latest';
+  sel.value = [...sel.options].some(o => o.value === wanted) ? wanted : 'deepseek-flash';
   document.getElementById('no_think').checked = !!c.no_think;
   // 自动检索默认开启: MiniCPM5-2B 自主调工具不可靠(幻觉路径/参数格式错),
   // 服务端注入检索才是稳定路径。显式保存过 false 的老配置予以尊重。
