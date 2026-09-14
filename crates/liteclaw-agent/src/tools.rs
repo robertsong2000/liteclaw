@@ -147,6 +147,20 @@ impl ToolOutcome {
 /// Max bytes returned to the model from a single read (keeps context bounded).
 const READ_MAX_BYTES: usize = 64 * 1024;
 
+/// Max chars per grep hit. Minified JSON corpora (e.g. manual/.index/index.json,
+/// 21 MB on one line) match as a single line; an uncapped hit alone can exceed
+/// the model's context window and make every later turn of the conversation fail.
+const GREP_LINE_MAX_CHARS: usize = 500;
+
+/// One grep hit, clipped so a single long line cannot flood the context.
+fn clip_hit_line(line: &str) -> String {
+    if line.chars().count() <= GREP_LINE_MAX_CHARS {
+        return line.to_string();
+    }
+    let clipped: String = line.chars().take(GREP_LINE_MAX_CHARS).collect();
+    format!("{clipped}…[line truncated at {GREP_LINE_MAX_CHARS} chars]")
+}
+
 fn resolve_path(args: &serde_json::Value, key: &str, ctx: &Ctx) -> std::path::PathBuf {
     let p = args.get(key).and_then(|v| v.as_str()).unwrap_or(".");
     ctx.cwd.join(p)
@@ -329,7 +343,7 @@ fn exec_grep(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
         };
         for (i, line) in text.lines().enumerate() {
             if re.is_match(line) {
-                hits.push(format!("{}:{}:{}", p.display(), i + 1, line));
+                hits.push(format!("{}:{}:{}", p.display(), i + 1, clip_hit_line(line)));
                 if hits.len() >= 50 {
                     hits.push("…[too many matches, truncated at 50]".into());
                     return ToolOutcome::ok(hits.join("\n"));
@@ -341,6 +355,30 @@ fn exec_grep(args: &serde_json::Value, ctx: &Ctx) -> ToolOutcome {
         ToolOutcome::failed("no matches")
     } else {
         ToolOutcome::ok(hits.join("\n"))
+    }
+}
+
+#[cfg(test)]
+mod grep_hit_tests {
+    #[test]
+    fn long_single_line_json_is_capped() {
+        let line = format!("{{\"chunks\":[\"{}\"]}}", "a".repeat(100_000));
+        let clipped = super::clip_hit_line(&line);
+        assert!(clipped.chars().count() < 600);
+        assert!(clipped.contains("line truncated at 500 chars"));
+    }
+
+    #[test]
+    fn short_lines_pass_through_untouched() {
+        let short = "manual/x.json:1:hello";
+        assert_eq!(super::clip_hit_line(short), short);
+    }
+
+    #[test]
+    fn multibyte_boundary_does_not_panic() {
+        let clipped = super::clip_hit_line(&"图".repeat(2000));
+        assert!(clipped.starts_with(&"图".repeat(500)));
+        assert!(clipped.ends_with("chars]"));
     }
 }
 
